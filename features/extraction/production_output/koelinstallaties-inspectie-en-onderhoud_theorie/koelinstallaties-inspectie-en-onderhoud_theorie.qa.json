@@ -1,0 +1,11 @@
+{
+  "total_pages": 61,
+  "total_chunks": 290,
+  "text_chunks": 180,
+  "table_chunks": 8,
+  "figure_chunks": 41,
+  "marginalia_chunks": 61,
+  "visual_crops_saved": 41,
+  "pages_with_content": 61,
+  "warnings": []
+}

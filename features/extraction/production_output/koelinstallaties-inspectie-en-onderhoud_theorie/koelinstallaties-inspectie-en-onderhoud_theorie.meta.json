@@ -1,0 +1,34 @@
+{
+  "doc_id": "koelinstallaties-inspectie-en-onderhoud_theorie",
+  "filename": "koelinstallaties-inspectie-en-onderhoud_theorie.pdf",
+  "source_pdf": "/Users/fausto/code_projects_work/vsm-hva/extraction/data/koelinstallaties-inspectie-en-onderhoud_theorie.pdf",
+  "page_count": 61,
+  "title": "Voorbereiding",
+  "version": "20 maart 2018",
+  "languages": [
+    "en",
+    "nl"
+  ],
+  "batches": [
+    {
+      "start": 0,
+      "end": 19,
+      "batch_file": "koelinstallaties-inspectie-en-onderhoud_theorie_batch_001-020.pdf"
+    },
+    {
+      "start": 20,
+      "end": 39,
+      "batch_file": "koelinstallaties-inspectie-en-onderhoud_theorie_batch_021-040.pdf"
+    },
+    {
+      "start": 40,
+      "end": 59,
+      "batch_file": "koelinstallaties-inspectie-en-onderhoud_theorie_batch_041-060.pdf"
+    },
+    {
+      "start": 60,
+      "end": 66,
+      "batch_file": "koelinstallaties-inspectie-en-onderhoud_theorie_batch_061-067.pdf"
+    }
+  ]
+}

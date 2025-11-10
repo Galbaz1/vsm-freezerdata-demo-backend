@@ -1,0 +1,14 @@
+# PDF Extraction Pipeline Requirements
+# Install with: pip install -r requirements.txt
+
+# LandingAI Document Extraction (ADE) API client
+landingai-ade>=0.1.0
+
+# PDF rendering and manipulation
+pypdfium2>=4.30.0
+
+# Image processing
+Pillow>=10.0.0
+
+# Language detection for multi-language support
+langdetect>=1.0.9

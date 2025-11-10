@@ -1,0 +1,1574 @@
+{
+  "markdown": "<a id='11cdb058-316e-44ba-a0fb-1903707c51e2'></a>\n\nStoringzoeken koeltechniek\n\nROVC\nTechnisch de beste opleider\n\n<a id='21562b21-72f2-47e3-8390-81d987ae4a55'></a>\n\nCOPYRIGHT ROVC\nAlle rechten voorbehouden. Niets uit deze uitgave mag worden verveelvoudigd, opgeslagen in een geautomatiseerd gegevensbestand, of openbaar gemaakt, in enige vorm of op enige wijze, hetzij elektronisch, mechanisch, door fotokopieën, opnamen, of op enige andere manier, zonder voorafgaande schriftelijke toestemming van de uitgever.\n\n<a id='a244f207-0589-43a3-8260-088a006fc753'></a>\n\nAll rights reserved. No part of this publication may be reproduced, stored in a retrieval system, or transmitted,\nin any form or by any means, electronic, mechanical, photocopying, recording, or otherwise without the prior\nwritten permission from the publisher.\n\n<a id='ff957521-960c-4579-ba3b-5a7824a1c0c8'></a>\n\n| ROVC | Postbus 117 | 6710 BC EDE | 0318 – 698 697 (studieadvies) | www.rovc.nl |\n\n<a id='1edb8417-c988-41ba-91ae-f3e029bfee1a'></a>\n\n2\n\n<a id='90f0bfcd-c3e3-4717-bc24-a892182c435c'></a>\n\nVersie: 20 maart 2018\n\n<a id='1ae4dc51-52ae-4213-ba82-6ae7dca0aebe'></a>\n\n<table id=\"2-1\">\n<tr><td id=\"2-2\" rowspan=\"2\">Inhouds</td><td id=\"2-3\">1 Gestructureerde aanpak storingzoeken</td><td id=\"2-4\">5</td></tr>\n<tr><td id=\"2-5\">Inleiding</td><td id=\"2-6\">7</td></tr>\n<tr><td id=\"2-7\" rowspan=\"2\">opgave</td><td id=\"2-8\">De SMIDO-methodiek</td><td id=\"2-9\">8</td></tr>\n<tr><td id=\"2-a\">Het koelproces uit balans</td><td id=\"2-b\">12</td></tr>\n<tr><td id=\"2-c\"></td><td id=\"2-d\">Bijlagen</td><td id=\"2-e\">14</td></tr>\n<tr><td id=\"2-f\"></td><td id=\"2-g\">Theorie opgaven</td><td id=\"2-h\">15</td></tr>\n<tr><td id=\"2-i\"></td><td id=\"2-j\">Case 1 Te warm in de trein</td><td id=\"2-k\">16</td></tr>\n<tr><td id=\"2-l\"></td><td id=\"2-m\">Werkplekopdracht Storingsregistratie</td><td id=\"2-n\">19</td></tr>\n<tr><td id=\"2-o\"></td><td id=\"2-p\">Storingsregistratie</td><td id=\"2-q\">20</td></tr>\n<tr><td id=\"2-r\"></td><td id=\"2-s\">2 Veelvoorkomende storingen</td><td id=\"2-t\">21</td></tr>\n<tr><td id=\"2-u\"></td><td id=\"2-v\">Inleiding</td><td id=\"2-w\">23</td></tr>\n<tr><td id=\"2-x\"></td><td id=\"2-y\">Storingstabel</td><td id=\"2-z\">24</td></tr>\n<tr><td id=\"2-A\"></td><td id=\"2-B\">StoringzoekApp</td><td id=\"2-C\">26</td></tr>\n<tr><td id=\"2-D\"></td><td id=\"2-E\">Bijlagen</td><td id=\"2-F\">27</td></tr>\n<tr><td id=\"2-G\"></td><td id=\"2-H\">Theorie opgaven.</td><td id=\"2-I\">28</td></tr>\n<tr><td id=\"2-J\"></td><td id=\"2-K\">Case 2 Mobiele inkoel- invriescel .................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................</td><td id=\"2-L\"></td></tr>\n</table>\n\n<a id='20fbede1-11da-4040-b7f8-678330be0a27'></a>\n\n3\n\n<a id='a804de5d-c5a0-4013-b244-26b2a4e3823c'></a>\n\n4\n\n<a id='cf1831df-b9aa-46bd-9cc4-08bc0cfb6355'></a>\n\nHoofdstuk 1\n\n<a id='f6b0ad21-1380-4f3c-9310-f1a5087c9dad'></a>\n\nGestructureerde aanpak storingzoeken\n\n\n\n<a id='cf7dbe76-fee0-4eef-81c7-3f9c829bfb7f'></a>\n\n# Inleiding\nAls servicemonteur krijg je te maken met storingen aan koelinstallaties. Het is daarbij belangrijk dat je met voldoende kennis en op een gestructureerde manier naar de oorzaak op zoek gaat. Daarbij ga je eerst instellingen en gegevens controleren voordat je componenten gaat vervangen of instellingen gaat aanpassen. Van veelvoorkomende storingen kun je de oorzaak eenvoudig achterhalen; zeker als je al ervaring hebt. Naast de technische oplossing is rapportage ook een belangrijk onderdeel van storingzoeken. ROVC werkt met de SMIDO-methodiek als gestructureerde methode.\n\n<a id='f8a78595-b5f8-4f10-acd8-758320957d5b'></a>\n\n<::A close-up photograph of a refrigeration unit component, likely an evaporator coil, heavily covered in white frost or ice. A copper pipe with a solenoid valve attached is visible, also partially covered in frost. A blue fan grille is visible on the right side of the image. The unit is housed within a metal frame.\n: photo::>\nFiguur 1\n\n<a id='4e05cca5-4674-4ca8-8cfa-54c04bf1617b'></a>\n\nIn dit hoofdstuk komen de volgende onderwerpen aan bod\n* De SMIDO-methodiek\n* Het koelproces uit balans\n\n<a id='42b3cbbc-5555-49a7-9c60-edb1d83e6211'></a>\n\n7\n\n<a id='517a00a4-da08-45d0-bee6-77f70b06245e'></a>\n\nDe SMIDO-me-thodiek\n\n<::transcription of the content\n: flowchart::>\n## Aanvalsplan\n\n**Start:**\n- Storing\n- Melding\n\n**Informeren (Inform) Section:**\n- **Decision:** melding compleet? (report complete?)\n  - **If 'nee' (no):** informatie verzamelen (gather information) -> returns to \"melding compleet?\"\n  - **If 'ja' (yes):**\n    - **Decision:** technisch? (technical?)\n      - **If 'nee' (no):**\n        - **Decision:** installatie vertrouwd? (installation familiar?)\n          - **If 'nee' (no):** informatie verzamelen (gather information) -> returns to \"installatie vertrouwd?\"\n          - **If 'ja' (yes):** -> proceeds to \"1 van de 3 P's?\" in Diagnose section\n      - **If 'ja' (yes):** -> proceeds to \"1 van de 3 P's?\" in Diagnose section\n- **External Process:** buiten installatie (outside installation) -> returns to \"melding compleet?\"\n\n**Diagnose (Diagnosis) Section:**\n- **Decision:** 1 van de 3 P's? (1 of the 3 P's?)\n  - **If 'ja' (yes):**\n    - **Decision:** proces instelling? (process setting?)\n      - **If 'nee' (no):** ketens uitsluiten (exclude chains) -> returns to \"proces instelling?\"\n      - **If 'ja' (yes):** -> proceeds to \"Oplossen\"\n  - **If 'nee' (no):**\n    - **Decision:** 1 keten? (1 chain?)\n      - **If 'nee' (no):** ketens uitsluiten (exclude chains) -> returns to \"1 keten?\"\n      - **If 'ja' (yes):**\n        - **Decision:** 1 onderdeel? (1 component?)\n          - **If 'nee' (no):** onderdelen uitsluiten (exclude components) -> returns to \"1 onderdeel?\"\n          - **If 'ja' (yes):** -> proceeds to \"Oplossen\"\n\n**End:**\n- Oplossen (Solve)\n\n**Logo:** ROVC Technisch de beste opleider\n\nFiguur 2 SMIDO-aanvalsplan gestructureerd storingzoeken\n<::>\n\n<a id='1fec7d3d-58e1-443d-a5f5-746a34971e27'></a>\n\n# Toelichting stappen in aanvalsplan\n\nOm te kunnen werken volgens het aanvalsplan worden de stappen hierna kort toegelicht\n\n* Wat voor acties voer je uit bij een stap?\n* Op welke vragen zoek je een antwoord?\n* Wat is de betekenis van enkele kreten en afkortingen in het aanvalsplan?\n\nJe gaat dit aanvalsplan daarna gebruiken bij de cases en in het practicum. Je hoeft niet altijd alle stappen uit te voeren.\n\n<a id='d7f8ae70-a7e2-4e2e-a22c-0d297fd8b446'></a>\n\n8\n\n<a id='e9a21e80-0792-4cf3-b85d-ad5d495679e3'></a>\n\n# Melding\n\n* Is de melding compleet, waar staat de installatie en bij wie moet je zijn?\n* Is de melding duidelijk of alleen maar 'hij doet het niet'?\n* Welke symptomen zijn er waargenomen door de gebruiker?\n* Welke vragen ga je stellen om meer duidelijkheid te krijgen?\n\n<a id='2d4466fd-e7a4-41bb-a7e0-8589a888e091'></a>\n\n**Technisch**\n\n* Je kijkt en luistert eerst bij een installatie of er een direct waarneembaar defect is.\n* Zo ja; dan ga je dit oplossen en hoef je verder geen storing te zoeken. Zoek wel naar de oorzaak waarom dit defect is opgetreden en of dit te voorkomen was.\n* Er zijn storingen die vaak voorkomen. Op basis van je ervaring kun je de symptomen vaak eenvoudig controleren op wat de meest voorkomende oorzaken zijn. Doe dit dan eerst. Maak hierbij zo nodig ook gebruik van diagnosetabellen of storingzoekapps.\n\n<a id='2566b2bd-7cce-47ae-b8e5-7dd629f62c70'></a>\n\nInstallatie vertrouwd\n\n* Heb je ervaring met de installatie of is deze te vergelijken met een andere installatie?\n* Heb je het schema van de installatie? Kun je dit ook lezen?\n* Kun je de leidingen volgen waar gas- en vloeibaar koudemiddel stromen?\n* Ken je de componenten?\n* Weet je hoe de regelingen werken?\n\n<a id='1bf27ef7-1be6-4ec7-b026-ca11437db04d'></a>\n\n3-P's\n\nVoordat je verder gaat met het zoeken naar een technisch defect controleer je drie aspecten die eenvoudig te controleren zijn\n\n* P van Power; is er voeding op alle componenten die dat nodig hebben aanwezig?\n* P van Procesinstellingen; zijn de parameters goed ingesteld? Bijvoorbeeld pressostaten, regelcomponenten, ontdooitijden, regelparameters etc.\n* P van Procesparameters; draait de installatie op de juiste temperaturen en drukken? Voer metingen uit met de meterset om dit vast te stellen. Vergelijk ze met de gegevens bij inbedrijfstelling.\n* P van 'Productinput'; dit zijn afwijkingen in condities van producten of omgevingscondities ten opzicht van het ontwerp, waardoor een installatie niet goed kan functioneren. Er is dus geen direct defect of een storing met de installatie zelf, maar de oorzaak ligt elders. Dan daar verder zoeken. Bijvoorbeeld: zijn de condities van koelwater of koellucht van de condensor binnen de ontwerpwaarden, is de belading van een koel- vriescel goed, zijn de ingangscondities van het product (temperatuur, hoeveelheid) wel volgens het ontwerp?\n\n<a id='ab558712-79fb-4da1-8c1a-563f29b6d03d'></a>\n\n# Ketens en onderdelen uitsluiten\n\nPas nu duik je dieper de techniek van de installatie in en heb je vaak meer technische gegevens nodig van componenten en de installatie (elektrotechnische schema's)\n\n* Je gaat kijken naar de ketens waardoor een uitvoerend component wordt aangestuurd (klep, compressor, ventilator)\n* Welke component in de keten of verbinding (signaal, voeding) is defect waardoor de component niet meer werkt?\n* Bijvoorbeeld de ventilatormotor van de verdamper draait niet meer. Is de motor zelf defect (meten), is er een component of verbinding in de voeding of aansturing defect? Op basis van welke signaalgevers wordt deze ventilator aangestuurd?\n\n<a id='783d2136-8de5-439e-846c-efcdb9f1cb7c'></a>\n\n9\n\n<a id='1dad0a3f-c409-4996-aca4-0b5425d6ab0d'></a>\n\nVoorbeeld\n\n<a id='7b7be4ba-ea0a-4ffc-86e6-303f93c58a4b'></a>\n\nMelding\nDe temperatuur in de koelcel is te hoog en de producten dreigen te bederven. Je gaat naar de klant toe en ziet de verdamper zoals in de afbeelding in de inleiding van dit hoofdstuk. De installatie draait nog wel.\n\n<a id='dd9f64c4-9683-40d2-847e-7ef63871c26c'></a>\n\nRelevante vragen en belangrijke informatie\n\n* Wat is de actuele temperatuur in de koelcel? Hoeveel is deze te hoog en hoe lang is dit al bekend?\n* Hoe lang is de verdamper al ingevroren?\n* Is dit al vaker gebeurd? Zijn er eerdere storingsmeldingen geweest? Is er recent onderhoud uitgevoerd?\n* Is het hele verdamperblok vol ijs of deels?\n\n<a id='4bdd5c7d-70b3-434b-a396-939517a6fa0f'></a>\n\n## Technisch\n\nRelevante vragen en belangrijke informatie\n\n* Is er zichtbaar iets mis met de condenswaterafvoer?\n* Hangen er draden los van de elektrische ontdooiing als die gemonteerd is?\n* Hangt er een temperatuuropnemer los die ergens vast op gemonteerd moet zijn?\n* Wat is, op basis van je ervaring, meestal de oorzaak van dit probleem? En hoe ga je dit controleren?\n\n<a id='e7bcfb0f-0dfe-4004-a165-8d5f6cc31f13'></a>\n\n## Installatie vertrouwd\n\nRelevante vragen en belangrijke informatie\n\n* Wat voor soort ontdooiing heeft de installatie?\n* Op basis van welke meetwaarden (opnemers) wordt de ontdooiing geregeld?\n* Is de lekbak en condenswaterafvoer voorzien van tracing?\n* Wat zou de temperatuur in de cel moeten zijn?\n* Kun je de ontdooiing handmatig inschakelen en testen?\n* Ben je bekend met de werking en instelling van de regelaar die is toegepast?\n* Heb je een schema van de installatie en/of kun je op basis van leidingwerk en componenten vaststellen hoe deze werken en welke mogelijk een oorzaak zijn van deze storing?\n\n<a id='c081fdb8-bb1b-47b8-af2d-13db37f8f7f0'></a>\n\n# 3 P's\n\nRelevante vragen en belangrijke informatie\n\n* Power: de installatie heeft elektrische ontdooiing. Heeft deze een eigen voeding?\n* Wat zijn de instellingen van de ontdooicyclus?\n* Wat is de setpointinstelling van de thermostaatregeling? Wat is het gevolg als deze veel te laag is ingesteld?\n* Wat is de verdampertemperatuur? Wijkt deze veel af van wat gangbaar (heb je de gegevens) is voor deze installatie?\n* Wat voor producten worden er in de cel opgeslagen? Zit hier meer vocht in dan normaal? Wat is de temperatuur van het product als dit in de cel geplaatst wordt?\n* Op welke manier zou er meer vocht in de koelcel kunnen komen dan normaal?\n\n<a id='3c68f9c4-f01b-4b52-92b5-3f095517cca5'></a>\n\n**Ketens en onderdelen uitsluiten**\nDe antwoorden op bovenstaande vragen hebben niet geleid tot de oorzaak. Je kan de elek-\ntrische ontdooiing handmatig inschakelen via de regelaar en gaat dan de keten controleren of\ndeze werkt.\n\n<a id='a165c596-2c98-49eb-8ba6-4c381602923b'></a>\n\n10\n\n<a id='a9dea4f5-2c05-43d7-abc3-3e2af2a20cb4'></a>\n\nRelevante vragen en belangrijke informatie\n\n* Je voelt dat de elektrische elementen warm worden en je meet de voedingspanning en stroom na. Deze keten werkt dus.\n* Het inschakelen van de ontdooiing werk via een temperatuurvoeler in de verdamper. Je meet of dit signaal ook binnenkomt op de regelaar. Dit blijkt niet zo te zijn. Je controleert of de opnemer nog werkt door deze te testen en door te meten. Je meet bij de stekkerverbinding in de verdamper de weerstandswaarde. Het is een Pt100 en de weerstandswaarde komt overeen met de temperatuur. De opnemer lijkt dus goed.\n* Je meet de bedrading tussen opnemer en regelaar en daar blijkt een draadbreuk te zitten.\n\n<a id='ea849b94-6c3c-427f-a948-cab8848db14b'></a>\n\n11\n\n<a id='fa6bea10-2a1d-4c14-b949-43bfdc8ac2e4'></a>\n\nHet koelproces\nuit balans\nEen koelinstallatie werkt alleen goed binnen bepaalde grenzen van o.a. temperaturen, drukken\nen belasting.\n\n<a id='6d06176a-9ceb-4e20-8126-aaef0f104e0d'></a>\n\nDeze grenzen worden bepaald bij het ontwerp van de installatie door\n* Koellast en benodigde koelvermogen\n* Type koudemiddel\n* Verdampercapaciteit en verdampingstemperatuur\n* Compressorcapaciteit en verdampingstemperatuur en condensatietemperatuur\n* Condensorcapaciteit en condensatietemperatuur\n* Smoorventielcapaciteit\n\n<a id='8bb59a20-544c-4817-934b-19b8f9c0f8d3'></a>\n\nDe componenten worden zodanig geselecteerd en op elkaar afgestemd (capaciteit, regelbereik), dat ze met elkaar in balans zijn voor een goed functionerende installatie.\n\n<a id='2c46544a-7d3a-4a70-bae9-67b49544a83a'></a>\n\nAls de balans van de koelkringloop ernstig verstoord raakt, functioneert de koelinstallatie niet goed meer en ontstaan storingen\n* Gewenste toepassingstemperatuur niet bereikt\n* Te weinig koelvermogen\n* Te hoog energieverbruik\n* Storingen en stilstand van de installatie door beveiligingen\n\n<a id='32a3fad1-629a-4d94-918f-b0aae08e1431'></a>\n\nEen storing betekent dus niet altijd dat er een component defect is. Dit soort 'koeltechnische storingen' ontstaan, doordat de installatie niet werkt onder de condities die gekozen zijn bij het ontwerp.\n\n<a id='39950276-3618-41d6-9e84-410a15360033'></a>\n\n<::A diagram showing a balance scale with a gauge on top. The gauge has a needle pointing to the 'Bandbreedte' (Bandwidth) section, which is yellow, between 'Ondergrens' (Lower limit) in red and 'Bovengrens' (Upper limit) in black. The left pan of the balance lists 'EXPANSIEORGAAN', 'VERDAMPER', 'COMPRESSOR', 'CONDENSOR', and 'Etcetera'. The right pan lists 'Koudemiddel hoeveelheid', 'Koellast product', 'Motorvermogen en verd/cond. temp', 'Hoeveelheid lucht/water', 'Omgevingstemperatuur', and 'Etcetera'. In the center, bidirectional arrows labeled 'Onderlinge relatie' (Interrelationship) connect the two lists.\n: diagram::>\n\nFiguur 3 In balans\n\n<a id='487ee748-9aab-4ffc-99c9-562f69ed8fe3'></a>\n\nBekijk in onderstaande animatie via de knoppen de verschillende processituaties. In een aantal gevallen raakt de koelinstallatie uit balans.\n\n<a id='54e6e19f-d30d-4677-a006-098a9c7e6f6e'></a>\n\n12\n\n<a id='7fcb92b5-831f-490c-a147-9e60ee4e4a04'></a>\n\nROVC\nTechnisch de beste opleider\noption Start: [x]\noption Koelen: [ ]\noption Vriezen: [ ]\noption Koelen met diagram: [ ]\noption Warmtebelasting neemt toe: [ ]\noption Warmtebelasting te hoog: [ ]\noption Oververhitting te klein: [ ]\noption Oververhitting te hoog: [ ]\noption Te lage condensordruk: [ ]\nΠ\n00\n<::koeltechniek\nDiagram of a refrigeration cycle showing a compressor, condenser, expansion valve, and evaporator.\nThe cycle starts from the compressor (right side), where refrigerant flows through red pipes to the condenser (top right) with fans.\nFrom the condenser, the refrigerant flows through an expansion valve (left side) and then to the evaporator (bottom left) with fans, indicated by blue pipes.\nThe refrigerant then returns to the compressor.\nNumbered points indicate states in the cycle:\n1: -5°C, 1.4 bar\n2: -5°C, 1.4 bar\n3: 0°C, 1.4 bar, with an additional label 5°C, R134a\n4: 55°C, 9 bar\n5: 40°C, 9 bar\n6: 35°C, 9 bar\n: diagram::>\n\n<a id='2b75a287-c62b-455e-9a07-0e83be2265ef'></a>\n\nFiguur 4 Verschillende processituaties\n\n<a id='db296cfe-e86b-468f-aad1-d8551cafbea6'></a>\n\n13\n\n<a id='53929abc-3727-42c3-a504-3161b2c55c9d'></a>\n\nBijlagen Bij dit hoofdstuk horen de volgende bijlagen\n\n* SMIDO-storingsrapportageformulieren\n\n<a id='2b7e19f3-10ef-4aa0-8571-1d4d3b2e95a9'></a>\n\n14\n\n<a id='6658296a-737d-4df2-9e34-3f31ca95e0bd'></a>\n\nTheorie opgaven Opgaven animatie\n\nIn de theorie heb je een animatie bekeken met verschillende processituaties. In een aantal situaties raakt de koelinstallatie uit balans.\n\n1. Wat gebeurt er met de installatie als de condensatietemperatuur te hoog is?\n2. Wat gebeurt er met de installatie als de oververhitting te klein wordt ingesteld?\n3. Wat gebeurt er met de installatie als de warmtebelasting te hoog wordt?\n\n<a id='0d520184-ccd2-4702-8cb6-8b4544d1fe38'></a>\n\nOpgaven theorie\n\n4. Noteer drie mogelijk oorzaken voor het invriezen van een verdamper.\n5. Welke signaalgevers (opnemers) zitten er in een koelinstallatie die het in- uitschakelen van de compressor regelen (keten van stuursignaal naar compressor)?\n6. Welke storingen kunnen er ontstaan als het setpoint van een koelcel veel lager wordt ingesteld dan waarvoor deze is ontworpen?\n\n<a id='3cc7c347-ed11-41c1-b582-bbdbeea41883'></a>\n\n15\n\n<a id='10c406cd-6d6c-4124-8b5f-8449e64c3140'></a>\n\nCase 1 Te warm\nin de trein\n\n**Inleiding**\nJe krijgt te maken met een storingsmelding en je gaat de stappen uit het SMIDO-aanvalsplan gebruiken om de oorzaak te achterhalen. Je gaat daarbij oefenen in het stellen van belangrijke vragen voor het stellen van de diagnose. Ook ga je uitzoeken welke informatie je nodig hebt om antwoord te krijgen op deze vragen.\n\n<a id='ab6f77fb-8d66-4d96-a432-be4ea0a9d570'></a>\n\n# Beschrijving\nDe reizigers in de trein hebben geklaagd dat de airco in de trein niet goed werkt: het is te warm.\nJij moet gaan uitzoeken wat er aan de hand is. Je bent nog niet zo bekend met dit soort instal-\nlaties.\n\n<a id='940082dd-12c0-4698-852f-c8746b510498'></a>\n\nDe koeling wordt verzorgd door\n* Een koelinstallatie\n* Een koudwatercircuit\n* Een luchtverdeelsysteem\n* Centraal besturingssysteem voor alle regelingen en beveiligingen\n\n<a id='4925fe89-cc5f-4697-8be3-0b9b094bc343'></a>\n\n<::A modern, sleek white and blue train with yellow accents is parked at a station platform. The train is seen from the front-left, extending into the background. The station features a large, arched glass and steel roof structure, allowing natural light to illuminate the platform. In the background, a sign indicates \"10\" for the platform number, with \"Richting Schiphol\" (Direction Schiphol) also visible. A building with orange-brown facades is visible through the glass roof in the distance. The platform is clean and modern. Figuur 1 Airco in trein::>\n\n<a id='41fb2c6b-49cc-44de-8228-a10b66aaca0f'></a>\n\nBijlagen\n\nBij deze case horen de volgende bijlagen\n\n* Koudemiddelcircuit (koeltechnisch schema)\n* Koudwatercircuit\n* Componentenlijst\n* Servicerapport van laatste onderhoudsbeurt\n* Foto's van de installatie\n* Overige tekeningen en schema's van de installatie\n\n<a id='c67a6d53-215a-47bc-8428-bb3bbf64288b'></a>\n\n16\n\n<a id='61a0f0ea-2c10-4efb-8548-9522f3c85e60'></a>\n\nSMIDO stappenplan\n\nMelding\nOpgaven\n\n1. De melding is niet heel concreet. Welke gegevens heb je nodig om vast te stellen of de klacht 'terecht' is en hoe zou je deze informatie kunnen krijgen?\n2. Wat zou je gaan meten bij de installatie als deze in bedrijf is?\n3. De installatie verzorgt koeling in verschillende ruimtes van de trein. Maakt het nog uit of de klacht voor alle ruimtes geldt of voor eén? Verklaar je antwoord.\n\n<a id='03f57c8e-1853-4a9d-b3bb-0a318cdd6c67'></a>\n\n# Technisch\nEr is niet direct een technisch defect zichtbaar. Op basis van je ervaring kun je ook niet direct een aantal mogelijke oorzaken bedenken die je eenvoudig kan controleren. Je kan dus niet direct de storing oplossen en zult verder moeten gaan met de diagnose.\n\n<a id='dc8921d7-de26-49df-a0be-beeef011a0a5'></a>\n\n## Installatie vertrouwd\n\nJe bent nog niet zo bekend met de installatie. Je gaat op basis van de schema's kijken welke componenten er op zitten en hoe de installatie moet werken.\n\n<a id='2f38b420-95ba-4896-bf6a-ae3a0e062616'></a>\n\nOpgaven\n\n4. Markeer in het koeltechnische schema de koudemiddelkringloop van koud zuiggas, heet persgas, gecondenseerd koudemiddel, geëxpandeerd vloeibaar koudemiddel.\n5. Wat is de functie van component nr. 15?\n6. Waarom is de magneetklep nr. 14 geplaatst?\n7. Hoeveel condensors heeft de installatie?\n8. Hoeveel verdampers heeft de installatie?\n9. Welke regel- en beveiligingscomponenten zitten er rond de compressoren?\n10. Wat is de functie van warmtewisselaar 8?\n11. Naar welke luchtbehandelingskast(en) gaat het water in het koudwatercircuit en hoeveel zijn dit er?\n12. In de bijlagen zijn foto's gegeven van de installatie. Welke componenten herken je op de foto in figuur 1, 2 en 3?\n13. In welke leiding zit het kijkglas meestal?\n14. Bij normaal gedrag van de installatie: wat is dan de uittredende koud-watertemperatuur van de waterkoeler?\n15. Bij normaal gedrag van de installatie: wat is dan de zuigdruk van de installatie ?\n\n<a id='21e7764b-c554-4c45-b44d-017a1f517719'></a>\n\n# Drie P's controleren\n\nJe mag er van uit gaan dat alle Power aanwezig is op de installatie. De oorzaak hoeft niet direct in de koelinstallatie te zitten. Op welke manier zou de klacht of storing veroorzaakt kunnen worden door systemen en componenten buiten de koelinstallatie zelf?\n\n<a id='1314d87d-6d72-4833-8d51-de52afb2417a'></a>\n\n**Opgaven**\n\n16. Welke omgevingscondities, buiten de koelunit om, hebben invloed op de werking hiervan?\nKunnen die de oorzaak zijn van de klacht?\n17. Op welke manier hebben componenten in het koudwatercircuit invloed op een goede\nwerking van de koelunit en daarmee op de klacht?\n18. Op welke manier zou de klacht veroorzaakt kunnen worden door componenten in het lucht-\nbehandeling en -verdeelsysteem? Welke componenten en op welke manier?\nJe gaat diverse Parameters controleren en Procescondities meten.\n\n<a id='a7f0d9c0-35e9-4531-9d05-c96eac77c19f'></a>\n\n17\n\n<a id='5a039ebe-3a5e-4239-9b57-199125faec71'></a>\n\n19. Op welke waarde zou de in- en uitschakeldruk van de hogedrukbeveiliging zijn ingesteld?\n20. Op welke waarde zou de in- uitschakeldruk van de lagedrukbeveiliging zijn ingesteld?\n21. Wat zou de oververhitting moeten zijn volgens de inbedrijfstelgegevens op het service-\nrapport?\n22. Je wil de werkelijke oververhitting controleren door een meting. Geef in het schema aan\nwaar je de druk en temperatuur gaat meten en verklaar hoe je op basis hiervan de overver-\nhitting vaststelt.\n\n<a id='9c27378b-91e4-476d-93d9-5543e3dc1b46'></a>\n\n# Ketens en onderdelen uitsluiten\n\nBij het testen van de werking blijkt dat de rechtercompressor steeds uitvalt, op basis van een lagedrukmelding. Deze is af te lezen in het besturingssysteem. De ingestelde waarde komt wel overeen met de inbedrijfstelgegevens op het servicerapport.\n\n<a id='4e113703-714f-4b89-bc2d-5b247e3a22e4'></a>\n\nOpgaven\n\n23. Noem vier mogelijke oorzaken voor een lagedruk storing.\n\n24. Welke component(en) in de koelinstallatie of het koud-watersysteem kunnen deze LD-storing veroorzaken?\n\n<a id='c76db511-f75b-419e-9c74-49b1228b308d'></a>\n\nDe servicemonteur is op onderzoek gegaan. Omdat er geen spanning aanwezig was op magneetklep 14 werd er geen hotgas doorgelaten naar de verdamper. En dat was de reden dat de compressor afviel op een te lage druk. Dit probleem heeft hij verholpen. Na het opstarten van de installatie viel de compressor niet meer af. Het probleem was echter nog niet opgelost omdat de hotgasregelaar constant hotgas doorliet naar de verdamper. Daarna heeft de servicemonteur de hotgasregelaar buiten werking gesteld en de installatie laten draaien.\n\n<a id='a79ac261-5dc7-47f2-a678-a2df1d905bdd'></a>\n\nWat hij waarnam was\n\n* De zuigdruk daalde weer naar de grenswaarde\n* Rijpvorming op het expansieventiel en net na het expansieventiel\n\n<a id='4df6342f-ab85-4718-bdb7-e3ecdff1f901'></a>\n\nHet probleem lijkt te worden veroorzaakt door he expansieventiel.\n\n<a id='6882eca7-c4a8-4b17-bb81-88b213d47163'></a>\n\nOpgaven\n\n25. Wat zijn de mogelijke oorzaken voor deze symptomen?\n26. Beschrijf voor elke oorzaak hoe je die gaat controleren.\n\n<a id='0bb3fb05-802b-4d65-8f80-4b46d38c1ab7'></a>\n\n18\n\n<a id='f9e69a16-eb38-4d9e-9c38-99cc7f8f2d5d'></a>\n\nWerkplekop-\ndracht Storings-\nregistratie\n\nInleiding\nAls servicemonteur los je storingen op aan koelinstallaties. Daarbij is het registeren van de storing en afhandeling belangrijk. Elke bedrijf heeft daarvoor zijn eigen methode en formulieren.\n\n<a id='cacc92f7-06a1-4a22-bfae-6f14224ee933'></a>\n\n19\n\n<a id='b60bb0c0-f6b1-4022-8485-ad9b68b0c057'></a>\n\nStoringsregistratie Opdrachten\n\n1. Noteer de vijf storingsmeldingen met koelinstallaties die het meest voorkomen bij jou op het bedrijf.\n2. Noteer de vijf meest voorkomende oorzaken van storingen met koelinstallaties uit jouw praktijk.\n3.\nUpload\nUpload een ingevulde storingsrapportage zoals die bij jou het bedrijf gebruikt wordt.\n4. Beschrijf een storing die je in de praktijk bent tegengekomen. Beschrijf je aanpak in stappen die je gemaakt hebt om de oorzaak vast te stellen: wat heb je gecontroleerd, in welke volgorde en wat waren je conclusies.\n5.\nUpload\nUpload het koeltechnisch schema en/of foto's van de installatie waar je een storing aan verholpen hebt.\n\n<a id='f6bcce53-d4f9-430d-b322-a20ed01ff27c'></a>\n\n20\n\n<a id='a545b213-e7e1-478c-867a-a9627adab6b1'></a>\n\nHoofdstuk 2\n\n<a id='c7b9b759-8aad-4c77-ab22-443e09fbea58'></a>\n\nVeelvoorkomende storingen\n\n\n\n<a id='6b2771ad-6f91-4a4c-a348-6d93f6656d26'></a>\n\nInleiding\nEr zijn storingen die vaak voorkomen. Door ervaring leer je wat daarvan de mogelijk oorzaken zijn en kun je de werkelijke oorzaak met een aantal controles sneller achterhalen. Je hoeft dan niet alle stappen van een gestructureerde aanpak (SMDO) te volgen. Wanneer je nog geen ervaring hebt kun je gebruik maken van storingstabellen of Apps waar veelvoorkomende storingen en oorzaken worden beschreven. In dit hoofdstuk bespreken we een voorbeeldtabel als hulpmiddel bij het storingzoeken. Door de vragen bij dit hoofdstuk oefen je in het gebruik ervan.\n\n<a id='4e496cb8-a9e8-4096-b5f8-070a83a00920'></a>\n\n<::flowchart\nDescription: A flowchart showing three blue rounded rectangles connected by right-pointing arrows.\n\n- The first rectangle contains the text: \"Verschijnselen (locatie in de installatie)\"\n- An arrow points from the first to the second rectangle.\n- The second rectangle contains the text: \"Mogelijke oorzaken 1. 2. 3.\"\n- An arrow points from the second to the third rectangle.\n- The third rectangle contains the text: \"Oplossingen (wat ga je controleren)\"\n\nFiguur 5 Opbouw storingstabel\n: flowchart::>\n\n<a id='d530df26-aa8e-4c8a-b7e1-91a75a4550c4'></a>\n\nOnderwerpen in dit hoofdstuk\n\n* Storingstabel\n* Storingsapp\n\n<a id='ce850708-f51f-4d40-9a61-e0ae19a8f78b'></a>\n\n23\n\n<a id='535574c5-73ac-4aa4-8928-b96a408405ad'></a>\n\nStoringstabel\nWil je de tabellen goed kunnen gebruiken dan heb je voldoende vakkennis nodig. De storingstabel is alleen een hulpmiddel. Je moet als servicemonteur in staat zijn om de oorzaak zoals beschreven in de tabel te analyseren en ook daadwerkelijk vast te stellen. De tabel kan een handig hulpmiddel zijn om bepaalde zaken uit te sluiten of om de juiste diagnose te stellen. In deze cursus maken we gebruik van een storingstabel die oorspronkelijk is opgesteld door Danfoss.\n\n<a id='f4417897-7057-4647-8300-15bb15a9c1e6'></a>\n\nDeze storingstabel heeft 3 kolommen\n* Kolom 1: Verschijnsel\n* Kolom 2: Mogelijke oorzaak\n* Kolom 3: Oplossing\n\n<a id='bc24d14d-5ca0-4569-b1e5-bd3ea0985b31'></a>\n\nOpsporen van fouten, algemeen [4]\n<table id=\"23-1\">\n<tr><td id=\"23-2\"></td><td id=\"23-3\">Verschijnsel</td><td id=\"23-4\">Mogelijke oorzaak</td><td id=\"23-5\">Oplossing</td></tr>\n<tr><td id=\"23-6\">17</td><td id=\"23-7\">Luchtkoelers. Verdamper alleen berijpt rond het expansieventiel, en het expansieventiel zelf behoorlijk berijpt.</td><td id=\"23-8\">Koudemiddeltoevoer naar de verdamper te klein door: a) fout bij het expansieventiel, bv.: 1) doorlaat te klein, 2) oververhitting te groot, 3) voelervulling gedeeltelijk verloren, 4) filterdroger gedeeltelijk verstopt. 5) Doorlaat gedeeltelijk door ijs geblokkeerd. b) Zie onder fouten \"Dampbellen in kijkglas\".</td><td id=\"23-9\">Thermostatische expansieventielen controleren, afstellen. Zie onder \"Dampbellen in kijkglas\".</td></tr>\n</table>\n\n<a id='1c049683-5213-484e-a5c8-3bb672d6046e'></a>\n\nFiguur 6\n\n<a id='86ed31b4-2f24-47a5-9285-c60bc7af8643'></a>\n\nVoorbeeld uit storingstabel Danfoss\n\n<a id='dc834716-843a-4485-8108-c13e39a81f12'></a>\n\nBij het gebruik van deze tabellen bij het oplossen van storingen pas je alle opgedane kennis toe om vragen te kunnen beantwoorden\n\n* Waarom is er rijp en ijsvorming bij het expansieventiel als er te weinig koudemiddel naar de verdamper stroomt?\n* Waarom kan dit ook gebeuren als de oververhitting te groot is ingesteld, wat is oververhitting en hoe meet je dat dan?\n* Wat is de voelervulling, waarom heeft een verlies hiervan invloed op de koudemiddel dosering en hoe ga je dit controleren?\n* Hoe kan er ijsvorming optreden in de doorlaat van het expansieventiel?\n* Waarom moet je ook kijken bij het verschijnsel dampbellen in het kijkglas?\n\n<a id='e8202766-24a1-47f3-a9ff-620feaaf56b4'></a>\n\nVeel storingen die je in de praktijk tegenkomt zijn zeer waarschijnlijk terug te vinden in deze tabel. Het kan ook zijn dat de storing een combinatie is van oorzaken en dus bij meer dan één verschijnsel (kolom 1) voorkomt. Als je mogelijke oorzaken gaat onderzoeken kies dan als eerste voor de oorzaken die eenvoudig, zonder veel tijd te controleren zijn. Beoordeel een storing ook niet op basis van maar een verschijnsel. Kijk of er ook andere afwijkingen zijn. Door de informatie van meerdere verschijnselen te combineren vallen sommige oorzaken vanzelf al af en kom je sneller tot de werkelijke oorzaak.\n\n<a id='709f1599-05a3-4d57-bd86-1c0bf6f7f024'></a>\n\nIn de storingstabel kom je de verschillende storingsoorzaken tegen die ook met behulp van de SMIDO-methodiek gevonden worden zoals\n\n* Wel of geen voeding op componenten (P van Power)\n* Verkeerde instelling regelparameter (P van Parameters)\n\n<a id='e076f540-c100-435f-af2d-9db4b748176d'></a>\n\n24\n\n<a id='949fcf1f-1589-41b5-a3a0-32f06dc3ae89'></a>\n\n- Afwijkende condities bij het gebruik (P van Procescondities)\n- Defecte component (ketens en componenten uitsluiten)\n- Defecte signaalverbindingen\n- Koelinstallatie uit balans, afwijkende procescondities (P van Procescondities)\n\n<a id='8efa7170-af4b-48ae-867a-5aa92b9395ed'></a>\n\n25\n\n<a id='54b8f0f2-dd9d-408b-9cb5-2f323e9cd009'></a>\n\nStoringzoekApp\nIn plaats van storingstabellen zijn er ook Apps beschikbaar die kunnen helpen bij het vaststellen van mogelijke storingsoorzakken. Danfoss heeft ook een App ontwikkeld; Trouble shooter. Download de App en kijk wat de mogelijkheden zijn.\n\n<a id='0fa574af-fe9f-475b-8037-c9cd5a72c6fa'></a>\n\n<::A hand holds a black smartphone displaying the 'FittersApp'. The app shows a diagram of a refrigeration or HVAC system with blue and red lines representing different circuits, connected to various components like coils, valves, and a compressor. The top bar of the app shows 'FittersApp', an information icon, a globe icon, and a message icon, along with the time '08:09' and network/battery indicators. Below the app title, there's text 'Tap area of interest'. In the top left corner of the overall image, a red square logo with a white snowflake and target symbol, and the word 'Danfoss' in white script, is visible.\n: diagram::>\n\nFiguur 7 Danfoss App Trouble Shooter\n\n<a id='a8e3f5c7-fd32-4b56-8d88-e54f352cfedb'></a>\n\n26\n\n<a id='b71f13c3-2aaf-49ef-b897-3440d2d02a48'></a>\n\nBijlagen Bij dit hoofdstuk horen de volgende bijlagen\n* Storingtabel Danfoss\n\n<a id='44e0d969-3ca3-4700-9429-72a212dc53ed'></a>\n\n27\n\n<a id='5ed7ef9a-f87c-4ee6-9e6f-ee506d7331ea'></a>\n\nTheorie opgaven\n\n1. De condensatiedruk in een luchtgekoelde condensor is te hoog. Welke mogelijke oorzaken kun je relatief eenvoudig onderzoeken om het probleem vast te stellen?\n2. De condensatiedruk in een luchtgekoelde condensor is te hoog. Deze installatie heeft al 2 jaar zonder problemen gedraaid. Welke mogelijke oorzaken zijn door deze extra informatie minder waarschijnlijk geworden en wat is volgens jou de meest voorkomende oorzaak?\n3. Je ziet dampbellen in het kijkglas voor het expansieventiel. In de tabel worden diverse oorzaken beschreven. Wat is op basis van je koeltechnische kennis in algemene zin de oorzaak dat hier dampbellen zichtbaar zijn?\n4. Je ziet dampbellen in het kijkglas voor het expansieventiel. De condensatiedruk blijkt ook te laag te zijn. Dit gebeurd op een winterdag. Aan welke oorzaak denk je en hoe ga je dit controleren?\n5. Het verdamperblok van een luchtkoeler zit vol rijp. Wat ga je als eerste controleren en leg uit waarom.\n6. De luchttemperatuur in een koelcel is te hoog. De installatie heeft goed gewerkt. Welke oorzaken liggen buiten de installatie zelf?\n7. De luchttemperatuur in een koelcel is te hoog. De installatie heeft goed gewerkt. Je ziet ook dampbellen in het kijkglas voor het expansieventiel. Ga jij de installatie al bijvullen of zoek je verder. Verklaar je antwoord.\n8. De zuigdruk is te laag maar de installatie draait wel. Een mogelijke oorzaak is dat de ventilator van de verdamper niet werkt. Verklaar waarom dit een mogelijke oorzaak is.\n9. De compressor start niet. Er is geen technisch defect. Welke instellingen van welke regelingen of beveiligingen kunnen dit dan veroorzaken?\n10. De compressor schakelt uit op hoge druk. De pressostaat staat goed ingesteld. Hoe kan deze storing veroorzaakt worden door een probleem bij de verdamper?\n11. Download de App van Danfoss. Welke mogelijke oorzaak(en) ga je volgens deze App onderzoeken als de ruimtetemperatuur te laag is? En is dit ook de enige mogelijke oorzaak?\n12. Op basis van welke symptomen en/of meetwaarden stel je vast dat er te weinig koudemiddel in een systeem zit?\n\n<a id='60f67439-4a2a-4015-93bf-30180b3b8dae'></a>\n\n28\n\n<a id='dca63e03-18b5-42a3-a449-71cc8c37db49'></a>\n\n## Case 2 Mobiele Inleiding\ninkoel- invriescel\n\nJe gaat in deze case de kennis die je hebt opgedaan over koelinstallaties, opbouw en werking, inspectie en onderhoud en storingzoeken toepassen. Het is voor jou een onbekende installatie en je leert gebruik te maken van diverse vormen van informatie om gegevens te verzamelen.\n\n<a id='819c8255-49d0-4753-89c5-1903b7499a3b'></a>\n\n# Beschrijving\nDe firma Coolworld levert en verhuurt diverse vormen van mobiele koelingen, van eenvoudige airco's, koel- vriescellen tot grote chillerunits. Deze case gaat over een mobiele inkoel- invriescel type M101.\n\n<a id='a1b387a9-1911-4cdd-8b0f-131a94a9d608'></a>\n\n<::A white, rectangular mobile cold storage unit with a door on one end. The unit has a blue circular logo on its side and on the door, which reads \"Coolworld\" in the center, and \"VERHUUR\", \"RENTAL\", \"VERMIETUNG\", \"LOCATION\" around the perimeter. A vent is visible on the left side of the unit. The unit is shown against a white background with a reflection beneath it.\nFigure 1. Coolworld mobile cold storage unit.::>\n\n<a id='c91cb741-ff3c-4a6a-a8cb-ad8e9a7be5de'></a>\n\n# Bijlagen\n\nBij deze case horen de volgende bijlagen\n\n* Schema koelinstallatie\n* Foto's\n* Logboekgegevens\n* Technische gegevens\n* Blanco servicerapport\n\n<a id='f2e69583-0dbd-43da-a612-28f1d6b210eb'></a>\n\n29\n\n<a id='6585f08a-4576-498f-b746-378a0fb8e219'></a>\n\nVertrouwd met de installatie Opgaven\n1. Benoem de componenten die je herkent op de foto in figuur 5 van de fotobijlage.\n2. Benoem de componenten die je herkent op de foto in figuur 6 van de fotobijlage.\n3. Benoem de componenten die je herkent op de foto in figuur 7 van de fotobijlage.\n4. Benoem de componenten die je herkent op de foto in figuur 8 van de fotobijlage.\n5. Wat voor type expansieorgaan zit er in de installatie?\n6. Op de foto in figuur 9 is een ontluchtingsklep te zien. Wat is hiervan de functie?\n7. De deurstijlen zijn voorzien van elektrische verwarming. Waarom is dit nodig?\n8. Wat is de functie van warmtewisselaar Z-04 (zie schema)?\n9. Waarom zit terugslagklep P-03 (zie schema) op deze plaats in het systeem?\n10. Welke vormen van 'demping' zijn er toegepast bij de compressor?\n11. Wat is de functie van pressostaat M-02 (zie schema)?\n12. Wat is de functie van pressostaat A-01 (zie schema)?\n13. Welke leidingen zijn geïsoleerd?\n14. Waar zit een afblaasveiligheid gemonteerd in de installatie?\n\n<a id='2346e5c5-25d4-4389-9673-ba914797b022'></a>\n\n30\n\n<a id='e2f1c331-0f65-4f51-87ca-4f50755ba45a'></a>\n\nInstallatie- en Opgaven\nprocesgegevens 15. De kenplaat is niet compleet. Welk gegeven mis je dat er wettelijk op moet staan?\n\n<a id='7d3452d3-63d4-436b-b7e1-798f80d41f14'></a>\n\n<::diagram: A 2D graph with a vertical axis labeled 'p' and a horizontal axis labeled 'h'. A closed, bell-shaped curve, characteristic of a vapor dome or phase envelope, is plotted within the first quadrant, starting from the origin, curving upwards and to the right, then downwards and to the left, and finally connecting back to the horizontal axis. The curve encloses an area.::>\nFiguur 2 Basisindeling diagram\n\n<a id='93f31c1a-e223-4b83-b973-038bce35496a'></a>\n\n16. De installatie is geschikt voor (in)koelen en (in)vriezen en opslag. Je kunt de diverse procescondities bij inbedrijfstellen vinden in de bijlage met logboekgegevens. Maak in figuur 2 een schets van de koelkringloop voor de situatie van koelen met de belangrijkste temperatuur en drukgegevens. Denk hierbij ook aan oververhitting en onderkoeling.\n17. Noteer de belangrijkste druk- en temperatuurgegevens uit de vorige opgave ook in het schema op de positie waar je deze waarden zou meten.\n18. Je gaat alle belangrijke inbedrijfstelgegevens uit het logboek verwerken op het service-rapport. Doe dit voor als de installatie gebruik wordt voor vriezen.\n\n<a id='549e9f0c-a3f4-41cc-95bb-a8e3b837a140'></a>\n\n31\n\n<a id='32724b8a-5159-4d54-b7f1-d8b08f1fa0c9'></a>\n\nStoringzoeken Opgaven\n\n19. De luchtkoeler is volledig berijpt. De oorzaak is een technisch probleem. Welke compo-\nnenten zitten er in de 'keten' voor ontdooiing?\n\n20. Magneetklep V-05 gaat niet open. Welke storingssymptomen en/of melding geeft de\ninstallatie?\n\n21. Het filter is berijpt. Is dit een probleem? Wat ga je nog meer controleren?\n\n22. De luchtkoeler is volledig berijpt. Wat is hiervan de oorzaak als er geen technisch defect\naan de installatie is?\n\n23. De zuigdruk is te laag, de installatie draait instabiel. Er zijn een aantal oorzaken mogelijk.\nWelke punten in de installatie ga je nog meer controleren om een aantal mogelijke\noorzaken uit te sluiten.\n\n24. Op welke waarde moet de lagedrukpressostaat staan ingesteld (setpoint en differentie)?\n\n25. Wat is het gevolg als de lagedrukpressosaat op een te lage waarde staat ingesteld?\n\n26. De deur staat open en de ventilatoren van de verdamper draaien niet meer. Wat is hiervan\nde reden?\n\n27. Welke problemen kunnen er ontstaan als de cel tot aan het plafond gevuld wordt met\ndozen product?\n\n28. De compressor kan niet starten. Welke technische oorzaken zijn hiervoor?\n\n29. De compressor kan niet starten. De compressor, voeding en aansturing zijn in orde. Welke\nprocestechnische oorzaken in de koelkringloop kunnen dit veroorzaken?\n\n30. De hogedrukpressostaat staat op 30 bar ingesteld. Mag dit of geeft dit problemen met de\ninstallatie?\n\n<a id='87958d0d-0f7f-4ecd-a889-c611ada6f319'></a>\n\n32",
+  "chunks": [
+    {
+      "id": "11cdb058-316e-44ba-a0fb-1903707c51e2",
+      "grounding": {
+        "box": {
+          "bottom": 0.99913489818573,
+          "left": -0.002205461263656616,
+          "right": 0.9580060243606567,
+          "top": 0.0017445385456085205
+        },
+        "page": 0
+      },
+      "markdown": "<a id='11cdb058-316e-44ba-a0fb-1903707c51e2'></a>\n\nStoringzoeken koeltechniek\n\nROVC\nTechnisch de beste opleider",
+      "type": "text"
+    },
+    {
+      "id": "21562b21-72f2-47e3-8390-81d987ae4a55",
+      "grounding": {
+        "box": {
+          "bottom": 0.7770004272460938,
+          "left": 0.05763399600982666,
+          "right": 0.8673520684242249,
+          "top": 0.6788369417190552
+        },
+        "page": 1
+      },
+      "markdown": "<a id='21562b21-72f2-47e3-8390-81d987ae4a55'></a>\n\nCOPYRIGHT ROVC\nAlle rechten voorbehouden. Niets uit deze uitgave mag worden verveelvoudigd, opgeslagen in een geautomatiseerd gegevensbestand, of openbaar gemaakt, in enige vorm of op enige wijze, hetzij elektronisch, mechanisch, door fotokopieën, opnamen, of op enige andere manier, zonder voorafgaande schriftelijke toestemming van de uitgever.",
+      "type": "text"
+    },
+    {
+      "id": "a244f207-0589-43a3-8260-088a006fc753",
+      "grounding": {
+        "box": {
+          "bottom": 0.8514872789382935,
+          "left": 0.05814260244369507,
+          "right": 0.882304310798645,
+          "top": 0.7878698110580444
+        },
+        "page": 1
+      },
+      "markdown": "<a id='a244f207-0589-43a3-8260-088a006fc753'></a>\n\nAll rights reserved. No part of this publication may be reproduced, stored in a retrieval system, or transmitted,\nin any form or by any means, electronic, mechanical, photocopying, recording, or otherwise without the prior\nwritten permission from the publisher.",
+      "type": "text"
+    },
+    {
+      "id": "ff957521-960c-4579-ba3b-5a7824a1c0c8",
+      "grounding": {
+        "box": {
+          "bottom": 0.9102516174316406,
+          "left": 0.0539344847202301,
+          "right": 0.9003009796142578,
+          "top": 0.8767287731170654
+        },
+        "page": 1
+      },
+      "markdown": "<a id='ff957521-960c-4579-ba3b-5a7824a1c0c8'></a>\n\n| ROVC | Postbus 117 | 6710 BC EDE | 0318 – 698 697 (studieadvies) | www.rovc.nl |",
+      "type": "text"
+    },
+    {
+      "id": "1edb8417-c988-41ba-91ae-f3e029bfee1a",
+      "grounding": {
+        "box": {
+          "bottom": 0.9644360542297363,
+          "left": 0.05206576734781265,
+          "right": 0.08135271817445755,
+          "top": 0.9424115419387817
+        },
+        "page": 1
+      },
+      "markdown": "<a id='1edb8417-c988-41ba-91ae-f3e029bfee1a'></a>\n\n2",
+      "type": "marginalia"
+    },
+    {
+      "id": "90f0bfcd-c3e3-4717-bc24-a892182c435c",
+      "grounding": {
+        "box": {
+          "bottom": 0.964045524597168,
+          "left": 0.3850021958351135,
+          "right": 0.5742648243904114,
+          "top": 0.9416617155075073
+        },
+        "page": 1
+      },
+      "markdown": "<a id='90f0bfcd-c3e3-4717-bc24-a892182c435c'></a>\n\nVersie: 20 maart 2018",
+      "type": "marginalia"
+    },
+    {
+      "id": "1ae4dc51-52ae-4213-ba82-6ae7dca0aebe",
+      "grounding": {
+        "box": {
+          "bottom": 0.296237051486969,
+          "left": 0.16683760285377502,
+          "right": 0.9514524936676025,
+          "top": 0.07500732690095901
+        },
+        "page": 2
+      },
+      "markdown": "<a id='1ae4dc51-52ae-4213-ba82-6ae7dca0aebe'></a>\n\n<table id=\"2-1\">\n<tr><td id=\"2-2\" rowspan=\"2\">Inhouds</td><td id=\"2-3\">1 Gestructureerde aanpak storingzoeken</td><td id=\"2-4\">5</td></tr>\n<tr><td id=\"2-5\">Inleiding</td><td id=\"2-6\">7</td></tr>\n<tr><td id=\"2-7\" rowspan=\"2\">opgave</td><td id=\"2-8\">De SMIDO-methodiek</td><td id=\"2-9\">8</td></tr>\n<tr><td id=\"2-a\">Het koelproces uit balans</td><td id=\"2-b\">12</td></tr>\n<tr><td id=\"2-c\"></td><td id=\"2-d\">Bijlagen</td><td id=\"2-e\">14</td></tr>\n<tr><td id=\"2-f\"></td><td id=\"2-g\">Theorie opgaven</td><td id=\"2-h\">15</td></tr>\n<tr><td id=\"2-i\"></td><td id=\"2-j\">Case 1 Te warm in de trein</td><td id=\"2-k\">16</td></tr>\n<tr><td id=\"2-l\"></td><td id=\"2-m\">Werkplekopdracht Storingsregistratie</td><td id=\"2-n\">19</td></tr>\n<tr><td id=\"2-o\"></td><td id=\"2-p\">Storingsregistratie</td><td id=\"2-q\">20</td></tr>\n<tr><td id=\"2-r\"></td><td id=\"2-s\">2 Veelvoorkomende storingen</td><td id=\"2-t\">21</td></tr>\n<tr><td id=\"2-u\"></td><td id=\"2-v\">Inleiding</td><td id=\"2-w\">23</td></tr>\n<tr><td id=\"2-x\"></td><td id=\"2-y\">Storingstabel</td><td id=\"2-z\">24</td></tr>\n<tr><td id=\"2-A\"></td><td id=\"2-B\">StoringzoekApp</td><td id=\"2-C\">26</td></tr>\n<tr><td id=\"2-D\"></td><td id=\"2-E\">Bijlagen</td><td id=\"2-F\">27</td></tr>\n<tr><td id=\"2-G\"></td><td id=\"2-H\">Theorie opgaven.</td><td id=\"2-I\">28</td></tr>\n<tr><td id=\"2-J\"></td><td id=\"2-K\">Case 2 Mobiele inkoel- invriescel .................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................</td><td id=\"2-L\"></td></tr>\n</table>",
+      "type": "table"
+    },
+    {
+      "id": "20fbede1-11da-4040-b7f8-678330be0a27",
+      "grounding": {
+        "box": {
+          "bottom": 0.9648077487945557,
+          "left": 0.9218438267707825,
+          "right": 0.9462670683860779,
+          "top": 0.9429585933685303
+        },
+        "page": 2
+      },
+      "markdown": "<a id='20fbede1-11da-4040-b7f8-678330be0a27'></a>\n\n3",
+      "type": "marginalia"
+    },
+    {
+      "id": "a804de5d-c5a0-4013-b244-26b2a4e3823c",
+      "grounding": {
+        "box": {
+          "bottom": 0.9667554497718811,
+          "left": 0.05191003531217575,
+          "right": 0.08136593550443649,
+          "top": 0.9407745003700256
+        },
+        "page": 3
+      },
+      "markdown": "<a id='a804de5d-c5a0-4013-b244-26b2a4e3823c'></a>\n\n4",
+      "type": "marginalia"
+    },
+    {
+      "id": "cf1831df-b9aa-46bd-9cc4-08bc0cfb6355",
+      "grounding": {
+        "box": {
+          "bottom": 0.08251377940177917,
+          "left": 0.7910088896751404,
+          "right": 0.9800563454627991,
+          "top": 0.04282926023006439
+        },
+        "page": 4
+      },
+      "markdown": "<a id='cf1831df-b9aa-46bd-9cc4-08bc0cfb6355'></a>\n\nHoofdstuk 1",
+      "type": "text"
+    },
+    {
+      "id": "f6b0ad21-1380-4f3c-9310-f1a5087c9dad",
+      "grounding": {
+        "box": {
+          "bottom": 0.26302582025527954,
+          "left": 0.21785739064216614,
+          "right": 0.9510359764099121,
+          "top": 0.21216386556625366
+        },
+        "page": 4
+      },
+      "markdown": "<a id='f6b0ad21-1380-4f3c-9310-f1a5087c9dad'></a>\n\nGestructureerde aanpak storingzoeken",
+      "type": "text"
+    },
+    {
+      "id": "cf7dbe76-fee0-4eef-81c7-3f9c829bfb7f",
+      "grounding": {
+        "box": {
+          "bottom": 0.18415339291095734,
+          "left": 0.19114455580711365,
+          "right": 0.9483513832092285,
+          "top": 0.073420450091362
+        },
+        "page": 6
+      },
+      "markdown": "<a id='cf7dbe76-fee0-4eef-81c7-3f9c829bfb7f'></a>\n\n# Inleiding\nAls servicemonteur krijg je te maken met storingen aan koelinstallaties. Het is daarbij belangrijk dat je met voldoende kennis en op een gestructureerde manier naar de oorzaak op zoek gaat. Daarbij ga je eerst instellingen en gegevens controleren voordat je componenten gaat vervangen of instellingen gaat aanpassen. Van veelvoorkomende storingen kun je de oorzaak eenvoudig achterhalen; zeker als je al ervaring hebt. Naast de technische oplossing is rapportage ook een belangrijk onderdeel van storingzoeken. ROVC werkt met de SMIDO-methodiek als gestructureerde methode.",
+      "type": "text"
+    },
+    {
+      "id": "f8a78595-b5f8-4f10-acd8-758320957d5b",
+      "grounding": {
+        "box": {
+          "bottom": 0.4869622588157654,
+          "left": 0.29541894793510437,
+          "right": 0.9466793537139893,
+          "top": 0.1953391581773758
+        },
+        "page": 6
+      },
+      "markdown": "<a id='f8a78595-b5f8-4f10-acd8-758320957d5b'></a>\n\n<::A close-up photograph of a refrigeration unit component, likely an evaporator coil, heavily covered in white frost or ice. A copper pipe with a solenoid valve attached is visible, also partially covered in frost. A blue fan grille is visible on the right side of the image. The unit is housed within a metal frame.\n: photo::>\nFiguur 1",
+      "type": "figure"
+    },
+    {
+      "id": "4e05cca5-4674-4ca8-8cfa-54c04bf1617b",
+      "grounding": {
+        "box": {
+          "bottom": 0.554983377456665,
+          "left": 0.29506152868270874,
+          "right": 0.6984816193580627,
+          "top": 0.49928775429725647
+        },
+        "page": 6
+      },
+      "markdown": "<a id='4e05cca5-4674-4ca8-8cfa-54c04bf1617b'></a>\n\nIn dit hoofdstuk komen de volgende onderwerpen aan bod\n* De SMIDO-methodiek\n* Het koelproces uit balans",
+      "type": "text"
+    },
+    {
+      "id": "42b3cbbc-5555-49a7-9c60-edb1d83e6211",
+      "grounding": {
+        "box": {
+          "bottom": 0.9646162390708923,
+          "left": 0.9217764735221863,
+          "right": 0.9460660815238953,
+          "top": 0.9408428072929382
+        },
+        "page": 6
+      },
+      "markdown": "<a id='42b3cbbc-5555-49a7-9c60-edb1d83e6211'></a>\n\n7",
+      "type": "marginalia"
+    },
+    {
+      "id": "517a00a4-da08-45d0-bee6-77f70b06245e",
+      "grounding": {
+        "box": {
+          "bottom": 0.7189722061157227,
+          "left": 0.07064321637153625,
+          "right": 0.9007744789123535,
+          "top": 0.0759829580783844
+        },
+        "page": 7
+      },
+      "markdown": "<a id='517a00a4-da08-45d0-bee6-77f70b06245e'></a>\n\nDe SMIDO-me-thodiek\n\n<::transcription of the content\n: flowchart::>\n## Aanvalsplan\n\n**Start:**\n- Storing\n- Melding\n\n**Informeren (Inform) Section:**\n- **Decision:** melding compleet? (report complete?)\n  - **If 'nee' (no):** informatie verzamelen (gather information) -> returns to \"melding compleet?\"\n  - **If 'ja' (yes):**\n    - **Decision:** technisch? (technical?)\n      - **If 'nee' (no):**\n        - **Decision:** installatie vertrouwd? (installation familiar?)\n          - **If 'nee' (no):** informatie verzamelen (gather information) -> returns to \"installatie vertrouwd?\"\n          - **If 'ja' (yes):** -> proceeds to \"1 van de 3 P's?\" in Diagnose section\n      - **If 'ja' (yes):** -> proceeds to \"1 van de 3 P's?\" in Diagnose section\n- **External Process:** buiten installatie (outside installation) -> returns to \"melding compleet?\"\n\n**Diagnose (Diagnosis) Section:**\n- **Decision:** 1 van de 3 P's? (1 of the 3 P's?)\n  - **If 'ja' (yes):**\n    - **Decision:** proces instelling? (process setting?)\n      - **If 'nee' (no):** ketens uitsluiten (exclude chains) -> returns to \"proces instelling?\"\n      - **If 'ja' (yes):** -> proceeds to \"Oplossen\"\n  - **If 'nee' (no):**\n    - **Decision:** 1 keten? (1 chain?)\n      - **If 'nee' (no):** ketens uitsluiten (exclude chains) -> returns to \"1 keten?\"\n      - **If 'ja' (yes):**\n        - **Decision:** 1 onderdeel? (1 component?)\n          - **If 'nee' (no):** onderdelen uitsluiten (exclude components) -> returns to \"1 onderdeel?\"\n          - **If 'ja' (yes):** -> proceeds to \"Oplossen\"\n\n**End:**\n- Oplossen (Solve)\n\n**Logo:** ROVC Technisch de beste opleider\n\nFiguur 2 SMIDO-aanvalsplan gestructureerd storingzoeken\n<::>",
+      "type": "figure"
+    },
+    {
+      "id": "1fec7d3d-58e1-443d-a5f5-746a34971e27",
+      "grounding": {
+        "box": {
+          "bottom": 0.8700841665267944,
+          "left": 0.2460935413837433,
+          "right": 0.8998199701309204,
+          "top": 0.7299442291259766
+        },
+        "page": 7
+      },
+      "markdown": "<a id='1fec7d3d-58e1-443d-a5f5-746a34971e27'></a>\n\n# Toelichting stappen in aanvalsplan\n\nOm te kunnen werken volgens het aanvalsplan worden de stappen hierna kort toegelicht\n\n* Wat voor acties voer je uit bij een stap?\n* Op welke vragen zoek je een antwoord?\n* Wat is de betekenis van enkele kreten en afkortingen in het aanvalsplan?\n\nJe gaat dit aanvalsplan daarna gebruiken bij de cases en in het practicum. Je hoeft niet altijd alle stappen uit te voeren.",
+      "type": "text"
+    },
+    {
+      "id": "d7f8ae70-a7e2-4e2e-a22c-0d297fd8b446",
+      "grounding": {
+        "box": {
+          "bottom": 0.9650164842605591,
+          "left": 0.05285573750734329,
+          "right": 0.07941458374261856,
+          "top": 0.9413057565689087
+        },
+        "page": 7
+      },
+      "markdown": "<a id='d7f8ae70-a7e2-4e2e-a22c-0d297fd8b446'></a>\n\n8",
+      "type": "marginalia"
+    },
+    {
+      "id": "e9a21e80-0792-4cf3-b85d-ad5d495679e3",
+      "grounding": {
+        "box": {
+          "bottom": 0.16738303005695343,
+          "left": 0.2936599552631378,
+          "right": 0.8049930334091187,
+          "top": 0.07707862555980682
+        },
+        "page": 8
+      },
+      "markdown": "<a id='e9a21e80-0792-4cf3-b85d-ad5d495679e3'></a>\n\n# Melding\n\n* Is de melding compleet, waar staat de installatie en bij wie moet je zijn?\n* Is de melding duidelijk of alleen maar 'hij doet het niet'?\n* Welke symptomen zijn er waargenomen door de gebruiker?\n* Welke vragen ga je stellen om meer duidelijkheid te krijgen?",
+      "type": "text"
+    },
+    {
+      "id": "2d4466fd-e7a4-41bb-a7e0-8589a888e091",
+      "grounding": {
+        "box": {
+          "bottom": 0.2930590510368347,
+          "left": 0.29425206780433655,
+          "right": 0.9481717348098755,
+          "top": 0.17645516991615295
+        },
+        "page": 8
+      },
+      "markdown": "<a id='2d4466fd-e7a4-41bb-a7e0-8589a888e091'></a>\n\n**Technisch**\n\n* Je kijkt en luistert eerst bij een installatie of er een direct waarneembaar defect is.\n* Zo ja; dan ga je dit oplossen en hoef je verder geen storing te zoeken. Zoek wel naar de oorzaak waarom dit defect is opgetreden en of dit te voorkomen was.\n* Er zijn storingen die vaak voorkomen. Op basis van je ervaring kun je de symptomen vaak eenvoudig controleren op wat de meest voorkomende oorzaken zijn. Doe dit dan eerst. Maak hierbij zo nodig ook gebruik van diagnosetabellen of storingzoekapps.",
+      "type": "text"
+    },
+    {
+      "id": "2566b2bd-7cce-47ae-b8e5-7dd629f62c70",
+      "grounding": {
+        "box": {
+          "bottom": 0.4042162597179413,
+          "left": 0.2954598367214203,
+          "right": 0.8933504819869995,
+          "top": 0.30227914452552795
+        },
+        "page": 8
+      },
+      "markdown": "<a id='2566b2bd-7cce-47ae-b8e5-7dd629f62c70'></a>\n\nInstallatie vertrouwd\n\n* Heb je ervaring met de installatie of is deze te vergelijken met een andere installatie?\n* Heb je het schema van de installatie? Kun je dit ook lezen?\n* Kun je de leidingen volgen waar gas- en vloeibaar koudemiddel stromen?\n* Ken je de componenten?\n* Weet je hoe de regelingen werken?",
+      "type": "text"
+    },
+    {
+      "id": "1bf27ef7-1be6-4ec7-b026-ca11437db04d",
+      "grounding": {
+        "box": {
+          "bottom": 0.6500802040100098,
+          "left": 0.2958398759365082,
+          "right": 0.9488977193832397,
+          "top": 0.41318416595458984
+        },
+        "page": 8
+      },
+      "markdown": "<a id='1bf27ef7-1be6-4ec7-b026-ca11437db04d'></a>\n\n3-P's\n\nVoordat je verder gaat met het zoeken naar een technisch defect controleer je drie aspecten die eenvoudig te controleren zijn\n\n* P van Power; is er voeding op alle componenten die dat nodig hebben aanwezig?\n* P van Procesinstellingen; zijn de parameters goed ingesteld? Bijvoorbeeld pressostaten, regelcomponenten, ontdooitijden, regelparameters etc.\n* P van Procesparameters; draait de installatie op de juiste temperaturen en drukken? Voer metingen uit met de meterset om dit vast te stellen. Vergelijk ze met de gegevens bij inbedrijfstelling.\n* P van 'Productinput'; dit zijn afwijkingen in condities van producten of omgevingscondities ten opzicht van het ontwerp, waardoor een installatie niet goed kan functioneren. Er is dus geen direct defect of een storing met de installatie zelf, maar de oorzaak ligt elders. Dan daar verder zoeken. Bijvoorbeeld: zijn de condities van koelwater of koellucht van de condensor binnen de ontwerpwaarden, is de belading van een koel- vriescel goed, zijn de ingangscondities van het product (temperatuur, hoeveelheid) wel volgens het ontwerp?",
+      "type": "text"
+    },
+    {
+      "id": "ab558712-79fb-4da1-8c1a-563f29b6d03d",
+      "grounding": {
+        "box": {
+          "bottom": 0.8246639370918274,
+          "left": 0.2956765592098236,
+          "right": 0.9482647180557251,
+          "top": 0.6594921946525574
+        },
+        "page": 8
+      },
+      "markdown": "<a id='ab558712-79fb-4da1-8c1a-563f29b6d03d'></a>\n\n# Ketens en onderdelen uitsluiten\n\nPas nu duik je dieper de techniek van de installatie in en heb je vaak meer technische gegevens nodig van componenten en de installatie (elektrotechnische schema's)\n\n* Je gaat kijken naar de ketens waardoor een uitvoerend component wordt aangestuurd (klep, compressor, ventilator)\n* Welke component in de keten of verbinding (signaal, voeding) is defect waardoor de component niet meer werkt?\n* Bijvoorbeeld de ventilatormotor van de verdamper draait niet meer. Is de motor zelf defect (meten), is er een component of verbinding in de voeding of aansturing defect? Op basis van welke signaalgevers wordt deze ventilator aangestuurd?",
+      "type": "text"
+    },
+    {
+      "id": "783d2136-8de5-439e-846c-efcdb9f1cb7c",
+      "grounding": {
+        "box": {
+          "bottom": 0.9630599617958069,
+          "left": 0.9230140447616577,
+          "right": 0.9442228078842163,
+          "top": 0.9425763487815857
+        },
+        "page": 8
+      },
+      "markdown": "<a id='783d2136-8de5-439e-846c-efcdb9f1cb7c'></a>\n\n9",
+      "type": "marginalia"
+    },
+    {
+      "id": "1dad0a3f-c409-4996-aca4-0b5425d6ab0d",
+      "grounding": {
+        "box": {
+          "bottom": 0.09794892370700836,
+          "left": 0.24800369143486023,
+          "right": 0.35909005999565125,
+          "top": 0.07816427946090698
+        },
+        "page": 9
+      },
+      "markdown": "<a id='1dad0a3f-c409-4996-aca4-0b5425d6ab0d'></a>\n\nVoorbeeld",
+      "type": "text"
+    },
+    {
+      "id": "7b7be4ba-ea0a-4ffc-86e6-303f93c58a4b",
+      "grounding": {
+        "box": {
+          "bottom": 0.1707831621170044,
+          "left": 0.24826380610466003,
+          "right": 0.9006228446960449,
+          "top": 0.10585334897041321
+        },
+        "page": 9
+      },
+      "markdown": "<a id='7b7be4ba-ea0a-4ffc-86e6-303f93c58a4b'></a>\n\nMelding\nDe temperatuur in de koelcel is te hoog en de producten dreigen te bederven. Je gaat naar de klant toe en ziet de verdamper zoals in de afbeelding in de inleiding van dit hoofdstuk. De installatie draait nog wel.",
+      "type": "text"
+    },
+    {
+      "id": "dd9f64c4-9683-40d2-847e-7ef63871c26c",
+      "grounding": {
+        "box": {
+          "bottom": 0.29108506441116333,
+          "left": 0.24835121631622314,
+          "right": 0.9006321430206299,
+          "top": 0.1803971529006958
+        },
+        "page": 9
+      },
+      "markdown": "<a id='dd9f64c4-9683-40d2-847e-7ef63871c26c'></a>\n\nRelevante vragen en belangrijke informatie\n\n* Wat is de actuele temperatuur in de koelcel? Hoeveel is deze te hoog en hoe lang is dit al bekend?\n* Hoe lang is de verdamper al ingevroren?\n* Is dit al vaker gebeurd? Zijn er eerdere storingsmeldingen geweest? Is er recent onderhoud uitgevoerd?\n* Is het hele verdamperblok vol ijs of deels?",
+      "type": "text"
+    },
+    {
+      "id": "4bdd5c7d-70b3-434b-a396-939517a6fa0f",
+      "grounding": {
+        "box": {
+          "bottom": 0.4222230315208435,
+          "left": 0.24808591604232788,
+          "right": 0.8987073302268982,
+          "top": 0.30095309019088745
+        },
+        "page": 9
+      },
+      "markdown": "<a id='4bdd5c7d-70b3-434b-a396-939517a6fa0f'></a>\n\n## Technisch\n\nRelevante vragen en belangrijke informatie\n\n* Is er zichtbaar iets mis met de condenswaterafvoer?\n* Hangen er draden los van de elektrische ontdooiing als die gemonteerd is?\n* Hangt er een temperatuuropnemer los die ergens vast op gemonteerd moet zijn?\n* Wat is, op basis van je ervaring, meestal de oorzaak van dit probleem? En hoe ga je dit controleren?",
+      "type": "text"
+    },
+    {
+      "id": "e7bcfb0f-0dfe-4004-a165-8d5f6cc31f13",
+      "grounding": {
+        "box": {
+          "bottom": 0.598656952381134,
+          "left": 0.24739816784858704,
+          "right": 0.8988267183303833,
+          "top": 0.4327411949634552
+        },
+        "page": 9
+      },
+      "markdown": "<a id='e7bcfb0f-0dfe-4004-a165-8d5f6cc31f13'></a>\n\n## Installatie vertrouwd\n\nRelevante vragen en belangrijke informatie\n\n* Wat voor soort ontdooiing heeft de installatie?\n* Op basis van welke meetwaarden (opnemers) wordt de ontdooiing geregeld?\n* Is de lekbak en condenswaterafvoer voorzien van tracing?\n* Wat zou de temperatuur in de cel moeten zijn?\n* Kun je de ontdooiing handmatig inschakelen en testen?\n* Ben je bekend met de werking en instelling van de regelaar die is toegepast?\n* Heb je een schema van de installatie en/of kun je op basis van leidingwerk en componenten vaststellen hoe deze werken en welke mogelijk een oorzaak zijn van deze storing?",
+      "type": "text"
+    },
+    {
+      "id": "c081fdb8-bb1b-47b8-af2d-13db37f8f7f0",
+      "grounding": {
+        "box": {
+          "bottom": 0.786575436592102,
+          "left": 0.24740290641784668,
+          "right": 0.9001733064651489,
+          "top": 0.6076116561889648
+        },
+        "page": 9
+      },
+      "markdown": "<a id='c081fdb8-bb1b-47b8-af2d-13db37f8f7f0'></a>\n\n# 3 P's\n\nRelevante vragen en belangrijke informatie\n\n* Power: de installatie heeft elektrische ontdooiing. Heeft deze een eigen voeding?\n* Wat zijn de instellingen van de ontdooicyclus?\n* Wat is de setpointinstelling van de thermostaatregeling? Wat is het gevolg als deze veel te laag is ingesteld?\n* Wat is de verdampertemperatuur? Wijkt deze veel af van wat gangbaar (heb je de gegevens) is voor deze installatie?\n* Wat voor producten worden er in de cel opgeslagen? Zit hier meer vocht in dan normaal? Wat is de temperatuur van het product als dit in de cel geplaatst wordt?\n* Op welke manier zou er meer vocht in de koelcel kunnen komen dan normaal?",
+      "type": "text"
+    },
+    {
+      "id": "3c68f9c4-f01b-4b52-92b5-3f095517cca5",
+      "grounding": {
+        "box": {
+          "bottom": 0.8608335256576538,
+          "left": 0.24935168027877808,
+          "right": 0.8997599482536316,
+          "top": 0.7963846921920776
+        },
+        "page": 9
+      },
+      "markdown": "<a id='3c68f9c4-f01b-4b52-92b5-3f095517cca5'></a>\n\n**Ketens en onderdelen uitsluiten**\nDe antwoorden op bovenstaande vragen hebben niet geleid tot de oorzaak. Je kan de elek-\ntrische ontdooiing handmatig inschakelen via de regelaar en gaat dan de keten controleren of\ndeze werkt.",
+      "type": "text"
+    },
+    {
+      "id": "a165c596-2c98-49eb-8ba6-4c381602923b",
+      "grounding": {
+        "box": {
+          "bottom": 0.9640623927116394,
+          "left": 0.05553489178419113,
+          "right": 0.09073988348245621,
+          "top": 0.9419955611228943
+        },
+        "page": 9
+      },
+      "markdown": "<a id='a165c596-2c98-49eb-8ba6-4c381602923b'></a>\n\n10",
+      "type": "marginalia"
+    },
+    {
+      "id": "a9dea4f5-2c05-43d7-abc3-3e2af2a20cb4",
+      "grounding": {
+        "box": {
+          "bottom": 0.21922355890274048,
+          "left": 0.29299625754356384,
+          "right": 0.9489052295684814,
+          "top": 0.0761452242732048
+        },
+        "page": 10
+      },
+      "markdown": "<a id='a9dea4f5-2c05-43d7-abc3-3e2af2a20cb4'></a>\n\nRelevante vragen en belangrijke informatie\n\n* Je voelt dat de elektrische elementen warm worden en je meet de voedingspanning en stroom na. Deze keten werkt dus.\n* Het inschakelen van de ontdooiing werk via een temperatuurvoeler in de verdamper. Je meet of dit signaal ook binnenkomt op de regelaar. Dit blijkt niet zo te zijn. Je controleert of de opnemer nog werkt door deze te testen en door te meten. Je meet bij de stekkerverbinding in de verdamper de weerstandswaarde. Het is een Pt100 en de weerstandswaarde komt overeen met de temperatuur. De opnemer lijkt dus goed.\n* Je meet de bedrading tussen opnemer en regelaar en daar blijkt een draadbreuk te zitten.",
+      "type": "text"
+    },
+    {
+      "id": "ea849b94-6c3c-427f-a948-cab8848db14b",
+      "grounding": {
+        "box": {
+          "bottom": 0.9647499322891235,
+          "left": 0.9137910008430481,
+          "right": 0.9430790543556213,
+          "top": 0.940595269203186
+        },
+        "page": 10
+      },
+      "markdown": "<a id='ea849b94-6c3c-427f-a948-cab8848db14b'></a>\n\n11",
+      "type": "marginalia"
+    },
+    {
+      "id": "fa6bea10-2a1d-4c14-b949-43bfdc8ac2e4",
+      "grounding": {
+        "box": {
+          "bottom": 0.12307605892419815,
+          "left": 0.07815763354301453,
+          "right": 0.9003562927246094,
+          "top": 0.07467833906412125
+        },
+        "page": 11
+      },
+      "markdown": "<a id='fa6bea10-2a1d-4c14-b949-43bfdc8ac2e4'></a>\n\nHet koelproces\nuit balans\nEen koelinstallatie werkt alleen goed binnen bepaalde grenzen van o.a. temperaturen, drukken\nen belasting.",
+      "type": "text"
+    },
+    {
+      "id": "6d06176a-9ceb-4e20-8126-aaef0f104e0d",
+      "grounding": {
+        "box": {
+          "bottom": 0.23129332065582275,
+          "left": 0.24769249558448792,
+          "right": 0.8118683099746704,
+          "top": 0.12272438406944275
+        },
+        "page": 11
+      },
+      "markdown": "<a id='6d06176a-9ceb-4e20-8126-aaef0f104e0d'></a>\n\nDeze grenzen worden bepaald bij het ontwerp van de installatie door\n* Koellast en benodigde koelvermogen\n* Type koudemiddel\n* Verdampercapaciteit en verdampingstemperatuur\n* Compressorcapaciteit en verdampingstemperatuur en condensatietemperatuur\n* Condensorcapaciteit en condensatietemperatuur\n* Smoorventielcapaciteit",
+      "type": "text"
+    },
+    {
+      "id": "8bb59a20-544c-4817-934b-19b8f9c0f8d3",
+      "grounding": {
+        "box": {
+          "bottom": 0.2754683792591095,
+          "left": 0.24788415431976318,
+          "right": 0.8991208076477051,
+          "top": 0.24090783298015594
+        },
+        "page": 11
+      },
+      "markdown": "<a id='8bb59a20-544c-4817-934b-19b8f9c0f8d3'></a>\n\nDe componenten worden zodanig geselecteerd en op elkaar afgestemd (capaciteit, regelbereik), dat ze met elkaar in balans zijn voor een goed functionerende installatie.",
+      "type": "text"
+    },
+    {
+      "id": "2c46544a-7d3a-4a70-bae9-67b49544a83a",
+      "grounding": {
+        "box": {
+          "bottom": 0.38051730394363403,
+          "left": 0.2480175793170929,
+          "right": 0.8993805646896362,
+          "top": 0.2839800715446472
+        },
+        "page": 11
+      },
+      "markdown": "<a id='2c46544a-7d3a-4a70-bae9-67b49544a83a'></a>\n\nAls de balans van de koelkringloop ernstig verstoord raakt, functioneert de koelinstallatie niet goed meer en ontstaan storingen\n* Gewenste toepassingstemperatuur niet bereikt\n* Te weinig koelvermogen\n* Te hoog energieverbruik\n* Storingen en stilstand van de installatie door beveiligingen",
+      "type": "text"
+    },
+    {
+      "id": "32a3fad1-629a-4d94-918f-b0aae08e1431",
+      "grounding": {
+        "box": {
+          "bottom": 0.4359310269355774,
+          "left": 0.24830371141433716,
+          "right": 0.8998022675514221,
+          "top": 0.38928329944610596
+        },
+        "page": 11
+      },
+      "markdown": "<a id='32a3fad1-629a-4d94-918f-b0aae08e1431'></a>\n\nEen storing betekent dus niet altijd dat er een component defect is. Dit soort 'koeltechnische storingen' ontstaan, doordat de installatie niet werkt onder de condities die gekozen zijn bij het ontwerp.",
+      "type": "text"
+    },
+    {
+      "id": "39950276-3618-41d6-9e84-410a15360033",
+      "grounding": {
+        "box": {
+          "bottom": 0.741382896900177,
+          "left": 0.246561199426651,
+          "right": 0.8981974124908447,
+          "top": 0.45984309911727905
+        },
+        "page": 11
+      },
+      "markdown": "<a id='39950276-3618-41d6-9e84-410a15360033'></a>\n\n<::A diagram showing a balance scale with a gauge on top. The gauge has a needle pointing to the 'Bandbreedte' (Bandwidth) section, which is yellow, between 'Ondergrens' (Lower limit) in red and 'Bovengrens' (Upper limit) in black. The left pan of the balance lists 'EXPANSIEORGAAN', 'VERDAMPER', 'COMPRESSOR', 'CONDENSOR', and 'Etcetera'. The right pan lists 'Koudemiddel hoeveelheid', 'Koellast product', 'Motorvermogen en verd/cond. temp', 'Hoeveelheid lucht/water', 'Omgevingstemperatuur', and 'Etcetera'. In the center, bidirectional arrows labeled 'Onderlinge relatie' (Interrelationship) connect the two lists.\n: diagram::>\n\nFiguur 3 In balans",
+      "type": "figure"
+    },
+    {
+      "id": "487ee748-9aab-4ffc-99c9-562f69ed8fe3",
+      "grounding": {
+        "box": {
+          "bottom": 0.7891188263893127,
+          "left": 0.2485184669494629,
+          "right": 0.8991985321044922,
+          "top": 0.7538022398948669
+        },
+        "page": 11
+      },
+      "markdown": "<a id='487ee748-9aab-4ffc-99c9-562f69ed8fe3'></a>\n\nBekijk in onderstaande animatie via de knoppen de verschillende processituaties. In een aantal gevallen raakt de koelinstallatie uit balans.",
+      "type": "text"
+    },
+    {
+      "id": "54e6e19f-d30d-4677-a006-098a9c7e6f6e",
+      "grounding": {
+        "box": {
+          "bottom": 0.9646186232566833,
+          "left": 0.05661029368638992,
+          "right": 0.09070170670747757,
+          "top": 0.9423345923423767
+        },
+        "page": 11
+      },
+      "markdown": "<a id='54e6e19f-d30d-4677-a006-098a9c7e6f6e'></a>\n\n12",
+      "type": "marginalia"
+    },
+    {
+      "id": "7fcb92b5-831f-490c-a147-9e60ee4e4a04",
+      "grounding": {
+        "box": {
+          "bottom": 0.3657180368900299,
+          "left": 0.2945907413959503,
+          "right": 0.9454931020736694,
+          "top": 0.10225251317024231
+        },
+        "page": 12
+      },
+      "markdown": "<a id='7fcb92b5-831f-490c-a147-9e60ee4e4a04'></a>\n\nROVC\nTechnisch de beste opleider\noption Start: [x]\noption Koelen: [ ]\noption Vriezen: [ ]\noption Koelen met diagram: [ ]\noption Warmtebelasting neemt toe: [ ]\noption Warmtebelasting te hoog: [ ]\noption Oververhitting te klein: [ ]\noption Oververhitting te hoog: [ ]\noption Te lage condensordruk: [ ]\nΠ\n00\n<::koeltechniek\nDiagram of a refrigeration cycle showing a compressor, condenser, expansion valve, and evaporator.\nThe cycle starts from the compressor (right side), where refrigerant flows through red pipes to the condenser (top right) with fans.\nFrom the condenser, the refrigerant flows through an expansion valve (left side) and then to the evaporator (bottom left) with fans, indicated by blue pipes.\nThe refrigerant then returns to the compressor.\nNumbered points indicate states in the cycle:\n1: -5°C, 1.4 bar\n2: -5°C, 1.4 bar\n3: 0°C, 1.4 bar, with an additional label 5°C, R134a\n4: 55°C, 9 bar\n5: 40°C, 9 bar\n6: 35°C, 9 bar\n: diagram::>",
+      "type": "figure"
+    },
+    {
+      "id": "2b75a287-c62b-455e-9a07-0e83be2265ef",
+      "grounding": {
+        "box": {
+          "bottom": 0.3857531249523163,
+          "left": 0.29700714349746704,
+          "right": 0.5651118755340576,
+          "top": 0.3660941421985626
+        },
+        "page": 12
+      },
+      "markdown": "<a id='2b75a287-c62b-455e-9a07-0e83be2265ef'></a>\n\nFiguur 4 Verschillende processituaties",
+      "type": "text"
+    },
+    {
+      "id": "db296cfe-e86b-468f-aad1-d8551cafbea6",
+      "grounding": {
+        "box": {
+          "bottom": 0.9649813771247864,
+          "left": 0.9124611020088196,
+          "right": 0.9462766051292419,
+          "top": 0.9416684508323669
+        },
+        "page": 12
+      },
+      "markdown": "<a id='db296cfe-e86b-468f-aad1-d8551cafbea6'></a>\n\n13",
+      "type": "marginalia"
+    },
+    {
+      "id": "53929abc-3727-42c3-a504-3161b2c55c9d",
+      "grounding": {
+        "box": {
+          "bottom": 0.1268513798713684,
+          "left": 0.1473136991262436,
+          "right": 0.5541414618492126,
+          "top": 0.07493098825216293
+        },
+        "page": 13
+      },
+      "markdown": "<a id='53929abc-3727-42c3-a504-3161b2c55c9d'></a>\n\nBijlagen Bij dit hoofdstuk horen de volgende bijlagen\n\n* SMIDO-storingsrapportageformulieren",
+      "type": "text"
+    },
+    {
+      "id": "2b7e19f3-10ef-4aa0-8571-1d4d3b2e95a9",
+      "grounding": {
+        "box": {
+          "bottom": 0.9654399752616882,
+          "left": 0.05428965762257576,
+          "right": 0.09276905655860901,
+          "top": 0.9404669404029846
+        },
+        "page": 13
+      },
+      "markdown": "<a id='2b7e19f3-10ef-4aa0-8571-1d4d3b2e95a9'></a>\n\n14",
+      "type": "marginalia"
+    },
+    {
+      "id": "6658296a-737d-4df2-9e34-3f31ca95e0bd",
+      "grounding": {
+        "box": {
+          "bottom": 0.1944725215435028,
+          "left": 0.10829564929008484,
+          "right": 0.9485909938812256,
+          "top": 0.0772242620587349
+        },
+        "page": 14
+      },
+      "markdown": "<a id='6658296a-737d-4df2-9e34-3f31ca95e0bd'></a>\n\nTheorie opgaven Opgaven animatie\n\nIn de theorie heb je een animatie bekeken met verschillende processituaties. In een aantal situaties raakt de koelinstallatie uit balans.\n\n1. Wat gebeurt er met de installatie als de condensatietemperatuur te hoog is?\n2. Wat gebeurt er met de installatie als de oververhitting te klein wordt ingesteld?\n3. Wat gebeurt er met de installatie als de warmtebelasting te hoog wordt?",
+      "type": "text"
+    },
+    {
+      "id": "0d520184-ccd2-4702-8cb6-8b4544d1fe38",
+      "grounding": {
+        "box": {
+          "bottom": 0.3106395900249481,
+          "left": 0.29517513513565063,
+          "right": 0.9484285712242126,
+          "top": 0.20279237627983093
+        },
+        "page": 14
+      },
+      "markdown": "<a id='0d520184-ccd2-4702-8cb6-8b4544d1fe38'></a>\n\nOpgaven theorie\n\n4. Noteer drie mogelijk oorzaken voor het invriezen van een verdamper.\n5. Welke signaalgevers (opnemers) zitten er in een koelinstallatie die het in- uitschakelen van de compressor regelen (keten van stuursignaal naar compressor)?\n6. Welke storingen kunnen er ontstaan als het setpoint van een koelcel veel lager wordt ingesteld dan waarvoor deze is ontworpen?",
+      "type": "text"
+    },
+    {
+      "id": "3cc7c347-ed11-41c1-b582-bbdbeea41883",
+      "grounding": {
+        "box": {
+          "bottom": 0.9641313552856445,
+          "left": 0.9129123687744141,
+          "right": 0.9446601867675781,
+          "top": 0.9421654939651489
+        },
+        "page": 14
+      },
+      "markdown": "<a id='3cc7c347-ed11-41c1-b582-bbdbeea41883'></a>\n\n15",
+      "type": "marginalia"
+    },
+    {
+      "id": "10c406cd-6d6c-4124-8b5f-8449e64c3140",
+      "grounding": {
+        "box": {
+          "bottom": 0.16214273869991302,
+          "left": 0.06586447358131409,
+          "right": 0.9020071029663086,
+          "top": 0.07500511407852173
+        },
+        "page": 15
+      },
+      "markdown": "<a id='10c406cd-6d6c-4124-8b5f-8449e64c3140'></a>\n\nCase 1 Te warm\nin de trein\n\n**Inleiding**\nJe krijgt te maken met een storingsmelding en je gaat de stappen uit het SMIDO-aanvalsplan gebruiken om de oorzaak te achterhalen. Je gaat daarbij oefenen in het stellen van belangrijke vragen voor het stellen van de diagnose. Ook ga je uitzoeken welke informatie je nodig hebt om antwoord te krijgen op deze vragen.",
+      "type": "text"
+    },
+    {
+      "id": "ab6f77fb-8d66-4d96-a432-be4ea0a9d570",
+      "grounding": {
+        "box": {
+          "bottom": 0.23927700519561768,
+          "left": 0.24562710523605347,
+          "right": 0.9021678566932678,
+          "top": 0.17084646224975586
+        },
+        "page": 15
+      },
+      "markdown": "<a id='ab6f77fb-8d66-4d96-a432-be4ea0a9d570'></a>\n\n# Beschrijving\nDe reizigers in de trein hebben geklaagd dat de airco in de trein niet goed werkt: het is te warm.\nJij moet gaan uitzoeken wat er aan de hand is. Je bent nog niet zo bekend met dit soort instal-\nlaties.",
+      "type": "text"
+    },
+    {
+      "id": "940082dd-12c0-4698-852f-c8746b510498",
+      "grounding": {
+        "box": {
+          "bottom": 0.3332461714744568,
+          "left": 0.24574892222881317,
+          "right": 0.7210720777511597,
+          "top": 0.2496255785226822
+        },
+        "page": 15
+      },
+      "markdown": "<a id='940082dd-12c0-4698-852f-c8746b510498'></a>\n\nDe koeling wordt verzorgd door\n* Een koelinstallatie\n* Een koudwatercircuit\n* Een luchtverdeelsysteem\n* Centraal besturingssysteem voor alle regelingen en beveiligingen",
+      "type": "text"
+    },
+    {
+      "id": "4925fe89-cc5f-4697-8be3-0b9b094bc343",
+      "grounding": {
+        "box": {
+          "bottom": 0.643433690071106,
+          "left": 0.24687883257865906,
+          "right": 0.9002730846405029,
+          "top": 0.35082170367240906
+        },
+        "page": 15
+      },
+      "markdown": "<a id='4925fe89-cc5f-4697-8be3-0b9b094bc343'></a>\n\n<::A modern, sleek white and blue train with yellow accents is parked at a station platform. The train is seen from the front-left, extending into the background. The station features a large, arched glass and steel roof structure, allowing natural light to illuminate the platform. In the background, a sign indicates \"10\" for the platform number, with \"Richting Schiphol\" (Direction Schiphol) also visible. A building with orange-brown facades is visible through the glass roof in the distance. The platform is clean and modern. Figuur 1 Airco in trein::>",
+      "type": "figure"
+    },
+    {
+      "id": "41fb2c6b-49cc-44de-8228-a10b66aaca0f",
+      "grounding": {
+        "box": {
+          "bottom": 0.7970470786094666,
+          "left": 0.24692398309707642,
+          "right": 0.6175959706306458,
+          "top": 0.6559566855430603
+        },
+        "page": 15
+      },
+      "markdown": "<a id='41fb2c6b-49cc-44de-8228-a10b66aaca0f'></a>\n\nBijlagen\n\nBij deze case horen de volgende bijlagen\n\n* Koudemiddelcircuit (koeltechnisch schema)\n* Koudwatercircuit\n* Componentenlijst\n* Servicerapport van laatste onderhoudsbeurt\n* Foto's van de installatie\n* Overige tekeningen en schema's van de installatie",
+      "type": "text"
+    },
+    {
+      "id": "c67a6d53-215a-47bc-8428-bb3bbf64288b",
+      "grounding": {
+        "box": {
+          "bottom": 0.9640234708786011,
+          "left": 0.05529382824897766,
+          "right": 0.09268979728221893,
+          "top": 0.9423468112945557
+        },
+        "page": 15
+      },
+      "markdown": "<a id='c67a6d53-215a-47bc-8428-bb3bbf64288b'></a>\n\n16",
+      "type": "marginalia"
+    },
+    {
+      "id": "61a0f0ea-2c10-4efb-8548-9522f3c85e60",
+      "grounding": {
+        "box": {
+          "bottom": 0.2163899540901184,
+          "left": 0.1076313853263855,
+          "right": 0.9487443566322327,
+          "top": 0.07467352598905563
+        },
+        "page": 16
+      },
+      "markdown": "<a id='61a0f0ea-2c10-4efb-8548-9522f3c85e60'></a>\n\nSMIDO stappenplan\n\nMelding\nOpgaven\n\n1. De melding is niet heel concreet. Welke gegevens heb je nodig om vast te stellen of de klacht 'terecht' is en hoe zou je deze informatie kunnen krijgen?\n2. Wat zou je gaan meten bij de installatie als deze in bedrijf is?\n3. De installatie verzorgt koeling in verschillende ruimtes van de trein. Maakt het nog uit of de klacht voor alle ruimtes geldt of voor eén? Verklaar je antwoord.",
+      "type": "text"
+    },
+    {
+      "id": "03f57c8e-1853-4a9d-b3bb-0a318cdd6c67",
+      "grounding": {
+        "box": {
+          "bottom": 0.29490962624549866,
+          "left": 0.29076093435287476,
+          "right": 0.9502618908882141,
+          "top": 0.22416569292545319
+        },
+        "page": 16
+      },
+      "markdown": "<a id='03f57c8e-1853-4a9d-b3bb-0a318cdd6c67'></a>\n\n# Technisch\nEr is niet direct een technisch defect zichtbaar. Op basis van je ervaring kun je ook niet direct een aantal mogelijke oorzaken bedenken die je eenvoudig kan controleren. Je kan dus niet direct de storing oplossen en zult verder moeten gaan met de diagnose.",
+      "type": "text"
+    },
+    {
+      "id": "dc8921d7-de26-49df-a0be-beeef011a0a5",
+      "grounding": {
+        "box": {
+          "bottom": 0.35943207144737244,
+          "left": 0.29181820154190063,
+          "right": 0.9488024115562439,
+          "top": 0.30277344584465027
+        },
+        "page": 16
+      },
+      "markdown": "<a id='dc8921d7-de26-49df-a0be-beeef011a0a5'></a>\n\n## Installatie vertrouwd\n\nJe bent nog niet zo bekend met de installatie. Je gaat op basis van de schema's kijken welke componenten er op zitten en hoe de installatie moet werken.",
+      "type": "text"
+    },
+    {
+      "id": "2f38b420-95ba-4896-bf6a-ae3a0e062616",
+      "grounding": {
+        "box": {
+          "bottom": 0.6879950165748596,
+          "left": 0.2921277582645416,
+          "right": 0.9518038034439087,
+          "top": 0.36641937494277954
+        },
+        "page": 16
+      },
+      "markdown": "<a id='2f38b420-95ba-4896-bf6a-ae3a0e062616'></a>\n\nOpgaven\n\n4. Markeer in het koeltechnische schema de koudemiddelkringloop van koud zuiggas, heet persgas, gecondenseerd koudemiddel, geëxpandeerd vloeibaar koudemiddel.\n5. Wat is de functie van component nr. 15?\n6. Waarom is de magneetklep nr. 14 geplaatst?\n7. Hoeveel condensors heeft de installatie?\n8. Hoeveel verdampers heeft de installatie?\n9. Welke regel- en beveiligingscomponenten zitten er rond de compressoren?\n10. Wat is de functie van warmtewisselaar 8?\n11. Naar welke luchtbehandelingskast(en) gaat het water in het koudwatercircuit en hoeveel zijn dit er?\n12. In de bijlagen zijn foto's gegeven van de installatie. Welke componenten herken je op de foto in figuur 1, 2 en 3?\n13. In welke leiding zit het kijkglas meestal?\n14. Bij normaal gedrag van de installatie: wat is dan de uittredende koud-watertemperatuur van de waterkoeler?\n15. Bij normaal gedrag van de installatie: wat is dan de zuigdruk van de installatie ?",
+      "type": "text"
+    },
+    {
+      "id": "21e7764b-c554-4c45-b44d-017a1f517719",
+      "grounding": {
+        "box": {
+          "bottom": 0.7656827569007874,
+          "left": 0.29334646463394165,
+          "right": 0.9499363303184509,
+          "top": 0.6945026516914368
+        },
+        "page": 16
+      },
+      "markdown": "<a id='21e7764b-c554-4c45-b44d-017a1f517719'></a>\n\n# Drie P's controleren\n\nJe mag er van uit gaan dat alle Power aanwezig is op de installatie. De oorzaak hoeft niet direct in de koelinstallatie te zitten. Op welke manier zou de klacht of storing veroorzaakt kunnen worden door systemen en componenten buiten de koelinstallatie zelf?",
+      "type": "text"
+    },
+    {
+      "id": "1314d87d-6d72-4833-8d51-de52afb2417a",
+      "grounding": {
+        "box": {
+          "bottom": 0.917704164981842,
+          "left": 0.2926945090293884,
+          "right": 0.9498429894447327,
+          "top": 0.7721369862556458
+        },
+        "page": 16
+      },
+      "markdown": "<a id='1314d87d-6d72-4833-8d51-de52afb2417a'></a>\n\n**Opgaven**\n\n16. Welke omgevingscondities, buiten de koelunit om, hebben invloed op de werking hiervan?\nKunnen die de oorzaak zijn van de klacht?\n17. Op welke manier hebben componenten in het koudwatercircuit invloed op een goede\nwerking van de koelunit en daarmee op de klacht?\n18. Op welke manier zou de klacht veroorzaakt kunnen worden door componenten in het lucht-\nbehandeling en -verdeelsysteem? Welke componenten en op welke manier?\nJe gaat diverse Parameters controleren en Procescondities meten.",
+      "type": "text"
+    },
+    {
+      "id": "a7f0d9c0-35e9-4531-9d05-c96eac77c19f",
+      "grounding": {
+        "box": {
+          "bottom": 0.9646360874176025,
+          "left": 0.910469651222229,
+          "right": 0.9454343318939209,
+          "top": 0.9403417110443115
+        },
+        "page": 16
+      },
+      "markdown": "<a id='a7f0d9c0-35e9-4531-9d05-c96eac77c19f'></a>\n\n17",
+      "type": "marginalia"
+    },
+    {
+      "id": "5a039ebe-3a5e-4239-9b57-199125faec71",
+      "grounding": {
+        "box": {
+          "bottom": 0.20063704252243042,
+          "left": 0.24632033705711365,
+          "right": 0.9018555879592896,
+          "top": 0.07523120194673538
+        },
+        "page": 17
+      },
+      "markdown": "<a id='5a039ebe-3a5e-4239-9b57-199125faec71'></a>\n\n19. Op welke waarde zou de in- en uitschakeldruk van de hogedrukbeveiliging zijn ingesteld?\n20. Op welke waarde zou de in- uitschakeldruk van de lagedrukbeveiliging zijn ingesteld?\n21. Wat zou de oververhitting moeten zijn volgens de inbedrijfstelgegevens op het service-\nrapport?\n22. Je wil de werkelijke oververhitting controleren door een meting. Geef in het schema aan\nwaar je de druk en temperatuur gaat meten en verklaar hoe je op basis hiervan de overver-\nhitting vaststelt.",
+      "type": "text"
+    },
+    {
+      "id": "9c27378b-91e4-476d-93d9-5543e3dc1b46",
+      "grounding": {
+        "box": {
+          "bottom": 0.2811240255832672,
+          "left": 0.24678245186805725,
+          "right": 0.9006491899490356,
+          "top": 0.20954746007919312
+        },
+        "page": 17
+      },
+      "markdown": "<a id='9c27378b-91e4-476d-93d9-5543e3dc1b46'></a>\n\n# Ketens en onderdelen uitsluiten\n\nBij het testen van de werking blijkt dat de rechtercompressor steeds uitvalt, op basis van een lagedrukmelding. Deze is af te lezen in het besturingssysteem. De ingestelde waarde komt wel overeen met de inbedrijfstelgegevens op het servicerapport.",
+      "type": "text"
+    },
+    {
+      "id": "4e113703-714f-4b89-bc2d-5b247e3a22e4",
+      "grounding": {
+        "box": {
+          "bottom": 0.36164918541908264,
+          "left": 0.24682435393333435,
+          "right": 0.9001798629760742,
+          "top": 0.28833672404289246
+        },
+        "page": 17
+      },
+      "markdown": "<a id='4e113703-714f-4b89-bc2d-5b247e3a22e4'></a>\n\nOpgaven\n\n23. Noem vier mogelijke oorzaken voor een lagedruk storing.\n\n24. Welke component(en) in de koelinstallatie of het koud-watersysteem kunnen deze LD-storing veroorzaken?",
+      "type": "text"
+    },
+    {
+      "id": "c76db511-f75b-419e-9c74-49b1228b308d",
+      "grounding": {
+        "box": {
+          "bottom": 0.45538386702537537,
+          "left": 0.24725225567817688,
+          "right": 0.9020100831985474,
+          "top": 0.3637617528438568
+        },
+        "page": 17
+      },
+      "markdown": "<a id='c76db511-f75b-419e-9c74-49b1228b308d'></a>\n\nDe servicemonteur is op onderzoek gegaan. Omdat er geen spanning aanwezig was op magneetklep 14 werd er geen hotgas doorgelaten naar de verdamper. En dat was de reden dat de compressor afviel op een te lage druk. Dit probleem heeft hij verholpen. Na het opstarten van de installatie viel de compressor niet meer af. Het probleem was echter nog niet opgelost omdat de hotgasregelaar constant hotgas doorliet naar de verdamper. Daarna heeft de servicemonteur de hotgasregelaar buiten werking gesteld en de installatie laten draaien.",
+      "type": "text"
+    },
+    {
+      "id": "a79ac261-5dc7-47f2-a678-a2df1d905bdd",
+      "grounding": {
+        "box": {
+          "bottom": 0.517117977142334,
+          "left": 0.24662424623966217,
+          "right": 0.7167685627937317,
+          "top": 0.46372711658477783
+        },
+        "page": 17
+      },
+      "markdown": "<a id='a79ac261-5dc7-47f2-a678-a2df1d905bdd'></a>\n\nWat hij waarnam was\n\n* De zuigdruk daalde weer naar de grenswaarde\n* Rijpvorming op het expansieventiel en net na het expansieventiel",
+      "type": "text"
+    },
+    {
+      "id": "4df6342f-ab85-4718-bdb7-e3ecdff1f901",
+      "grounding": {
+        "box": {
+          "bottom": 0.5462514162063599,
+          "left": 0.2477855086326599,
+          "right": 0.6987943649291992,
+          "top": 0.5246187448501587
+        },
+        "page": 17
+      },
+      "markdown": "<a id='4df6342f-ab85-4718-bdb7-e3ecdff1f901'></a>\n\nHet probleem lijkt te worden veroorzaakt door he expansieventiel.",
+      "type": "text"
+    },
+    {
+      "id": "6882eca7-c4a8-4b17-bb81-88b213d47163",
+      "grounding": {
+        "box": {
+          "bottom": 0.6171413660049438,
+          "left": 0.24745549261569977,
+          "right": 0.6667967438697815,
+          "top": 0.5547845363616943
+        },
+        "page": 17
+      },
+      "markdown": "<a id='6882eca7-c4a8-4b17-bb81-88b213d47163'></a>\n\nOpgaven\n\n25. Wat zijn de mogelijke oorzaken voor deze symptomen?\n26. Beschrijf voor elke oorzaak hoe je die gaat controleren.",
+      "type": "text"
+    },
+    {
+      "id": "0bb3fb05-802b-4d65-8f80-4b46d38c1ab7",
+      "grounding": {
+        "box": {
+          "bottom": 0.9655512571334839,
+          "left": 0.05555497109889984,
+          "right": 0.09216785430908203,
+          "top": 0.9404512643814087
+        },
+        "page": 17
+      },
+      "markdown": "<a id='0bb3fb05-802b-4d65-8f80-4b46d38c1ab7'></a>\n\n18",
+      "type": "marginalia"
+    },
+    {
+      "id": "f9e69a16-eb38-4d9e-9c38-99cc7f8f2d5d",
+      "grounding": {
+        "box": {
+          "bottom": 0.15199044346809387,
+          "left": 0.11582967638969421,
+          "right": 0.9482283592224121,
+          "top": 0.0753859132528305
+        },
+        "page": 18
+      },
+      "markdown": "<a id='f9e69a16-eb38-4d9e-9c38-99cc7f8f2d5d'></a>\n\nWerkplekop-\ndracht Storings-\nregistratie\n\nInleiding\nAls servicemonteur los je storingen op aan koelinstallaties. Daarbij is het registeren van de storing en afhandeling belangrijk. Elke bedrijf heeft daarvoor zijn eigen methode en formulieren.",
+      "type": "text"
+    },
+    {
+      "id": "cacc92f7-06a1-4a22-bfae-6f14224ee933",
+      "grounding": {
+        "box": {
+          "bottom": 0.965257465839386,
+          "left": 0.9130250811576843,
+          "right": 0.944700300693512,
+          "top": 0.9418215155601501
+        },
+        "page": 18
+      },
+      "markdown": "<a id='cacc92f7-06a1-4a22-bfae-6f14224ee933'></a>\n\n19",
+      "type": "marginalia"
+    },
+    {
+      "id": "b60bb0c0-f6b1-4022-8485-ad9b68b0c057",
+      "grounding": {
+        "box": {
+          "bottom": 0.4317176342010498,
+          "left": 0.06229269504547119,
+          "right": 0.9054774045944214,
+          "top": 0.07399006187915802
+        },
+        "page": 19
+      },
+      "markdown": "<a id='b60bb0c0-f6b1-4022-8485-ad9b68b0c057'></a>\n\nStoringsregistratie Opdrachten\n\n1. Noteer de vijf storingsmeldingen met koelinstallaties die het meest voorkomen bij jou op het bedrijf.\n2. Noteer de vijf meest voorkomende oorzaken van storingen met koelinstallaties uit jouw praktijk.\n3.\nUpload\nUpload een ingevulde storingsrapportage zoals die bij jou het bedrijf gebruikt wordt.\n4. Beschrijf een storing die je in de praktijk bent tegengekomen. Beschrijf je aanpak in stappen die je gemaakt hebt om de oorzaak vast te stellen: wat heb je gecontroleerd, in welke volgorde en wat waren je conclusies.\n5.\nUpload\nUpload het koeltechnisch schema en/of foto's van de installatie waar je een storing aan verholpen hebt.",
+      "type": "text"
+    },
+    {
+      "id": "f6bcce53-d4f9-430d-b322-a20ed01ff27c",
+      "grounding": {
+        "box": {
+          "bottom": 0.9646729826927185,
+          "left": 0.05331104248762131,
+          "right": 0.0920410230755806,
+          "top": 0.942486584186554
+        },
+        "page": 19
+      },
+      "markdown": "<a id='f6bcce53-d4f9-430d-b322-a20ed01ff27c'></a>\n\n20",
+      "type": "marginalia"
+    },
+    {
+      "id": "a545b213-e7e1-478c-867a-a9627adab6b1",
+      "grounding": {
+        "box": {
+          "bottom": 0.08372433483600616,
+          "left": 0.7904918789863586,
+          "right": 0.9843668341636658,
+          "top": 0.041740089654922485
+        },
+        "page": 20
+      },
+      "markdown": "<a id='a545b213-e7e1-478c-867a-a9627adab6b1'></a>\n\nHoofdstuk 2",
+      "type": "text"
+    },
+    {
+      "id": "c7b9b759-8aad-4c77-ab22-443e09fbea58",
+      "grounding": {
+        "box": {
+          "bottom": 0.2656542658805847,
+          "left": 0.21422865986824036,
+          "right": 0.7497807741165161,
+          "top": 0.20818299055099487
+        },
+        "page": 20
+      },
+      "markdown": "<a id='c7b9b759-8aad-4c77-ab22-443e09fbea58'></a>\n\nVeelvoorkomende storingen",
+      "type": "text"
+    },
+    {
+      "id": "6b2771ad-6f91-4a4c-a348-6d93f6656d26",
+      "grounding": {
+        "box": {
+          "bottom": 0.1834472417831421,
+          "left": 0.19105121493339539,
+          "right": 0.9485030174255371,
+          "top": 0.07381382584571838
+        },
+        "page": 22
+      },
+      "markdown": "<a id='6b2771ad-6f91-4a4c-a348-6d93f6656d26'></a>\n\nInleiding\nEr zijn storingen die vaak voorkomen. Door ervaring leer je wat daarvan de mogelijk oorzaken zijn en kun je de werkelijke oorzaak met een aantal controles sneller achterhalen. Je hoeft dan niet alle stappen van een gestructureerde aanpak (SMDO) te volgen. Wanneer je nog geen ervaring hebt kun je gebruik maken van storingstabellen of Apps waar veelvoorkomende storingen en oorzaken worden beschreven. In dit hoofdstuk bespreken we een voorbeeldtabel als hulpmiddel bij het storingzoeken. Door de vragen bij dit hoofdstuk oefen je in het gebruik ervan.",
+      "type": "text"
+    },
+    {
+      "id": "4e496cb8-a9e8-4096-b5f8-070a83a00920",
+      "grounding": {
+        "box": {
+          "bottom": 0.33180469274520874,
+          "left": 0.29436391592025757,
+          "right": 0.9455012679100037,
+          "top": 0.19657929241657257
+        },
+        "page": 22
+      },
+      "markdown": "<a id='4e496cb8-a9e8-4096-b5f8-070a83a00920'></a>\n\n<::flowchart\nDescription: A flowchart showing three blue rounded rectangles connected by right-pointing arrows.\n\n- The first rectangle contains the text: \"Verschijnselen (locatie in de installatie)\"\n- An arrow points from the first to the second rectangle.\n- The second rectangle contains the text: \"Mogelijke oorzaken 1. 2. 3.\"\n- An arrow points from the second to the third rectangle.\n- The third rectangle contains the text: \"Oplossingen (wat ga je controleren)\"\n\nFiguur 5 Opbouw storingstabel\n: flowchart::>",
+      "type": "figure"
+    },
+    {
+      "id": "d530df26-aa8e-4c8a-b7e1-91a75a4550c4",
+      "grounding": {
+        "box": {
+          "bottom": 0.3991020917892456,
+          "left": 0.29562151432037354,
+          "right": 0.5069382190704346,
+          "top": 0.34400832653045654
+        },
+        "page": 22
+      },
+      "markdown": "<a id='d530df26-aa8e-4c8a-b7e1-91a75a4550c4'></a>\n\nOnderwerpen in dit hoofdstuk\n\n* Storingstabel\n* Storingsapp",
+      "type": "text"
+    },
+    {
+      "id": "ce850708-f51f-4d40-9a61-e0ae19a8f78b",
+      "grounding": {
+        "box": {
+          "bottom": 0.9635269045829773,
+          "left": 0.9106315970420837,
+          "right": 0.9440204501152039,
+          "top": 0.9428791403770447
+        },
+        "page": 22
+      },
+      "markdown": "<a id='ce850708-f51f-4d40-9a61-e0ae19a8f78b'></a>\n\n23",
+      "type": "marginalia"
+    },
+    {
+      "id": "535574c5-73ac-4aa4-8928-b96a408405ad",
+      "grounding": {
+        "box": {
+          "bottom": 0.16826584935188293,
+          "left": 0.0977347195148468,
+          "right": 0.9025956392288208,
+          "top": 0.07505452632904053
+        },
+        "page": 23
+      },
+      "markdown": "<a id='535574c5-73ac-4aa4-8928-b96a408405ad'></a>\n\nStoringstabel\nWil je de tabellen goed kunnen gebruiken dan heb je voldoende vakkennis nodig. De storingstabel is alleen een hulpmiddel. Je moet als servicemonteur in staat zijn om de oorzaak zoals beschreven in de tabel te analyseren en ook daadwerkelijk vast te stellen. De tabel kan een handig hulpmiddel zijn om bepaalde zaken uit te sluiten of om de juiste diagnose te stellen. In deze cursus maken we gebruik van een storingstabel die oorspronkelijk is opgesteld door Danfoss.",
+      "type": "text"
+    },
+    {
+      "id": "f4417897-7057-4647-8300-15bb15a9c1e6",
+      "grounding": {
+        "box": {
+          "bottom": 0.2468617856502533,
+          "left": 0.2463996857404709,
+          "right": 0.5114516615867615,
+          "top": 0.17756342887878418
+        },
+        "page": 23
+      },
+      "markdown": "<a id='f4417897-7057-4647-8300-15bb15a9c1e6'></a>\n\nDeze storingstabel heeft 3 kolommen\n* Kolom 1: Verschijnsel\n* Kolom 2: Mogelijke oorzaak\n* Kolom 3: Oplossing",
+      "type": "text"
+    },
+    {
+      "id": "bc24d14d-5ca0-4569-b1e5-bd3ea0985b31",
+      "grounding": {
+        "box": {
+          "bottom": 0.5401235222816467,
+          "left": 0.0544397234916687,
+          "right": 0.8972648978233337,
+          "top": 0.2765676975250244
+        },
+        "page": 23
+      },
+      "markdown": "<a id='bc24d14d-5ca0-4569-b1e5-bd3ea0985b31'></a>\n\nOpsporen van fouten, algemeen [4]\n<table id=\"23-1\">\n<tr><td id=\"23-2\"></td><td id=\"23-3\">Verschijnsel</td><td id=\"23-4\">Mogelijke oorzaak</td><td id=\"23-5\">Oplossing</td></tr>\n<tr><td id=\"23-6\">17</td><td id=\"23-7\">Luchtkoelers. Verdamper alleen berijpt rond het expansieventiel, en het expansieventiel zelf behoorlijk berijpt.</td><td id=\"23-8\">Koudemiddeltoevoer naar de verdamper te klein door: a) fout bij het expansieventiel, bv.: 1) doorlaat te klein, 2) oververhitting te groot, 3) voelervulling gedeeltelijk verloren, 4) filterdroger gedeeltelijk verstopt. 5) Doorlaat gedeeltelijk door ijs geblokkeerd. b) Zie onder fouten \"Dampbellen in kijkglas\".</td><td id=\"23-9\">Thermostatische expansieventielen controleren, afstellen. Zie onder \"Dampbellen in kijkglas\".</td></tr>\n</table>",
+      "type": "table"
+    },
+    {
+      "id": "1c049683-5213-484e-a5c8-3bb672d6046e",
+      "grounding": {
+        "box": {
+          "bottom": 0.5558145642280579,
+          "left": 0.056551069021224976,
+          "right": 0.126413494348526,
+          "top": 0.5405101180076599
+        },
+        "page": 23
+      },
+      "markdown": "<a id='1c049683-5213-484e-a5c8-3bb672d6046e'></a>\n\nFiguur 6",
+      "type": "marginalia"
+    },
+    {
+      "id": "86ed31b4-2f24-47a5-9285-c60bc7af8643",
+      "grounding": {
+        "box": {
+          "bottom": 0.5559670925140381,
+          "left": 0.13835474848747253,
+          "right": 0.36094504594802856,
+          "top": 0.5415502786636353
+        },
+        "page": 23
+      },
+      "markdown": "<a id='86ed31b4-2f24-47a5-9285-c60bc7af8643'></a>\n\nVoorbeeld uit storingstabel Danfoss",
+      "type": "text"
+    },
+    {
+      "id": "dc834716-843a-4485-8108-c13e39a81f12",
+      "grounding": {
+        "box": {
+          "bottom": 0.7250922322273254,
+          "left": 0.24719133973121643,
+          "right": 0.9011365175247192,
+          "top": 0.5705179572105408
+        },
+        "page": 23
+      },
+      "markdown": "<a id='dc834716-843a-4485-8108-c13e39a81f12'></a>\n\nBij het gebruik van deze tabellen bij het oplossen van storingen pas je alle opgedane kennis toe om vragen te kunnen beantwoorden\n\n* Waarom is er rijp en ijsvorming bij het expansieventiel als er te weinig koudemiddel naar de verdamper stroomt?\n* Waarom kan dit ook gebeuren als de oververhitting te groot is ingesteld, wat is oververhitting en hoe meet je dat dan?\n* Wat is de voelervulling, waarom heeft een verlies hiervan invloed op de koudemiddel dosering en hoe ga je dit controleren?\n* Hoe kan er ijsvorming optreden in de doorlaat van het expansieventiel?\n* Waarom moet je ook kijken bij het verschijnsel dampbellen in het kijkglas?",
+      "type": "text"
+    },
+    {
+      "id": "e8202766-24a1-47f3-a9ff-620feaaf56b4",
+      "grounding": {
+        "box": {
+          "bottom": 0.8381898999214172,
+          "left": 0.24743235111236572,
+          "right": 0.9004470109939575,
+          "top": 0.7340791821479797
+        },
+        "page": 23
+      },
+      "markdown": "<a id='e8202766-24a1-47f3-a9ff-620feaaf56b4'></a>\n\nVeel storingen die je in de praktijk tegenkomt zijn zeer waarschijnlijk terug te vinden in deze tabel. Het kan ook zijn dat de storing een combinatie is van oorzaken en dus bij meer dan één verschijnsel (kolom 1) voorkomt. Als je mogelijke oorzaken gaat onderzoeken kies dan als eerste voor de oorzaken die eenvoudig, zonder veel tijd te controleren zijn. Beoordeel een storing ook niet op basis van maar een verschijnsel. Kijk of er ook andere afwijkingen zijn. Door de informatie van meerdere verschijnselen te combineren vallen sommige oorzaken vanzelf al af en kom je sneller tot de werkelijke oorzaak.",
+      "type": "text"
+    },
+    {
+      "id": "709f1599-05a3-4d57-bd86-1c0bf6f7f024",
+      "grounding": {
+        "box": {
+          "bottom": 0.9167699813842773,
+          "left": 0.24851387739181519,
+          "right": 0.8988781571388245,
+          "top": 0.8479126691818237
+        },
+        "page": 23
+      },
+      "markdown": "<a id='709f1599-05a3-4d57-bd86-1c0bf6f7f024'></a>\n\nIn de storingstabel kom je de verschillende storingsoorzaken tegen die ook met behulp van de SMIDO-methodiek gevonden worden zoals\n\n* Wel of geen voeding op componenten (P van Power)\n* Verkeerde instelling regelparameter (P van Parameters)",
+      "type": "text"
+    },
+    {
+      "id": "e076f540-c100-435f-af2d-9db4b748176d",
+      "grounding": {
+        "box": {
+          "bottom": 0.9627953767776489,
+          "left": 0.05468162149190903,
+          "right": 0.0890093520283699,
+          "top": 0.9440425634384155
+        },
+        "page": 23
+      },
+      "markdown": "<a id='e076f540-c100-435f-af2d-9db4b748176d'></a>\n\n24",
+      "type": "marginalia"
+    },
+    {
+      "id": "949fcf1f-1589-41b5-a3a0-32f06dc3ae89",
+      "grounding": {
+        "box": {
+          "bottom": 0.14149042963981628,
+          "left": 0.2947963774204254,
+          "right": 0.843591570854187,
+          "top": 0.07780587673187256
+        },
+        "page": 24
+      },
+      "markdown": "<a id='949fcf1f-1589-41b5-a3a0-32f06dc3ae89'></a>\n\n- Afwijkende condities bij het gebruik (P van Procescondities)\n- Defecte component (ketens en componenten uitsluiten)\n- Defecte signaalverbindingen\n- Koelinstallatie uit balans, afwijkende procescondities (P van Procescondities)",
+      "type": "text"
+    },
+    {
+      "id": "8efa7170-af4b-48ae-867a-5aa92b9395ed",
+      "grounding": {
+        "box": {
+          "bottom": 0.9634061455726624,
+          "left": 0.9101889729499817,
+          "right": 0.9448174834251404,
+          "top": 0.942809522151947
+        },
+        "page": 24
+      },
+      "markdown": "<a id='8efa7170-af4b-48ae-867a-5aa92b9395ed'></a>\n\n25",
+      "type": "marginalia"
+    },
+    {
+      "id": "54b8f0f2-dd9d-408b-9cb5-2f323e9cd009",
+      "grounding": {
+        "box": {
+          "bottom": 0.12643814086914062,
+          "left": 0.06945082545280457,
+          "right": 0.9009463787078857,
+          "top": 0.074589803814888
+        },
+        "page": 25
+      },
+      "markdown": "<a id='54b8f0f2-dd9d-408b-9cb5-2f323e9cd009'></a>\n\nStoringzoekApp\nIn plaats van storingstabellen zijn er ook Apps beschikbaar die kunnen helpen bij het vaststellen van mogelijke storingsoorzakken. Danfoss heeft ook een App ontwikkeld; Trouble shooter. Download de App en kijk wat de mogelijkheden zijn.",
+      "type": "text"
+    },
+    {
+      "id": "0fa574af-fe9f-475b-8037-c9cd5a72c6fa",
+      "grounding": {
+        "box": {
+          "bottom": 0.4311555325984955,
+          "left": 0.2464173138141632,
+          "right": 0.9001199007034302,
+          "top": 0.13777288794517517
+        },
+        "page": 25
+      },
+      "markdown": "<a id='0fa574af-fe9f-475b-8037-c9cd5a72c6fa'></a>\n\n<::A hand holds a black smartphone displaying the 'FittersApp'. The app shows a diagram of a refrigeration or HVAC system with blue and red lines representing different circuits, connected to various components like coils, valves, and a compressor. The top bar of the app shows 'FittersApp', an information icon, a globe icon, and a message icon, along with the time '08:09' and network/battery indicators. Below the app title, there's text 'Tap area of interest'. In the top left corner of the overall image, a red square logo with a white snowflake and target symbol, and the word 'Danfoss' in white script, is visible.\n: diagram::>\n\nFiguur 7 Danfoss App Trouble Shooter",
+      "type": "figure"
+    },
+    {
+      "id": "a8e3f5c7-fd32-4b56-8d88-e54f352cfedb",
+      "grounding": {
+        "box": {
+          "bottom": 0.9642106890678406,
+          "left": 0.05372443050146103,
+          "right": 0.09177205711603165,
+          "top": 0.9430047869682312
+        },
+        "page": 25
+      },
+      "markdown": "<a id='a8e3f5c7-fd32-4b56-8d88-e54f352cfedb'></a>\n\n26",
+      "type": "marginalia"
+    },
+    {
+      "id": "b71f13c3-2aaf-49ef-b897-3440d2d02a48",
+      "grounding": {
+        "box": {
+          "bottom": 0.11771012097597122,
+          "left": 0.19586879014968872,
+          "right": 0.6015664935112,
+          "top": 0.07460629194974899
+        },
+        "page": 26
+      },
+      "markdown": "<a id='b71f13c3-2aaf-49ef-b897-3440d2d02a48'></a>\n\nBijlagen Bij dit hoofdstuk horen de volgende bijlagen\n* Storingtabel Danfoss",
+      "type": "text"
+    },
+    {
+      "id": "44e0d969-3ca3-4700-9429-72a212dc53ed",
+      "grounding": {
+        "box": {
+          "bottom": 0.964993953704834,
+          "left": 0.9089429378509521,
+          "right": 0.9440182447433472,
+          "top": 0.9414234161376953
+        },
+        "page": 26
+      },
+      "markdown": "<a id='44e0d969-3ca3-4700-9429-72a212dc53ed'></a>\n\n27",
+      "type": "marginalia"
+    },
+    {
+      "id": "5ed7ef9a-f87c-4ee6-9e6f-ee506d7331ea",
+      "grounding": {
+        "box": {
+          "bottom": 0.5636783838272095,
+          "left": 0.057201653718948364,
+          "right": 0.9061274528503418,
+          "top": 0.07458284497261047
+        },
+        "page": 27
+      },
+      "markdown": "<a id='5ed7ef9a-f87c-4ee6-9e6f-ee506d7331ea'></a>\n\nTheorie opgaven\n\n1. De condensatiedruk in een luchtgekoelde condensor is te hoog. Welke mogelijke oorzaken kun je relatief eenvoudig onderzoeken om het probleem vast te stellen?\n2. De condensatiedruk in een luchtgekoelde condensor is te hoog. Deze installatie heeft al 2 jaar zonder problemen gedraaid. Welke mogelijke oorzaken zijn door deze extra informatie minder waarschijnlijk geworden en wat is volgens jou de meest voorkomende oorzaak?\n3. Je ziet dampbellen in het kijkglas voor het expansieventiel. In de tabel worden diverse oorzaken beschreven. Wat is op basis van je koeltechnische kennis in algemene zin de oorzaak dat hier dampbellen zichtbaar zijn?\n4. Je ziet dampbellen in het kijkglas voor het expansieventiel. De condensatiedruk blijkt ook te laag te zijn. Dit gebeurd op een winterdag. Aan welke oorzaak denk je en hoe ga je dit controleren?\n5. Het verdamperblok van een luchtkoeler zit vol rijp. Wat ga je als eerste controleren en leg uit waarom.\n6. De luchttemperatuur in een koelcel is te hoog. De installatie heeft goed gewerkt. Welke oorzaken liggen buiten de installatie zelf?\n7. De luchttemperatuur in een koelcel is te hoog. De installatie heeft goed gewerkt. Je ziet ook dampbellen in het kijkglas voor het expansieventiel. Ga jij de installatie al bijvullen of zoek je verder. Verklaar je antwoord.\n8. De zuigdruk is te laag maar de installatie draait wel. Een mogelijke oorzaak is dat de ventilator van de verdamper niet werkt. Verklaar waarom dit een mogelijke oorzaak is.\n9. De compressor start niet. Er is geen technisch defect. Welke instellingen van welke regelingen of beveiligingen kunnen dit dan veroorzaken?\n10. De compressor schakelt uit op hoge druk. De pressostaat staat goed ingesteld. Hoe kan deze storing veroorzaakt worden door een probleem bij de verdamper?\n11. Download de App van Danfoss. Welke mogelijke oorzaak(en) ga je volgens deze App onderzoeken als de ruimtetemperatuur te laag is? En is dit ook de enige mogelijke oorzaak?\n12. Op basis van welke symptomen en/of meetwaarden stel je vast dat er te weinig koudemiddel in een systeem zit?",
+      "type": "text"
+    },
+    {
+      "id": "60f67439-4a2a-4015-93bf-30180b3b8dae",
+      "grounding": {
+        "box": {
+          "bottom": 0.9635471701622009,
+          "left": 0.053965307772159576,
+          "right": 0.09050480276346207,
+          "top": 0.9433583617210388
+        },
+        "page": 27
+      },
+      "markdown": "<a id='60f67439-4a2a-4015-93bf-30180b3b8dae'></a>\n\n28",
+      "type": "marginalia"
+    },
+    {
+      "id": "dca63e03-18b5-42a3-a449-71cc8c37db49",
+      "grounding": {
+        "box": {
+          "bottom": 0.14789846539497375,
+          "left": 0.10854798555374146,
+          "right": 0.9468129277229309,
+          "top": 0.07550258934497833
+        },
+        "page": 28
+      },
+      "markdown": "<a id='dca63e03-18b5-42a3-a449-71cc8c37db49'></a>\n\n## Case 2 Mobiele Inleiding\ninkoel- invriescel\n\nJe gaat in deze case de kennis die je hebt opgedaan over koelinstallaties, opbouw en werking, inspectie en onderhoud en storingzoeken toepassen. Het is voor jou een onbekende installatie en je leert gebruik te maken van diverse vormen van informatie om gegevens te verzamelen.",
+      "type": "text"
+    },
+    {
+      "id": "819c8255-49d0-4753-89c5-1903b7499a3b",
+      "grounding": {
+        "box": {
+          "bottom": 0.22556337714195251,
+          "left": 0.2930765748023987,
+          "right": 0.9485419392585754,
+          "top": 0.1573793590068817
+        },
+        "page": 28
+      },
+      "markdown": "<a id='819c8255-49d0-4753-89c5-1903b7499a3b'></a>\n\n# Beschrijving\nDe firma Coolworld levert en verhuurt diverse vormen van mobiele koelingen, van eenvoudige airco's, koel- vriescellen tot grote chillerunits. Deze case gaat over een mobiele inkoel- invriescel type M101.",
+      "type": "text"
+    },
+    {
+      "id": "a1b387a9-1911-4cdd-8b0f-131a94a9d608",
+      "grounding": {
+        "box": {
+          "bottom": 0.5181713104248047,
+          "left": 0.28957855701446533,
+          "right": 0.9446390867233276,
+          "top": 0.2408168613910675
+        },
+        "page": 28
+      },
+      "markdown": "<a id='a1b387a9-1911-4cdd-8b0f-131a94a9d608'></a>\n\n<::A white, rectangular mobile cold storage unit with a door on one end. The unit has a blue circular logo on its side and on the door, which reads \"Coolworld\" in the center, and \"VERHUUR\", \"RENTAL\", \"VERMIETUNG\", \"LOCATION\" around the perimeter. A vent is visible on the left side of the unit. The unit is shown against a white background with a reflection beneath it.\nFigure 1. Coolworld mobile cold storage unit.::>",
+      "type": "figure"
+    },
+    {
+      "id": "c91cb741-ff3c-4a6a-a8cb-ad8e9a7be5de",
+      "grounding": {
+        "box": {
+          "bottom": 0.671053946018219,
+          "left": 0.2921100854873657,
+          "right": 0.5861823558807373,
+          "top": 0.5375459790229797
+        },
+        "page": 28
+      },
+      "markdown": "<a id='c91cb741-ff3c-4a6a-a8cb-ad8e9a7be5de'></a>\n\n# Bijlagen\n\nBij deze case horen de volgende bijlagen\n\n* Schema koelinstallatie\n* Foto's\n* Logboekgegevens\n* Technische gegevens\n* Blanco servicerapport",
+      "type": "text"
+    },
+    {
+      "id": "f2e69583-0dbd-43da-a612-28f1d6b210eb",
+      "grounding": {
+        "box": {
+          "bottom": 0.963859498500824,
+          "left": 0.9092531800270081,
+          "right": 0.9445436596870422,
+          "top": 0.9424911141395569
+        },
+        "page": 28
+      },
+      "markdown": "<a id='f2e69583-0dbd-43da-a612-28f1d6b210eb'></a>\n\n29",
+      "type": "marginalia"
+    },
+    {
+      "id": "6585f08a-4576-498f-b746-378a0fb8e219",
+      "grounding": {
+        "box": {
+          "bottom": 0.38441702723503113,
+          "left": 0.08006429672241211,
+          "right": 0.833251953125,
+          "top": 0.07392576336860657
+        },
+        "page": 29
+      },
+      "markdown": "<a id='6585f08a-4576-498f-b746-378a0fb8e219'></a>\n\nVertrouwd met de installatie Opgaven\n1. Benoem de componenten die je herkent op de foto in figuur 5 van de fotobijlage.\n2. Benoem de componenten die je herkent op de foto in figuur 6 van de fotobijlage.\n3. Benoem de componenten die je herkent op de foto in figuur 7 van de fotobijlage.\n4. Benoem de componenten die je herkent op de foto in figuur 8 van de fotobijlage.\n5. Wat voor type expansieorgaan zit er in de installatie?\n6. Op de foto in figuur 9 is een ontluchtingsklep te zien. Wat is hiervan de functie?\n7. De deurstijlen zijn voorzien van elektrische verwarming. Waarom is dit nodig?\n8. Wat is de functie van warmtewisselaar Z-04 (zie schema)?\n9. Waarom zit terugslagklep P-03 (zie schema) op deze plaats in het systeem?\n10. Welke vormen van 'demping' zijn er toegepast bij de compressor?\n11. Wat is de functie van pressostaat M-02 (zie schema)?\n12. Wat is de functie van pressostaat A-01 (zie schema)?\n13. Welke leidingen zijn geïsoleerd?\n14. Waar zit een afblaasveiligheid gemonteerd in de installatie?",
+      "type": "text"
+    },
+    {
+      "id": "2346e5c5-25d4-4389-9673-ba914797b022",
+      "grounding": {
+        "box": {
+          "bottom": 0.9650735259056091,
+          "left": 0.05307654291391373,
+          "right": 0.09395144134759903,
+          "top": 0.9420388340950012
+        },
+        "page": 29
+      },
+      "markdown": "<a id='2346e5c5-25d4-4389-9673-ba914797b022'></a>\n\n30",
+      "type": "marginalia"
+    },
+    {
+      "id": "e2f1c331-0f65-4f51-87ca-4f50755ba45a",
+      "grounding": {
+        "box": {
+          "bottom": 0.12877582013607025,
+          "left": 0.10876044631004333,
+          "right": 0.8904203176498413,
+          "top": 0.07557839155197144
+        },
+        "page": 30
+      },
+      "markdown": "<a id='e2f1c331-0f65-4f51-87ca-4f50755ba45a'></a>\n\nInstallatie- en Opgaven\nprocesgegevens 15. De kenplaat is niet compleet. Welk gegeven mis je dat er wettelijk op moet staan?",
+      "type": "text"
+    },
+    {
+      "id": "7d3452d3-63d4-436b-b7e1-798f80d41f14",
+      "grounding": {
+        "box": {
+          "bottom": 0.4232742488384247,
+          "left": 0.2906107008457184,
+          "right": 0.9488296508789062,
+          "top": 0.14025214314460754
+        },
+        "page": 30
+      },
+      "markdown": "<a id='7d3452d3-63d4-436b-b7e1-798f80d41f14'></a>\n\n<::diagram: A 2D graph with a vertical axis labeled 'p' and a horizontal axis labeled 'h'. A closed, bell-shaped curve, characteristic of a vapor dome or phase envelope, is plotted within the first quadrant, starting from the origin, curving upwards and to the right, then downwards and to the left, and finally connecting back to the horizontal axis. The curve encloses an area.::>\nFiguur 2 Basisindeling diagram",
+      "type": "figure"
+    },
+    {
+      "id": "93f31c1a-e223-4b83-b973-038bce35496a",
+      "grounding": {
+        "box": {
+          "bottom": 0.5679020881652832,
+          "left": 0.2922663688659668,
+          "right": 0.9508519172668457,
+          "top": 0.432273268699646
+        },
+        "page": 30
+      },
+      "markdown": "<a id='93f31c1a-e223-4b83-b973-038bce35496a'></a>\n\n16. De installatie is geschikt voor (in)koelen en (in)vriezen en opslag. Je kunt de diverse procescondities bij inbedrijfstellen vinden in de bijlage met logboekgegevens. Maak in figuur 2 een schets van de koelkringloop voor de situatie van koelen met de belangrijkste temperatuur en drukgegevens. Denk hierbij ook aan oververhitting en onderkoeling.\n17. Noteer de belangrijkste druk- en temperatuurgegevens uit de vorige opgave ook in het schema op de positie waar je deze waarden zou meten.\n18. Je gaat alle belangrijke inbedrijfstelgegevens uit het logboek verwerken op het service-rapport. Doe dit voor als de installatie gebruik wordt voor vriezen.",
+      "type": "text"
+    },
+    {
+      "id": "549e9f0c-a3f4-41cc-95bb-a8e3b837a140",
+      "grounding": {
+        "box": {
+          "bottom": 0.9652255177497864,
+          "left": 0.9090734720230103,
+          "right": 0.9434976577758789,
+          "top": 0.9414097666740417
+        },
+        "page": 30
+      },
+      "markdown": "<a id='549e9f0c-a3f4-41cc-95bb-a8e3b837a140'></a>\n\n31",
+      "type": "marginalia"
+    },
+    {
+      "id": "32724b8a-5159-4d54-b7f1-d8b08f1fa0c9",
+      "grounding": {
+        "box": {
+          "bottom": 0.470978319644928,
+          "left": 0.08072340488433838,
+          "right": 0.9079948663711548,
+          "top": 0.07376064360141754
+        },
+        "page": 31
+      },
+      "markdown": "<a id='32724b8a-5159-4d54-b7f1-d8b08f1fa0c9'></a>\n\nStoringzoeken Opgaven\n\n19. De luchtkoeler is volledig berijpt. De oorzaak is een technisch probleem. Welke compo-\nnenten zitten er in de 'keten' voor ontdooiing?\n\n20. Magneetklep V-05 gaat niet open. Welke storingssymptomen en/of melding geeft de\ninstallatie?\n\n21. Het filter is berijpt. Is dit een probleem? Wat ga je nog meer controleren?\n\n22. De luchtkoeler is volledig berijpt. Wat is hiervan de oorzaak als er geen technisch defect\naan de installatie is?\n\n23. De zuigdruk is te laag, de installatie draait instabiel. Er zijn een aantal oorzaken mogelijk.\nWelke punten in de installatie ga je nog meer controleren om een aantal mogelijke\noorzaken uit te sluiten.\n\n24. Op welke waarde moet de lagedrukpressostaat staan ingesteld (setpoint en differentie)?\n\n25. Wat is het gevolg als de lagedrukpressosaat op een te lage waarde staat ingesteld?\n\n26. De deur staat open en de ventilatoren van de verdamper draaien niet meer. Wat is hiervan\nde reden?\n\n27. Welke problemen kunnen er ontstaan als de cel tot aan het plafond gevuld wordt met\ndozen product?\n\n28. De compressor kan niet starten. Welke technische oorzaken zijn hiervoor?\n\n29. De compressor kan niet starten. De compressor, voeding en aansturing zijn in orde. Welke\nprocestechnische oorzaken in de koelkringloop kunnen dit veroorzaken?\n\n30. De hogedrukpressostaat staat op 30 bar ingesteld. Mag dit of geeft dit problemen met de\ninstallatie?",
+      "type": "text"
+    },
+    {
+      "id": "87958d0d-0f7f-4ecd-a889-c611ada6f319",
+      "grounding": {
+        "box": {
+          "bottom": 0.96458899974823,
+          "left": 0.0541437529027462,
+          "right": 0.09240533411502838,
+          "top": 0.9425703287124634
+        },
+        "page": 31
+      },
+      "markdown": "<a id='87958d0d-0f7f-4ecd-a889-c611ada6f319'></a>\n\n32",
+      "type": "marginalia"
+    }
+  ],
+  "batch_info": null
+}

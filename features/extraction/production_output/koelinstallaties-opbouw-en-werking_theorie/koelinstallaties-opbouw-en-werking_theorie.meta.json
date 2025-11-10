@@ -1,0 +1,19 @@
+{
+  "doc_id": "koelinstallaties-opbouw-en-werking_theorie",
+  "filename": "koelinstallaties-opbouw-en-werking_theorie.pdf",
+  "source_pdf": "/Users/fausto/code_projects_work/vsm-hva/extraction/data/koelinstallaties-opbouw-en-werking_theorie.pdf",
+  "page_count": 18,
+  "title": null,
+  "version": "7 januari 2021",
+  "languages": [
+    "en",
+    "nl"
+  ],
+  "batches": [
+    {
+      "start": 0,
+      "end": 19,
+      "batch_file": "koelinstallaties-opbouw-en-werking_theorie_batch_001-020.pdf"
+    }
+  ]
+}
