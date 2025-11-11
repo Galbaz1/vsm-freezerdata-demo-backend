@@ -130,35 +130,24 @@ mkdocs build
 
 ---
 
-## Data Status (Updated November 11, 2024)
+## Data Status - Phase 1 Complete ✅
 
-### ✅ Telemetry Data - READY
-- **Location**: `features/telemetry/timeseries_freezerdata/`
-- **Files**: `135_1570_cleaned_with_flags.parquet` (785,398 rows, 15 columns)
-- **Timespan**: Oct 2022 - Dec 2024 (2.2 years)
-- **Sampling**: 1-minute intervals
-- **Key columns**: `sGekoeldeRuimte` (room temp), 6 boolean flags
-- **Documentation**: [docs/data/telemetry_schema.md](docs/data/telemetry_schema.md)
+**All data processed and uploaded to Weaviate**:
+- Telemetry: 785K rows → 12 events (VSM_TelemetryEvent)
+- Manuals: 689 chunks → 167 sections (VSM_ManualSections), 9 diagrams (VSM_Diagram)
+- Vlogs: 15 videos → 15 clips + 5 cases (VSM_VlogClip, VSM_VlogCase)
+- Synthetic: 13 snapshots (VSM_WorldStateSnapshot), commissioning data (FD_Assets)
 
-### ✅ Manuals - READY
-- **Location**: `features/extraction/production_output/`
-- **Count**: 3 manuals (253 pages total, 689 text chunks, 233 visual chunks)
-- **Primary**: `storingzoeken-koeltechniek_theorie_179` (SMIDO methodology, 29 pages, 79 chunks)
-- **Other manuals**: 
-  - `koelinstallaties-opbouw-en-werking_theorie_2016` (163 pages, 422 chunks)
-  - `koelinstallaties-inspectie-en-onderhoud_theorie_168` (61 pages, 188 chunks)
-- **Format**: Landing AI parsed (JSON, JSONL, Markdown)
-- **Note**: Archive versions in `archive_output/` have 108 pages/300 chunks (older, less complete)
-- **Documentation**: [docs/data/manuals_structure.md](docs/data/manuals_structure.md)
+**Processed outputs** in `features/*/output/`:
+- `diagrams_metadata.jsonl` (9)
+- `manual_sections_classified.jsonl` (167)
+- `telemetry_events.jsonl` (12)
+- `vlog_clips_enriched.jsonl` (15)
+- `vlog_cases_enriched.jsonl` (5)
+- `worldstate_snapshots.jsonl` (13)
+- `fd_assets_enrichment.json` (Context C)
 
-### ✅ Vlogs - PROCESSED
-- **Location**: `features/vlogs_vsm/` (15 .mov files)
-- **Processed**: `features/vlogs_vsm/output/vlogs_vsm_annotations.jsonl`
-- **Status**: ALL 15 videos processed + 5 case aggregations (20 total records)
-- **Cases**: A1-A5 covering 5 different failure modes
-- **Documentation**: [docs/data/vlogs_processing_results.md](docs/data/vlogs_processing_results.md)
-
-**See**: [docs/data/README.md](docs/data/README.md) for complete data analysis overview
+**See**: [docs/data/PHASE1_COMPLETION_SUMMARY.md](docs/data/PHASE1_COMPLETION_SUMMARY.md)
 
 ---
 
@@ -266,17 +255,26 @@ The troubleshooting decision tree follows **SMIDO** (M→T→I→D→O):
 
 ## Implementation Status
 
-### ✅ IMPLEMENTED
-- Data analysis, vlog processing (15 videos), FD_* test collections
-- Architecture design: [docs/diagrams/vsm_agent_architecture.mermaid](docs/diagrams/vsm_agent_architecture.mermaid)
-- Data strategy: [docs/data/DATA_UPLOAD_STRATEGY.md](docs/data/DATA_UPLOAD_STRATEGY.md)
+### ✅ Phase 1: COMPLETE (Data Upload)
+- **221 objects** in Weaviate (6 VSM collections)
+- **13 WorldState snapshots** (reference patterns for AnalyzeSensorPattern)
+- **Commissioning data** (Context C for GetAssetHealth)
+- **Elysia preprocessing** complete (ELYSIA_METADATA__ has 6 entries)
+- **Validation** passed (4 P's, A3 coverage, opgave filtering)
+- **Documentation**: [docs/data/PHASE1_COMPLETION_SUMMARY.md](docs/data/PHASE1_COMPLETION_SUMMARY.md)
 
-### 📝 PLANNED (Priority Order)
-1. **Upload Core Collections**: VSM_ManualSections, VSM_Diagram, VSM_TelemetryEvent, VSM_VlogCase/Clip
-2. **Generate Synthetic**: VSM_WorldStateSnapshot (8-12 patterns), enrich FD_Assets with C
-3. **Elysia Preprocessing**: Run `preprocess()` on all VSM_* collections
-4. **Build 7 VSM Tools**: ComputeWorldState, QueryTelemetryEvents, SearchManualsBySMIDO, QueryVlogCases, GetAlarms, GetAssetHealth, AnalyzeSensorPattern
-5. **SMIDO Decision Tree**: M→T→I→D[P1,P2,P3,P4]→O nodes with tool mappings
+### 📝 Phase 2: READY (Agent Tools & Tree)
+**7 implementation plans** in [docs/plans/](docs/plans/):
+1. WorldState Engine + ComputeWorldState tool (2-3h, independent)
+2. Simple query tools: GetAlarms, QueryTelemetryEvents, QueryVlogCases (2h, independent)
+3. SearchManualsBySMIDO tool (2h, independent)
+4. Advanced tools: GetAssetHealth, AnalyzeSensorPattern (3h, depends on #1)
+5. SMIDO nodes: M→T→I→D[P1,P2,P3,P4]→O (3h, independent)
+6. Orchestrator + Context Manager (4h, depends on #1-5)
+7. A3 end-to-end test (2-3h, depends on all)
+
+**Merge strategy**: [docs/plans/00_MERGE_STRATEGY_AND_TESTING.md](docs/plans/00_MERGE_STRATEGY_AND_TESTING.md)  
+**Parallelizable**: Plans 1,2,3,5 can run simultaneously (~3h parallel vs ~10h sequential)
 
 ---
 
@@ -284,19 +282,19 @@ The troubleshooting decision tree follows **SMIDO** (M→T→I→D→O):
 
 ### Weaviate vs Local Files Split
 
-**Rationale**: Weaviate is optimized for semantic search and RAG, not for storing massive timeseries or large binary files. Use a hybrid approach:
+**Weaviate** (221 objects uploaded):
+- VSM_ManualSections: 167 (9 opgave flagged)
+- VSM_Diagram: 9
+- VSM_TelemetryEvent: 12
+- VSM_VlogCase: 5
+- VSM_VlogClip: 15
+- VSM_WorldStateSnapshot: 13 (SYNTHETIC)
+- FD_Assets: enriched with Context C (SYNTHETIC)
 
-**Weaviate** (semantic search, RAG):
-- **VSM_ManualSections** + **VSM_Diagram**: ~240 sections + 9 diagrams (SMIDO-tagged)
-- **VSM_TelemetryEvent**: ~1000 "uit balans" incidents (aggregated from 785K rows)
-- **VSM_VlogCase** + **VSM_VlogClip**: 5 cases + 15 clips (problem→solution)
-- **VSM_WorldStateSnapshot**: 8-12 reference patterns (SYNTHETIC - balance factors)
-- **FD_Assets** (enriched): Commissioning data (C) for balance checks (SYNTHETIC)
-
-**Local Files** (raw data, on-demand computation):
-- **Telemetry parquet**: 785K rows → ComputeWorldState tool
-- **Manual JSONL**: 922 chunks (audit)
-- **Vlog .mov**: 15 videos (playback)
+**Local Files**:
+- Telemetry parquet: 785K rows (ComputeWorldState reads directly)
+- Manual JSONL: 689 chunks (source data)
+- Vlog .mov: 15 videos (playback)
 
 ### Hybrid Query Pattern
 
@@ -332,33 +330,19 @@ The troubleshooting decision tree follows **SMIDO** (M→T→I→D→O):
 
 ---
 
-## Weaviate Collections (Target Architecture)
+## Weaviate Collections - UPLOADED ✅
 
-**Note**: `FD_*` collections (FD_Assets, FD_Alarms, FD_Cases) exist as MVP test data. VSM_* collections are production.
+| Collection | Objects | Status | Purpose |
+|------------|---------|--------|---------|
+| VSM_ManualSections | 167 | ✅ | SMIDO-filtered search (9 opgave flagged) |
+| VSM_Diagram | 9 | ✅ | Visual diagrams for SearchManualsBySMIDO |
+| VSM_TelemetryEvent | 12 | ✅ | "Uit balans" incidents |
+| VSM_VlogCase | 5 | ✅ | A1-A5 problem→solution workflows |
+| VSM_VlogClip | 15 | ✅ | Individual troubleshooting clips |
+| VSM_WorldStateSnapshot | 13 | ✅ | Reference patterns (SYNTHETIC) |
+| FD_Assets | enriched | ✅ | Context C: commissioning data (SYNTHETIC) |
 
-### VSM_ManualSections (~240 sections)
-- SMIDO-tagged sections + diagrams for SearchManualsBySMIDO tool
-- Grouped from 922 chunks, filterable by SMIDO step/failure mode/component
-
-### VSM_TelemetryEvent (~1000 events)
-- Aggregated incidents (not 785K rows) with WorldState metadata
-- Represents "uit balans" states, not just broken components
-
-### VSM_VlogCase (5 cases) + VSM_VlogClip (15 clips)
-- Problem→Solution workflows for QueryVlogCases tool
-- SMIDO-tagged, linked to manual sections
-
-### VSM_Diagram (9 diagrams)
-- Mermaid logic diagrams returned by SearchManualsBySMIDO
-- Linked to manual sections via chunk_id
-
-### VSM_WorldStateSnapshot (8-12 patterns) - SYNTHETIC
-- Reference patterns for AnalyzeSensorPattern tool
-- Typical W for each "uit balans" scenario (balance factors from manual page 11)
-
-### FD_Assets (enriched) - SYNTHETIC CONTEXT
-- Installation commissioning data ("gegevens bij inbedrijfstelling")
-- Design parameters (C) for GetAssetHealth to compare against WorldState (W)
+**All preprocessed**: ELYSIA_METADATA__ has 6 entries
 
 ---
 
@@ -405,43 +389,33 @@ This is the **best case scenario** with perfect alignment across ALL data source
 
 ---
 
-## Next Development Steps
+## Implementation Roadmap
 
-### Phase 1: Core Collections (Real Data)
-1. **Diagrams + Manual Sections** (`features/diagrams_vsm/`, `features/manuals_vsm/`)
-   - Extract Mermaid metadata, group chunks into sections
-   - Classify SMIDO steps (4 P's!), failure modes, components
-   
-2. **Telemetry Events** (`features/telemetry_vsm/src/detect_events.py`)
-   - Detect "uit balans" incidents from flags
-   - Compute WorldState features per event (~500-1000 events)
+### ✅ Phase 1: Data Upload - COMPLETE
+All collections uploaded, synthetic data generated, preprocessing done. **Ready for Phase 2**.
 
-3. **Vlog Enrichment** (`features/vlogs_vsm/src/enrich_vlog_metadata.py`)
-   - Add SMIDO tags, standardize failure modes
-   - Generate WorldState patterns
+### 📝 Phase 2: Tools & Tree - IN PROGRESS (7 parallel plans)
 
-### Phase 2: Synthetic Data (Agent References)
-1. **WorldState Snapshots** (`features/telemetry_vsm/src/generate_worldstate_snapshots.py`)
-   - 8-12 reference patterns from vlogs + manual balance factors (page 11)
-   - Required by AnalyzeSensorPattern tool
+**Round 1** (Parallel, ~3h):
+- Plan 1: WorldState Engine (`features/telemetry_vsm/src/worldstate_engine.py`)
+- Plan 2: Simple tools (GetAlarms, QueryTelemetryEvents, QueryVlogCases in `elysia/api/custom_tools.py`)
+- Plan 3: SearchManualsBySMIDO (with opgave filtering, diagram integration)
+- Plan 5: SMIDO tree structure (`features/vsm_tree/smido_tree.py`)
 
-2. **Enrich FD_Assets** (`features/integration_vsm/src/enrich_fd_assets.py`)
-   - Add commissioning data (C): design temps, pressures, control settings
-   - Required by GetAssetHealth tool for W vs C comparison
+**Round 2** (Depends on Plan 1, ~3h):
+- Plan 4: GetAssetHealth + AnalyzeSensorPattern (W vs C, pattern matching)
 
-### Phase 3: Integration
-- Cross-collection linking, Elysia preprocessing, validation
+**Round 3** (Integration, ~4h):
+- Plan 6: Orchestrator + Context Manager (`features/vsm_tree/`)
 
-### Phase 4: Agent Tools & Tree
-- **Build 7 VSM tools**: ComputeWorldState, QueryTelemetryEvents, SearchManualsBySMIDO, QueryVlogCases, GetAlarms, GetAssetHealth, AnalyzeSensorPattern
-- **SMIDO Tree**: M→T→I→D[P1,P2,P3,P4]→O nodes with tool mappings
+**Round 4** (Validation, ~2h):
+- Plan 7: A3 end-to-end test (`features/vsm_tree/tests/`, `scripts/demo_a3_scenario.py`)
 
-### Phase 5: Demo & Validation
-- **PRIMARY**: Test with A3 "Ingevroren Verdamper" scenario ⭐
-- Verify W vs C balance checks, pattern matching, cross-collection linking
-- Polish and document
+**Merge order**: 1→2→3→4→5→6→7 (tests after each merge)  
+**See**: [docs/plans/00_MERGE_STRATEGY_AND_TESTING.md](docs/plans/00_MERGE_STRATEGY_AND_TESTING.md)
 
-**See**: [docs/data/DATA_UPLOAD_STRATEGY.md](docs/data/DATA_UPLOAD_STRATEGY.md) for detailed upload plan
+### ⏳ Phase 3: Demo & Polish
+- UI enhancements, additional scenarios, documentation
 
 ---
 
@@ -468,41 +442,101 @@ This is the **best case scenario** with perfect alignment across ALL data source
 
 ---
 
-## Coding Conventions
+## Elysia Patterns (Critical for Phase 2)
 
-### Agent Tool Pattern
+### Tree + Branch Creation
 ```python
-from elysia import tool, Tree
+from elysia import Tree
 
-tree = Tree()
+tree = Tree(
+    branch_initialisation="empty",  # Manual control
+    agent_description="Virtual Service Mechanic...",
+    style="Professional, clear Dutch",
+    end_goal="Root cause identified and solution provided"
+)
 
-@tool(tree=tree, branch_id="smido_diagnose")
-async def compute_worldstate(asset_id: str, timestamp: str, window_minutes: int = 60) -> dict:
-    """Compute WorldState (W) from parquet for SMIDO diagnosis."""
-    # Load telemetry, compute 60+ features
-    # Returns W (current state, trends, flags, health scores)
-    pass
+# Add branches with from_branch_id hierarchy
+tree.add_branch(
+    branch_id="smido_melding",
+    instruction="Collect symptoms, assess urgency...",
+    description="Symptom collection phase",
+    root=True,  # First branch
+    status="Collecting symptoms..."
+)
 
-@tool(tree=tree, branch_id="smido_diagnose")
-async def get_asset_health(asset_id: str) -> dict:
-    """Compare WorldState (W) vs Context (C) - balance check."""
-    # Get C from FD_Assets (commissioning data)
-    # Get W from ComputeWorldState
-    # Compare: is system "uit balans"?
-    pass
+tree.add_branch(
+    branch_id="smido_technisch",
+    instruction="Visual inspection...",
+    description="Quick technical check",
+    from_branch_id="smido_melding",  # Comes after M
+    status="Performing technical check..."
+)
 ```
 
-### Weaviate Queries
+### Add Tools to Branches
+```python
+from elysia.api.custom_tools import compute_worldstate, search_manuals_by_smido
+
+# Add to specific branch
+tree.add_tool(compute_worldstate, branch_id="smido_p3_procesparameters")
+tree.add_tool(search_manuals_by_smido, branch_id="smido_installatie")
+```
+
+## Coding Conventions
+
+### VSM Tool Pattern (Elysia v4)
+```python
+from elysia import tool, Result, Status
+
+@tool(branch_id="smido_p3_procesparameters")
+async def compute_worldstate(
+    asset_id: str,
+    timestamp: str = None,
+    window_minutes: int = 60,
+    tree_data=None,  # Auto-injected by Elysia
+    **kwargs
+):
+    """Compute WorldState (W) - 60+ features from parquet."""
+    yield Status("Computing WorldState features...")
+    
+    from features.telemetry_vsm.src.worldstate_engine import WorldStateEngine
+    engine = WorldStateEngine("features/telemetry/timeseries_freezerdata/135_1570_cleaned_with_flags.parquet")
+    worldstate = engine.compute_worldstate(asset_id, timestamp, window_minutes)
+    
+    # Store in tree environment
+    if tree_data:
+        tree_data.environment["worldstate"] = worldstate
+    
+    yield Result(objects=[worldstate], metadata={"source": "worldstate_engine"})
+
+@tool(branch_id="smido_p2_procesinstellingen")
+async def get_asset_health(
+    asset_id: str,
+    tree_data=None,
+    client_manager=None,
+    **kwargs
+):
+    """Compare W vs C - balance check."""
+    yield Status("Comparing WorldState vs Context...")
+    
+    # Get C from FD_Assets, compute W, compare
+    # Identify out-of-balance factors
+    
+    yield Result(objects=[health_summary])
+
+### Weaviate Queries (v4 API)
 ```python
 from elysia.util.client import ClientManager
+from weaviate.classes.query import Filter
 
 async def search_manual_by_smido(smido_step: str, query: str):
     """Search manuals filtered by SMIDO step."""
-    async with ClientManager().connect_to_client() as client:
-        result = client.collections.get("VSM_ManualSections").query.hybrid(
+    async with ClientManager().connect_to_async_client() as client:
+        collection = client.collections.get("VSM_ManualSections")
+        result = await collection.query.hybrid(
             query=query,
-            filters={"path": ["smido_step"], "operator": "Equal",
-                     "valueText": smido_step}
+            filters=Filter.by_property("smido_step").equal(smido_step) &
+                    Filter.by_property("content_type").not_equal("opgave")  # Exclude test content
         )
         return result
 ```
@@ -560,17 +594,17 @@ print(df.describe())
 
 ## Key Documentation
 
-### Architecture & Strategy
+### Phase 2 Implementation (START HERE)
+- **Plans Index**: [docs/plans/README.md](docs/plans/README.md) - 7 parallelizable plans
+- **Merge Strategy**: [docs/plans/00_MERGE_STRATEGY_AND_TESTING.md](docs/plans/00_MERGE_STRATEGY_AND_TESTING.md)
+- **Session Summary**: [docs/plans/SESSION_SUMMARY.md](docs/plans/SESSION_SUMMARY.md)
+
+### Architecture & Data
 - **Agent Architecture**: [docs/diagrams/vsm_agent_architecture.mermaid](docs/diagrams/vsm_agent_architecture.mermaid)
-- **Data Upload**: [docs/data/DATA_UPLOAD_STRATEGY.md](docs/data/DATA_UPLOAD_STRATEGY.md)
-- **Synthetic Data**: [docs/data/SYNTHETIC_DATA_STRATEGY.md](docs/data/SYNTHETIC_DATA_STRATEGY.md)
+- **Phase 1 Complete**: [docs/data/PHASE1_COMPLETION_SUMMARY.md](docs/data/PHASE1_COMPLETION_SUMMARY.md)
+- **Weaviate API**: [docs/data/WEAVIATE_API_NOTES.md](docs/data/WEAVIATE_API_NOTES.md) (Filter.by_property patterns)
 
-### Data Analysis
-- **Overview**: [docs/data/README.md](docs/data/README.md)
-- **Summary**: [docs/data/data_analysis_summary.md](docs/data/data_analysis_summary.md)
-- **Schemas**: telemetry_features.md, manuals_weaviate_design.md, vlogs_structure.md
-
-### Framework Docs
-- **Elysia**: https://weaviate.github.io/elysia/
-- **Elysia Diagrams**: [docs/diagrams/elysia/INDEX.md](docs/diagrams/elysia/INDEX.md)
-- **Weaviate**: https://weaviate.io/developers/weaviate
+### Elysia Framework
+- **Tool Creation**: [docs/creating_tools.md](docs/creating_tools.md) (@tool decorator, async generators)
+- **Basic Usage**: [docs/basic.md](docs/basic.md) (Tree, branches, preprocessing)
+- **Elysia Diagrams**: [docs/diagrams/elysia/INDEX.md](docs/diagrams/elysia/INDEX.md) (16 architecture diagrams)
