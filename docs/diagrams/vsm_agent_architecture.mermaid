@@ -4,77 +4,77 @@
 %% Status: Proposed Architecture
 
 graph TB
-    subgraph "User Interface Layer"
-        Technician[👷 Junior Technician]
-        UI[VSM Dashboard UI]
-        Query[User Query<br/>"Koelcel bereikt temperatuur niet"]
+    subgraph UILayer["User Interface Layer"]
+        Technician["👷 Junior Technician"]
+        UI["VSM Dashboard UI"]
+        Query["User Query<br/>Koelcel bereikt temperatuur niet"]
     end
 
-    subgraph "VSM Agent Orchestration Layer"
-        VSMTree[VSM Tree Instance<br/>extends Elysia Tree]
-        SMIDOOrchestrator[SMIDO Orchestrator<br/>M→T→I→D→O Workflow]
-        ContextManager[Context Manager<br/>WorldState + User Input]
+    subgraph VSMOrchestration["VSM Agent Orchestration Layer"]
+        VSMTree["VSM Tree Instance<br/>extends Elysia Tree"]
+        SMIDOOrchestrator["SMIDO Orchestrator<br/>M to T to I to D to O Workflow"]
+        ContextManager["Context Manager<br/>W: WorldState dynamic<br/>C: Context static design"]
     end
 
-    subgraph "SMIDO Decision Tree (Elysia Decision Nodes)"
-        M_Node[M - MELDING<br/>Symptom Collection<br/>DecisionNode]
-        T_Node[T - TECHNISCH<br/>Quick Visual Check<br/>DecisionNode]
-        I_Node[I - INSTALLATIE<br/>Familiarity Check<br/>DecisionNode]
-        D_Node[D - DIAGNOSE<br/>3 P's Branch<br/>DecisionNode]
-        P1_Node[P1: POWER<br/>Electrical Checks<br/>DecisionNode]
-        P2_Node[P2: PROCESINSTELLINGEN<br/>Settings Check<br/>DecisionNode]
-        P3_Node[P3: PROCESPARAMETERS<br/>Measurements<br/>DecisionNode]
-        P4_Node[P4: PRODUCTINPUT<br/>Environmental<br/>DecisionNode]
-        O_Node[O - ONDERDELEN<br/>Component Isolation<br/>DecisionNode]
+    subgraph SMIDOTree["SMIDO Decision Tree - Elysia Decision Nodes"]
+        M_Node["M - MELDING<br/>Symptom Collection<br/>DecisionNode"]
+        T_Node["T - TECHNISCH<br/>Quick Visual Check<br/>DecisionNode"]
+        I_Node["I - INSTALLATIE<br/>Familiarity Check<br/>DecisionNode"]
+        D_Node["D - DIAGNOSE<br/>4 Ps Branch<br/>DecisionNode"]
+        P1_Node["P1: POWER<br/>Electrical supply<br/>DecisionNode"]
+        P2_Node["P2: PROCESINSTELLINGEN<br/>Settings vs design<br/>DecisionNode"]
+        P3_Node["P3: PROCESPARAMETERS<br/>Measurements vs design<br/>DecisionNode"]
+        P4_Node["P4: PRODUCTINPUT<br/>External conditions vs design<br/>DecisionNode"]
+        O_Node["O - ONDERDELEN<br/>Component Isolation<br/>DecisionNode"]
     end
 
-    subgraph "VSM Domain Tools (Elysia Tools)"
-        WorldStateTool[ComputeWorldState Tool<br/>60+ features from parquet]
-        TelemetryEventTool[QueryTelemetryEvents Tool<br/>Historical incidents]
-        ManualSearchTool[SearchManualsBySMIDO Tool<br/>SMIDO-filtered search]
-        VlogCaseTool[QueryVlogCases Tool<br/>Similar case matching]
-        AlarmTool[GetAlarms Tool<br/>Active alarm retrieval]
-        AssetHealthTool[GetAssetHealth Tool<br/>Health summary]
-        SensorPatternTool[AnalyzeSensorPattern Tool<br/>Pattern detection]
+    subgraph VSMTools["VSM Domain Tools - Elysia Tools"]
+        WorldStateTool["ComputeWorldState Tool<br/>60+ features from parquet"]
+        TelemetryEventTool["QueryTelemetryEvents Tool<br/>Historical incidents"]
+        ManualSearchTool["SearchManualsBySMIDO Tool<br/>SMIDO-filtered search"]
+        VlogCaseTool["QueryVlogCases Tool<br/>Similar case matching"]
+        AlarmTool["GetAlarms Tool<br/>Active alarm retrieval"]
+        AssetHealthTool["GetAssetHealth Tool<br/>Health summary"]
+        SensorPatternTool["AnalyzeSensorPattern Tool<br/>Pattern detection"]
     end
 
-    subgraph "Elysia Core (Reused)"
-        ElysiaTree[Elysia Tree Engine<br/>Decision orchestration]
-        ElysiaQuery[Query Tool<br/>Weaviate hybrid search]
-        ElysiaAggregate[Aggregate Tool<br/>Statistics & metrics]
-        ElysiaText[Text Response Tool<br/>Final answers]
-        TreeData[TreeData/Environment<br/>Global state]
-        DSPyModule[DSPy ChainOfThought<br/>LLM integration]
+    subgraph ElysiaCore["Elysia Core - Reused"]
+        ElysiaTree["Elysia Tree Engine<br/>Decision orchestration"]
+        ElysiaQuery["Query Tool<br/>Weaviate hybrid search"]
+        ElysiaAggregate["Aggregate Tool<br/>Statistics & metrics"]
+        ElysiaText["Text Response Tool<br/>Final answers"]
+        TreeData["TreeData/Environment<br/>Global state"]
+        DSPyModule["DSPy ChainOfThought<br/>LLM integration"]
     end
 
-    subgraph "Data Computation Layer"
-        WorldStateEngine[WorldState Engine<br/>Feature computation]
-        ParquetReader[Parquet Reader<br/>Time-window queries]
-        EventDetector[Event Detector<br/>Incident detection]
-        PatternAnalyzer[Pattern Analyzer<br/>Anomaly detection]
+    subgraph DataComputation["Data Computation Layer"]
+        WorldStateEngine["WorldState Engine<br/>Feature computation"]
+        ParquetReader["Parquet Reader<br/>Time-window queries"]
+        EventDetector["Event Detector<br/>Incident detection"]
+        PatternAnalyzer["Pattern Analyzer<br/>Anomaly detection"]
     end
 
-    subgraph "Weaviate Collections (Semantic Search)"
-        VSM_ManualSections[VSM_ManualSections<br/>~240 logical sections<br/>SMIDO-tagged]
-        VSM_Diagram[VSM_Diagram<br/>9 Mermaid diagrams<br/>Visual logic]
-        VSM_TelemetryEvent[VSM_TelemetryEvent<br/>~1000 incidents<br/>WorldState metadata]
-        VSM_VlogCase[VSM_VlogCase<br/>5 aggregated cases<br/>Problem→Solution]
-        VSM_VlogClip[VSM_VlogClip<br/>15 individual clips<br/>Timestamped]
-        VSM_WorldStateSnapshot[VSM_WorldStateSnapshot<br/>5-10 reference patterns<br/>SYNTHETIC]
-        FD_Assets_Enriched[FD_Assets Enriched<br/>Installation context<br/>SYNTHETIC]
-        ELYSIA_METADATA[ELYSIA_METADATA__<br/>Collection schemas<br/>Display types]
+    subgraph WeaviateColls["Weaviate Collections - Semantic Search"]
+        VSM_ManualSections["VSM_ManualSections<br/>~240 logical sections<br/>SMIDO-tagged"]
+        VSM_Diagram["VSM_Diagram<br/>9 Mermaid diagrams<br/>Visual logic"]
+        VSM_TelemetryEvent["VSM_TelemetryEvent<br/>~1000 incidents<br/>WorldState metadata"]
+        VSM_VlogCase["VSM_VlogCase<br/>5 aggregated cases<br/>Problem to Solution"]
+        VSM_VlogClip["VSM_VlogClip<br/>15 individual clips<br/>Timestamped"]
+        VSM_WorldStateSnapshot["VSM_WorldStateSnapshot<br/>5-10 reference patterns<br/>SYNTHETIC"]
+        FD_Assets_Enriched["FD_Assets Enriched<br/>Installation context<br/>SYNTHETIC"]
+        ELYSIA_METADATA["ELYSIA_METADATA__<br/>Collection schemas<br/>Display types"]
     end
 
-    subgraph "Local Data Storage (Raw Data)"
-        TelemetryParquet[Telemetry Parquet<br/>785K datapoints<br/>1-min intervals]
-        ManualJSONL[Manual JSONL<br/>922 chunks<br/>Source data]
-        VlogMOV[Vlog .mov Files<br/>15 videos<br/>21.7 MB]
+    subgraph LocalStorage["Local Data Storage - Raw Data"]
+        TelemetryParquet["Telemetry Parquet<br/>785K datapoints<br/>1-min intervals"]
+        ManualJSONL["Manual JSONL<br/>922 chunks<br/>Source data"]
+        VlogMOV["Vlog .mov Files<br/>15 videos<br/>21.7 MB"]
     end
 
-    subgraph "LLM Layer (DSPy)"
-        BaseLM[Base LM<br/>gemini-1.5-flash<br/>Fast decisions]
-        ComplexLM[Complex LM<br/>gemini-1.5-pro<br/>Deep analysis]
-        FeedbackSystem[Feedback System<br/>Few-shot learning<br/>User-specific]
+    subgraph LLMLayer["LLM Layer - DSPy"]
+        BaseLM["Base LM<br/>gemini-1.5-flash<br/>Fast decisions"]
+        ComplexLM["Complex LM<br/>gemini-1.5-pro<br/>Deep analysis"]
+        FeedbackSystem["Feedback System<br/>Few-shot learning<br/>User-specific"]
     end
 
     %% User Flow
@@ -176,4 +176,3 @@ graph TB
     class VSM_ManualSections,VSM_Diagram,VSM_TelemetryEvent,VSM_VlogCase,VSM_VlogClip,VSM_WorldStateSnapshot,FD_Assets_Enriched,ELYSIA_METADATA weaviate
     class TelemetryParquet,ManualJSONL,VlogMOV localData
     class BaseLM,ComplexLM,FeedbackSystem llm
-

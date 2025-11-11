@@ -1,0 +1,140 @@
+{
+  "installation_id": "135_1570",
+  "asset_name": "Industrial Freezer 135-1570",
+  "location": "Training Facility, Warehouse A",
+  "installation_date": "2022-10-01",
+  "model": "Industrial Freezer 135-1570",
+  "capacity_liters": 1500,
+  "refrigerant_type": "R404A",
+  
+  "commissioning_data": {
+    "target_temp": -33.0,
+    "evaporator_temp_design": -38.0,
+    "condenser_temp_design": 45.0,
+    "suction_pressure_design": 1.2,
+    "discharge_pressure_design": 14.5,
+    "suction_temp_design": -38.0,
+    "discharge_temp_design": 50.0,
+    "liquid_temp_design": 28.0,
+    "superheat_design": 5.0,
+    "subcooling_design": 3.0,
+    "ambient_design_max": 32.0,
+    "ambient_design_nominal": 25.0,
+    "product_load_max_kg_per_hour": 150,
+    "notes": "Gegevens bij inbedrijfstelling volgens ontwerp - baseline voor 'uit balans' detectie"
+  },
+  
+  "components": {
+    "compressor": {
+      "model": "Copeland Scroll ZF09K4E",
+      "type": "scroll",
+      "capacity_kW": 2.5,
+      "motor_power_kW": 1.8,
+      "refrigerant": "R404A",
+      "oil_type": "POE",
+      "design_suction_pressure_bar": 1.2,
+      "design_discharge_pressure_bar": 14.5,
+      "max_discharge_temp_C": 85.0,
+      "notes": "Compressorcapaciteit afgestemd op maximale belasting bij ontwerptemperaturen"
+    },
+    "evaporator": {
+      "type": "forced_air",
+      "model": "Industrial Air Cooler IAC-150",
+      "capacity_kW": 2.8,
+      "design_evap_temp_C": -38.0,
+      "design_air_flow_m3h": 850,
+      "fans": 3,
+      "fan_power_W": 75,
+      "defrost_type": "electric",
+      "defrost_heater_kW": 2.0,
+      "coil_material": "copper_aluminum",
+      "notes": "Verdampercapaciteit en verdampingstemperatuur bepalen koelvermogen"
+    },
+    "condenser": {
+      "type": "air_cooled",
+      "model": "Air Cooled Condenser ACC-300",
+      "capacity_kW": 3.2,
+      "design_condensing_temp_C": 45.0,
+      "design_ambient_max_C": 32.0,
+      "fans": 2,
+      "fan_power_W": 120,
+      "design_air_flow_m3h": 1200,
+      "coil_material": "copper_aluminum",
+      "notes": "Condensorcapaciteit en condensatietemperatuur kritisch voor warmteafvoer"
+    },
+    "expansion_valve": {
+      "type": "TXV",
+      "model": "Danfoss TEN 2",
+      "capacity": "matched",
+      "superheat_setting": 5.0,
+      "refrigerant": "R404A",
+      "notes": "Smoorventielcapaciteit afgestemd op verdamper en compressor"
+    },
+    "filter_dryer": {
+      "model": "DML 164S",
+      "connection": "16mm",
+      "replacement_interval_months": 12,
+      "notes": "Regelmatig vervangen voorkomt verstoppingen"
+    },
+    "sight_glass": {
+      "location": "liquid_line",
+      "with_moisture_indicator": true,
+      "notes": "Voor controle koudemiddelstroming en vocht"
+    }
+  },
+  
+  "control_settings": {
+    "defrost_interval_hours": 6,
+    "defrost_duration_minutes": 20,
+    "defrost_end_temp_C": 8.0,
+    "thermostat_setpoint": -33.0,
+    "thermostat_differential": 2.0,
+    "hp_pressostat_cutout_bar": 16.0,
+    "hp_pressostat_differential_bar": 2.0,
+    "lp_pressostat_cutin_bar": 2.0,
+    "lp_pressostat_differential_bar": 1.0,
+    "controller_type": "Danfoss AK-CC 550",
+    "controller_software_version": "2.1.5",
+    "notes": "Procesinstellingen volgens fabrieksspecificaties en inbedrijfstelling"
+  },
+  
+  "operational_limits": {
+    "room_temp_min_C": -35.0,
+    "room_temp_max_C": -30.0,
+    "room_temp_alarm_high_C": -18.0,
+    "room_temp_alarm_critical_C": -10.0,
+    "compressor_max_runtime_ratio": 0.85,
+    "door_max_open_ratio_30m": 0.20,
+    "max_door_openings_per_hour": 12,
+    "ambient_max_operating_C": 35.0,
+    "notes": "Operationele grenzen voor 'uit balans' detectie"
+  },
+  
+  "balance_check_parameters": {
+    "superheat_min": 4.0,
+    "superheat_max": 8.0,
+    "subcooling_min": 2.0,
+    "subcooling_max": 5.0,
+    "hot_gas_temp_min_C": 45.0,
+    "hot_gas_temp_max_C": 65.0,
+    "suction_temp_min_C": -40.0,
+    "suction_temp_max_C": -35.0,
+    "discharge_pressure_min_bar": 12.0,
+    "discharge_pressure_max_bar": 17.0,
+    "suction_pressure_min_bar": 0.9,
+    "suction_pressure_max_bar": 1.5,
+    "notes": "Bandbreedte voor GetAssetHealth tool - W vs C vergelijking"
+  },
+  
+  "metadata": {
+    "data_source": "manual_derived_design_parameters",
+    "generated_date": "2024-11-11",
+    "purpose": "Context (C) for GetAssetHealth tool - compare WorldState (W) against design/commissioning values",
+    "validation_status": "synthetic_realistic",
+    "manual_references": [
+      "storingzoeken-koeltechniek_theorie_179 - Koelproces uit balans (page 11-12)",
+      "koelinstallaties-opbouw-en-werking_theorie_2016 - Component specifications"
+    ]
+  }
+}
+

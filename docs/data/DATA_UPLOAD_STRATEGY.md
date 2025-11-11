@@ -88,7 +88,9 @@ Mermaid    SMIDO Tag                           QueryVlogs
 
 ### 1. VSM_TelemetryEvent
 
-**Purpose**: Historical telemetry incidents with WorldState features for semantic search and pattern matching.
+**Purpose**: Historical telemetry incidents with WorldState (W) features for semantic search and pattern matching.
+
+**Key Concept**: Events capture when system went "uit balans" (out of balance), not just component failures.
 
 **Schema** (based on `docs/data/telemetry_features.md`):
 
@@ -135,6 +137,8 @@ properties = [
 **Vectorization**: `description_nl` + `worldstate_summary` (combined)
 
 **Size Estimate**: ~500-1000 events × ~2KB = **1-2 MB**
+
+**Note**: Manual states "Een storing betekent dus niet altijd dat er een component defect is" - events represent system out of balance, not just broken parts.
 
 ---
 

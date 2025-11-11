@@ -116,49 +116,63 @@ These are **synthetic test collections** used for MVP/demo purposes:
 | **GetAssetHealth** | **Yes** | Installation Context | HIGH |
 | **AnalyzeSensorPattern** | **Yes** | WorldState Snapshots | HIGH |
 
-### 1. Installation Context (GetAssetHealth Tool)
+### 1. Installation Context (C) - GetAssetHealth Tool
 
-**Purpose**: Asset metadata for health summary and context
+**Purpose**: Static design/commissioning data for comparing WorldState (W) against design specs
 
-**Data Needed**:
+**Manual Reference**: "gegevens bij inbedrijfstelling" (commissioning data) - baseline for detecting "uit balans"
+
+**Data Needed** (Context C):
 
 ```json
 {
   "installation_id": "135_1570",
   "location": "Training Facility, Warehouse A",
-  "installation_type": "Industrial Freezer",
   "model": "Industrial Freezer 135-1570",
   "capacity_liters": 1500,
-  "target_temp": -33.0,
-  "installation_date": "2022-10-15",
-  "operational_hours": 17520,
-  "maintenance_schedule": "monthly",
-  "last_maintenance": "2024-10-15",
-  "environment": {
-    "ambient_temp_range": [15, 35],
-    "humidity_range": [40, 60],
-    "usage_pattern": "business_hours"
+  
+  "commissioning_data": {
+    "target_temp": -33.0,
+    "evaporator_temp_design": -38.0,
+    "suction_pressure_design": 1.2,
+    "discharge_pressure_design": 14.5,
+    "superheat_design": 5.0,
+    "subcooling_design": 3.0,
+    "ambient_design_max": 32.0,
+    "product_load_max_kg_per_hour": 150
   },
+  
   "components": {
-    "compressor": {"model": "XYZ-123", "age_years": 2},
-    "evaporator": {"type": "forced_air", "defrost_type": "electric"},
-    "condenser": {"type": "air_cooled", "fans": 2}
+    "compressor": {"model": "XYZ-123", "capacity_kW": 2.5},
+    "evaporator": {"type": "forced_air", "defrost_type": "electric", "fans": 3},
+    "condenser": {"type": "air_cooled", "fans": 2, "design_ambient_max": 32},
+    "expansion_valve": {"type": "TXV", "capacity": "matched"}
+  },
+  
+  "control_settings": {
+    "defrost_interval_hours": 6,
+    "defrost_duration_minutes": 20,
+    "thermostat_setpoint": -33.0,
+    "hp_pressostat_cutout": 16.0,
+    "lp_pressostat_cutout": 0.8
   }
 }
 ```
 
-**Storage**: 
-- Option A: Add to `VSM_TelemetryEvent` as metadata
-- Option B: Create `VSM_Installation` collection
-- Option C: Store in `FD_Assets` (already exists, but needs enrichment)
+**Storage**: Enrich `FD_Assets` (already exists)
 
-**Recommendation**: **Option C** - Enrich `FD_Assets` with VSM-specific context data.
+**Rationale**: 
+- GetAssetHealth compares W (current) against C (design)
+- Manual explicitly references "gegevens bij inbedrijfstelling" for comparison
+- Implements "balans" concept: system operating within design parameters?
 
 ---
 
 ### 2. WorldState Snapshots (AnalyzeSensorPattern Tool)
 
-**Purpose**: Reference patterns for comparing current state against known failure modes
+**Purpose**: Reference patterns for "uit balans" (out of balance) detection - typical WorldState for each failure mode
+
+**Manual Reference**: "Koelproces uit balans" section - system balance concept
 
 **Data Needed**:
 
@@ -192,12 +206,12 @@ These are **synthetic test collections** used for MVP/demo purposes:
 }
 ```
 
-**Storage**:
-- Option A: Add to `VSM_TelemetryEvent` as reference snapshots
-- Option B: Create `VSM_WorldStateSnapshot` collection
-- Option C: Store in local JSON files, referenced by events
+**Storage**: Create `VSM_WorldStateSnapshot` collection
 
-**Recommendation**: **Option B** - Create `VSM_WorldStateSnapshot` collection for fast pattern matching.
+**Rationale**:
+- AnalyzeSensorPattern needs fast semantic matching: "Is current W similar to known failure pattern?"
+- Manual states: **"Een storing betekent dus niet altijd dat er een component defect is"** - faults can be system imbalance
+- Snapshots represent typical W for each "uit balans" scenario
 
 ---
 
@@ -266,13 +280,19 @@ async def analyze_sensor_pattern(current_worldstate, tree_data):
 #### GetAssetHealth Tool
 ```python
 async def get_asset_health(asset_id, tree_data):
-    # Get installation context from enriched FD_Assets
-    asset = get_asset(asset_id)
-    # Compute current WorldState
-    current = compute_worldstate(asset_id, now())
-    # Compare to expected performance
-    return health_summary(current, asset.target_performance)
+    # Get Context (C) - design parameters from commissioning
+    context = get_asset_context(asset_id)  # FD_Assets enriched
+    # Compute WorldState (W) - current operating state
+    worldstate = compute_worldstate(asset_id, now())
+    # Compare W vs C - implements "balans" concept
+    return balance_analysis(
+        current=worldstate,
+        design=context.commissioning_data,
+        question="Is system operating within design parameters?"
+    )
 ```
+
+**Key Insight**: Manual's "gegevens bij inbedrijfstelling" (commissioning data) is what we call Context (C). GetAssetHealth implements the balance check: W vs C.
 
 ## Schema Definitions
 
@@ -348,38 +368,40 @@ See `DATA_UPLOAD_STRATEGY.md` for complete sequence. Synthetic data added in Pha
 **Script**: `features/telemetry_vsm/src/generate_worldstate_snapshots.py`
 
 **Process**:
-1. Identify common failure modes from:
-   - Telemetry events
-   - Vlog cases
-   - Manual sections
-2. For each failure mode:
-   - Compute typical WorldState pattern
-   - Extract from real events OR generate synthetic pattern
-   - Create snapshot object
-3. Output: JSONL with snapshot objects
+1. For each vlog case (A1-A5):
+   - Find corresponding telemetry event in parquet
+   - Compute WorldState at event peak
+   - Extract "uit balans" factors (which design parameter violated?)
+2. Add manual-described patterns:
+   - "Condensatietemperatuur te hoog" (from balance section)
+   - "Oververhitting te klein" (from balance section)
+   - "Warmtebelasting te hoog" (from balance section)
+3. Output: 8-12 reference snapshots (5 from vlogs + 3-7 from manual)
 
-**Failure Modes to Cover**:
-- `ingevroren_verdamper` (Frozen Evaporator) - **Priority 1**
-- `ventilator_defect` (Fan Failure) - **Priority 2**
-- `te_hoge_temperatuur` (High Temperature) - **Priority 2**
-- `expansieventiel_defect` (TXV Failure) - **Priority 3**
-- `regelaar_probleem` (Controller Issue) - **Priority 3**
+**Balance Factors** (from manual page 11):
+- Koellast en koelvermogen mismatch
+- Verdampercapaciteit vs temperatuur
+- Compressorcapaciteit mismatch
+- Condensorcapaciteit vs temperatuur
+- Smoorventielcapaciteit
+- Koudemiddel charge (too much/too little)
 
 ---
 
-### Step 2: Enrich FD_Assets
+### Step 2: Enrich FD_Assets with Commissioning Data
 
 **Script**: `features/integration_vsm/src/enrich_fd_assets.py`
 
 **Process**:
 1. Load existing FD_Assets collection
-2. For asset "135_1570":
-   - Add VSM-specific context (components, environment, operational history)
-   - Link to VSM_TelemetryEvent
-   - Add synthetic operational metadata
-3. Update or create enriched asset object
+2. Add "gegevens bij inbedrijfstelling" (commissioning/design data):
+   - Design temperatures and pressures (evaporator, condenser, suction, discharge)
+   - Component capacities (compressor, evaporator, condenser matched)
+   - Design operating limits (superheat, subcooling, ambient max, load max)
+   - Control settings (defrost interval, thermostat setpoint, pressostat cutouts)
+3. This becomes Context (C) that GetAssetHealth uses to check if W is within design limits
 
-**Alternative**: Create `VSM_Installation` collection instead of enriching FD_Assets.
+**No Alternative**: Must use FD_Assets (GetAssetHealth tool queries this collection).
 
 ---
 
@@ -435,19 +457,19 @@ See `DATA_UPLOAD_STRATEGY.md` for complete sequence. Synthetic data added in Pha
 ## Summary
 
 **Agent Tool Requirements**:
-- **GetAssetHealth**: Installation context (enrich FD_Assets)
-- **AnalyzeSensorPattern**: WorldState snapshots (5-10 reference patterns)
-- **All other tools**: Use real data only
+- **GetAssetHealth**: Needs C (design/commissioning data) → Enrich FD_Assets
+- **AnalyzeSensorPattern**: Needs reference patterns → VSM_WorldStateSnapshot
+- **Other 5 tools**: Real data only (no synthetic needed)
 
-**Implementation**:
-1. Generate 5-10 WorldState snapshots from real telemetry events
-2. Enrich FD_Assets with installation context for asset "135_1570"
-3. Upload as Phase 2 (after core collections, before cross-linking)
+**Implementation Priority**:
+1. **HIGH**: Enrich FD_Assets with commissioning data (C) - GetAssetHealth blocked
+2. **HIGH**: Generate 8-12 WorldState snapshots - AnalyzeSensorPattern blocked
+3. Upload as Phase 2 (after core collections)
 
-**Not Required**:
-- Synthetic troubleshooting cases (use real VSM_VlogCase)
-- Synthetic telemetry events (use real parquet data)
-- Additional assets (single-asset demo)
+**Key Insights from Manual**:
+- "3-P's" section lists **4 P's** (including Productinput)
+- "Balans" concept: compare W (current) vs C (design) - not all faults are broken components
+- "Gegevens bij inbedrijfstelling" = commissioning data = our Context (C)
 
 ---
 

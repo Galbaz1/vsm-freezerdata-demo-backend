@@ -7,17 +7,41 @@
 
 ## Key Findings
 
-### 1. Elysia Preprocessing is Critical
+### 1. Manual Reveals 4 P's (Not 3!)
 
-**Finding**: Elysia's `preprocess()` function is **essential** for intelligent querying. Without it, the Query tool cannot understand your collections.
+**Finding**: Manual heading says "3-P's" but lists **4 P's**:
+- P1: Power (electrical supply)
+- P2: Procesinstellingen (settings vs design)
+- P3: Procesparameters (measurements vs design)
+- **P4: Productinput** (external conditions - condenser air/water, product load, ambient vs design)
 
-**Action**: Run `preprocess()` on all VSM_* collections **after** uploading data.
+**Impact**: P4_Node checks if fault is **outside installation** (not a broken component).
 
-**Impact**: Preprocessing generates:
-- LLM summaries of collection purpose
-- Property descriptions for agent understanding
-- Display type mappings (table, document, etc.)
-- Example queries for the agent
+### 2. WorldState (W) vs Context (C) Split
+
+**Finding**: Manual distinguishes dynamic state from static design data:
+- **W (WorldState)**: Current sensors, technician observations, urgency
+- **C (Context)**: "Gegevens bij inbedrijfstelling" (commissioning data, design parameters, schemas)
+
+**Impact**: 
+- GetAssetHealth compares W vs C (balance check)
+- Context Manager manages both W and C separately
+- Matches manual's conceptual model exactly
+
+### 3. "Uit Balans" Concept is Central
+
+**Finding**: Manual section "Het koelproces uit balans" states: **"Een storing betekent dus niet altijd dat er een component defect is"**
+
+**Impact**:
+- Faults can be system operating outside design parameters (balance violated)
+- AnalyzeSensorPattern detects which balance factor is violated
+- Events represent "uit balans" states, not just broken parts
+
+### 4. Elysia Preprocessing is Critical
+
+**Finding**: Elysia's `preprocess()` function is essential for intelligent querying.
+
+**Action**: Run `preprocess()` on all VSM_* collections after uploading data.
 
 ---
 
@@ -54,21 +78,20 @@
 
 ---
 
-### 4. New Collection: VSM_Diagram
+### 5. Two New Collections Required
 
-**Finding**: Diagrams from parsed manuals should be stored in Weaviate for agent reference.
+**VSM_Diagram**: Visual logic diagrams
+- SearchManualsBySMIDO returns diagrams alongside text
+- Links to manual sections via chunk_id
 
-**Rationale**:
-- Diagrams contain machine-readable logic (Mermaid flowcharts)
-- Agent can reference diagrams during troubleshooting
-- Links to source manual sections via chunk_id
-- Enables "show diagram" functionality in agent responses
-
-**Schema**: See `DATA_UPLOAD_STRATEGY.md` section 5.
+**VSM_WorldStateSnapshot**: Reference patterns (SYNTHETIC)
+- AnalyzeSensorPattern needs typical "uit balans" patterns
+- Generate 8-12 snapshots from real events + manual descriptions
+- Represents balance factors from manual page 11
 
 ---
 
-### 5. Cross-Collection Linking Strategy
+### 6. Cross-Collection Linking Strategy
 
 **Finding**: Cross-references enable unified troubleshooting across all data sources.
 
@@ -174,7 +197,9 @@ preprocess([
 | VSM_TelemetryEvent | ~500-1000 | ~1-2 MB | 📝 Planned |
 | VSM_VlogCase | 5 | ~25 KB | 📝 Planned |
 | VSM_VlogClip | 15 | ~45 KB | 📝 Planned |
-| **Total** | **~700-1250** | **~2-3 MB** | |
+| VSM_WorldStateSnapshot | 8-12 | ~20 KB | 📝 Planned (SYNTHETIC) |
+| FD_Assets (enriched) | 1 | ~5 KB | 📝 Planned (SYNTHETIC) |
+| **Total** | **~700-1270** | **~2.5-3 MB** | |
 
 **Cost Estimate**: <$10/month for Weaviate Cloud (demo usage)
 
@@ -243,10 +268,11 @@ preprocess([
 
 ### Immediate (This Week)
 
-1. ✅ Review `DATA_UPLOAD_STRATEGY.md` (this document)
-2. ⏳ Create `features/diagrams_vsm/src/extract_diagram_metadata.py`
-3. ⏳ Create `features/diagrams_vsm/src/import_diagrams_weaviate.py`
-4. ⏳ Upload VSM_Diagram collection (test with 1 diagram first)
+1. ✅ Review strategy documents (updated with manual insights)
+2. ⏳ Create diagram extraction + upload scripts
+3. ⏳ Create manual section parsing + SMIDO classification scripts
+4. ⏳ Generate WorldState snapshots (8-12 patterns from vlogs + manual balance factors)
+5. ⏳ Enrich FD_Assets with commissioning data (C)
 
 ### Short-term (Next 2 Weeks)
 

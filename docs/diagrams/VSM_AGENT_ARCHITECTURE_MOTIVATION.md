@@ -79,17 +79,25 @@ This document proposes a **hybrid architecture** that intelligently builds on El
 - Makes SMIDO workflow testable independently
 
 #### Context Manager
-- **New Component**: Manages WorldState + user input + historical context
+- **New Component**: Manages WorldState (W) + Context (C)
 - **Responsibilities**:
-  - Accumulates context across SMIDO phases
-  - Merges user-reported symptoms with telemetry data
-  - Provides unified context to decision agents
-- **Integration**: Populates `TreeData.environment` with structured context
+  - **WorldState (W)** - Dynamic state:
+    - Current sensor readings (ComputeWorldState)
+    - Technician observations (visual, audio, tactile)
+    - Customer-reported symptoms
+    - Urgency (goods at risk)
+  - **Context (C)** - Static/historical:
+    - Installation design parameters ("gegevens bij inbedrijfstelling")
+    - Technical schemas and documentation
+    - Service history
+    - Normal operating ranges per installation
+- **Integration**: Populates `TreeData.environment` with W+C structure
 
-**Why New Component?**
-- VSM needs richer context than generic RAG (WorldState features, sensor patterns, historical incidents)
-- Separates context logic from tree execution logic
-- Enables context reuse across multiple troubleshooting sessions
+**Why Split W and C?**
+- **W changes during troubleshooting** (measurements, observations, actions)
+- **C is reference data** (design specs, schemas, history)
+- Agent queries C to interpret W (compare current state to normal values)
+- Matches manual's conceptual model exactly
 
 ---
 
@@ -102,15 +110,17 @@ This document proposes a **hybrid architecture** that intelligently builds on El
 SMIDO Phase          →  Elysia DecisionNode
 ─────────────────────────────────────────────
 M - Melding          →  M_Node (root)
-T - Technisch         →  T_Node
+T - Technisch        →  T_Node
 I - Installatie      →  I_Node
-D - Diagnose         →  D_Node (branch)
+D - Diagnose (4 P's) →  D_Node (branch)
   ├─ P1: Power       →  P1_Node
-  ├─ P2: Settings    →  P2_Node
-  ├─ P3: Parameters  →  P3_Node
-  └─ P4: Product     →  P4_Node
+  ├─ P2: Procesinstellingen →  P2_Node
+  ├─ P3: Procesparameters   →  P3_Node
+  └─ P4: Productinput       →  P4_Node
 O - Onderdelen       →  O_Node
 ```
+
+**Note**: Manual says "3-P's" but lists **4 P's**. All four are essential diagnostic checks.
 
 **Design Choices**:
 
@@ -119,9 +129,10 @@ O - Onderdelen       →  O_Node
    - ✅ Each node has specific instruction and available tools
    - ✅ Enables phase-specific reasoning prompts
 
-2. **D_Node as Branch Node**
-   - ✅ 3 P's are parallel checks (can be done in any order)
-   - ✅ Agent decides which P to check first based on symptoms
+2. **D_Node as Branch Node (4 P's)**
+   - ✅ **4 P's** despite "3-P's" heading in manual (Power, Procesinstellingen, Procesparameters, Productinput)
+   - ✅ Parallel checks - agent decides order based on symptoms
+   - ✅ **Productinput (P4)** checks if fault is outside installation (condenser air/water conditions, product load, door usage)
    - ✅ More flexible than strict sequential flow
 
 3. **Reuse Elysia DecisionNode Class**
@@ -184,14 +195,16 @@ async def compute_worldstate(
    - **Why Separate Tool?**: Alarm-specific logic (severity filtering, acknowledgment status)
 
 6. **GetAssetHealth Tool**
-   - **Purpose**: Health summary (current state + recent trends)
-   - **Data Source**: Multiple (WorldState + Weaviate)
-   - **Why Separate Tool?**: Aggregates multiple data sources into single health view
+   - **Purpose**: Health summary comparing WorldState (W) against Context (C)
+   - **Data Source**: ComputeWorldState (W) + FD_Assets enriched (C: design parameters)
+   - **Why Separate Tool?**: Implements "balance" concept - compares current state to design specs
+   - **Example**: Current suction pressure vs commissioning data ("gegevens bij inbedrijfstelling")
 
 7. **AnalyzeSensorPattern Tool**
-   - **Purpose**: Compare current state against known failure patterns
-   - **Data Source**: VSM_WorldStateSnapshot (Weaviate), Parquet (via WorldState Engine)
-   - **Why Separate Tool?**: Pattern matching requires reference data (synthetic snapshots)
+   - **Purpose**: Detect if system is "uit balans" (out of balance) - pattern matching against known failures
+   - **Data Source**: VSM_WorldStateSnapshot (reference patterns), ComputeWorldState (current W)
+   - **Why Separate Tool?**: Implements manual's "Koelproces uit balans" concept
+   - **Key Insight**: Not all faults are broken components - system can be out of balance (design vs operating conditions)
 
 **Tool Data Dependencies**:
 - **Real Data Only**: ComputeWorldState, QueryTelemetryEvents, SearchManualsBySMIDO, QueryVlogCases, GetAlarms

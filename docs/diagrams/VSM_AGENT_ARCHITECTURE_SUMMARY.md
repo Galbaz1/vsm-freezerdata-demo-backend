@@ -50,31 +50,36 @@ See `vsm_agent_architecture.mermaid` for complete visual diagram.
 - **Parquet**: Time-series computation (WorldState) - 785K datapoints
 - **Why**: Each tool uses the right data source for its purpose
 
-### 4. WorldState On-Demand Computation
-- **Why**: 60+ features × 785K datapoints = too much to pre-compute
-- **How**: WorldState Engine computes features on-demand from parquet
+### 4. WorldState (W) vs Context (C) Split
+- **W (WorldState)**: Dynamic state (sensors, observations, measurements) - computed on-demand
+- **C (Context)**: Static design data (commissioning parameters, schemas, history) - stored in FD_Assets
+- **Balance Check**: Compare W vs C to detect "uit balans" (operating outside design parameters)
 
-### 5. VSM Domain Tools
-- **Why**: Domain-specific logic (SMIDO filtering, WorldState computation, pattern detection)
-- **Tools**: ComputeWorldState, QueryTelemetryEvents, SearchManualsBySMIDO, QueryVlogCases, GetAlarms, GetAssetHealth, AnalyzeSensorPattern
+### 5. VSM Domain Tools (7 tools)
+- **Real Data**: ComputeWorldState, QueryTelemetryEvents, SearchManualsBySMIDO, QueryVlogCases, GetAlarms
+- **Need Synthetic**: GetAssetHealth (needs C), AnalyzeSensorPattern (needs reference patterns)
+- **Key Concept**: GetAssetHealth compares W vs C, AnalyzeSensorPattern detects "uit balans" patterns
 
 ---
 
 ## SMIDO Workflow Mapping
 
 ```
-SMIDO Phase          →  Elysia DecisionNode  →  Tools
-─────────────────────────────────────────────────────────────
-M - Melding          →  M_Node                →  GetAlarms, AssetHealth
-T - Technisch        →  T_Node                →  AssetHealth, Visual checks
-I - Installatie      →  I_Node                →  SearchManualsBySMIDO (if not familiar)
-D - Diagnose         →  D_Node (branch)       →  
-  ├─ P1: Power       →  P1_Node              →  GetAlarms
-  ├─ P2: Settings    →  P2_Node              →  SearchManualsBySMIDO
-  ├─ P3: Parameters  →  P3_Node              →  ComputeWorldState, AnalyzeSensorPattern
-  └─ P4: Product     →  P4_Node              →  QueryTelemetryEvents
-O - Onderdelen       →  O_Node                →  QueryVlogCases, SearchManualsBySMIDO
+SMIDO Phase              →  Elysia DecisionNode  →  Tools  →  Data (W/C)
+─────────────────────────────────────────────────────────────────────────────────────────
+M - Melding              →  M_Node              →  GetAlarms, GetAssetHealth  →  W+C
+T - Technisch            →  T_Node              →  GetAssetHealth, SearchManuals  →  W+C
+I - Installatie          →  I_Node              →  SearchManuals (schemas)  →  C
+D - Diagnose (4 P's)     →  D_Node (branch)     →  
+  ├─ P1: Power           →  P1_Node            →  GetAlarms, ComputeWorldState  →  W
+  ├─ P2: Procesinstellingen → P2_Node          →  SearchManuals, GetAssetHealth  →  C (compare)
+  ├─ P3: Procesparameters   → P3_Node          →  ComputeWorldState, AnalyzeSensorPattern  →  W vs Snapshots
+  └─ P4: Productinput       → P4_Node          →  QueryTelemetryEvents, AnalyzeSensorPattern  →  W (external)
+O - Onderdelen           →  O_Node              →  QueryVlogCases, SearchManuals  →  W+manuals
 ```
+
+**W = WorldState** (dynamic): Current sensors, technician observations, measurements  
+**C = Context** (static): Design parameters, commissioning data, schemas, normal values
 
 ---
 
