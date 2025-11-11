@@ -6,7 +6,7 @@ This file provides guidance to the agent when working with code in this reposito
 
 **Virtual Service Mechanic (VSM) Demo** - An AI agent built on the Elysia framework that helps junior cooling technicians troubleshoot freezer/cooling cell installations using the SMIDO methodology.
 
-**Tech Stack**: Python 3.12.12, FastAPI, DSPy, Weaviate (vector DB), pandas (telemetry analysis)
+**Tech Stack**: Python 3.12.12, FastAPI, DSPy, Weaviate (vector DB), pandas (telemetry analysis), Next.js 14 (frontend)
 
 ---
 
@@ -42,7 +42,7 @@ All required API keys and configuration are stored in the `.env` file at root of
 ### Running Elysia
 
 ```bash
-# Start the API server
+# Start the API server (includes frontend)
 elysia start
 
 # With custom port
@@ -50,6 +50,21 @@ elysia start --port 8080
 
 # Access at http://localhost:8000
 ```
+
+**Frontend Development:**
+
+The Elysia frontend source code is located in `apps/elysia-frontend/`. To develop or customize the frontend:
+
+```bash
+cd apps/elysia-frontend
+npm install          # First time setup
+npm run dev          # Development server (http://localhost:3000)
+
+# Build and copy to backend
+npm run assemble     # Builds and copies to ../../elysia/api/static/
+```
+
+See `apps/elysia-frontend/README_VSM.md` for detailed frontend setup and VSM customization guide.
 
 ---
 
