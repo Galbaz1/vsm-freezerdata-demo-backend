@@ -1,0 +1,312 @@
+{
+  "135_1570_cleaned.parquet": {
+    "filepath": "/Users/lab/Documents/vsm-freezerdata-demo-backend/features/telemetry/timeseries_freezerdata/135_1570_cleaned.parquet",
+    "filename": "135_1570_cleaned.parquet",
+    "row_count": 785398,
+    "columns": {
+      "sGekoeldeRuimte": {
+        "dtype": "float64",
+        "missing_count": 29139,
+        "missing_percent": 3.71,
+        "min": -37.5,
+        "max": 0.0,
+        "mean": -33.27435579106327,
+        "median": -34.2,
+        "std": 5.455944081266179
+      },
+      "p:42_s:_a:standard_n:Gekoelderuimte(2)_inactive": {
+        "dtype": "float64",
+        "missing_count": 48212,
+        "missing_percent": 6.14,
+        "min": -37.5,
+        "max": 0.0,
+        "mean": -34.134544023908624,
+        "median": -34.2,
+        "std": 1.0833796087628123
+      },
+      "sHeetgasLeiding": {
+        "dtype": "float64",
+        "missing_count": 29208,
+        "missing_percent": 3.72,
+        "min": 20.0,
+        "max": 77.5,
+        "mean": 49.8213835744022,
+        "median": 52.8,
+        "std": 9.052870790310182
+      },
+      "sVloeistofleiding": {
+        "dtype": "float64",
+        "missing_count": 29139,
+        "missing_percent": 3.71,
+        "min": 20.0,
+        "max": 50.0,
+        "mean": 33.66786097091049,
+        "median": 34.2,
+        "std": 2.518262967071803
+      },
+      "sZuigleiding": {
+        "dtype": "float64",
+        "missing_count": 29145,
+        "missing_percent": 3.71,
+        "min": 20.0,
+        "max": 40.0,
+        "mean": 31.104433839326052,
+        "median": 31.5,
+        "std": 2.5984633049879595
+      },
+      "sOmgeving": {
+        "dtype": "float64",
+        "missing_count": 29198,
+        "missing_percent": 3.72,
+        "min": -10.0,
+        "max": 50.0,
+        "mean": 29.70867625386865,
+        "median": 29.4,
+        "std": 3.5828846289258904
+      },
+      "sDeurcontact": {
+        "dtype": "float64",
+        "missing_count": 29177,
+        "missing_percent": 3.71,
+        "min": 0.0,
+        "max": 1.0,
+        "mean": 0.026547130192806776,
+        "median": 0.0,
+        "std": 0.1607506073733186,
+        "unique_values": 13,
+        "value_counts": {
+          "0.0": 736143,
+          "1.0": 20063,
+          "0.5": 5,
+          "0.9999091322126307": 1,
+          "0.9998182644252612": 1,
+          "0.9997273966378919": 1,
+          "0.9996365288505225": 1,
+          "0.9995456610631531": 1,
+          "0.9999136367561966": 1,
+          "0.9998272735123931": 1
+        }
+      },
+      "sRSSI": {
+        "dtype": "float64",
+        "missing_count": 29734,
+        "missing_percent": 3.79,
+        "min": -115.0,
+        "max": 0.0,
+        "mean": -80.67042309109442,
+        "median": -82.0,
+        "std": 5.10181177247844
+      },
+      "sBattery": {
+        "dtype": "float64",
+        "missing_count": 29195,
+        "missing_percent": 3.72,
+        "min": 0.0,
+        "max": 100.0,
+        "mean": 98.40149893613223,
+        "median": 100.0,
+        "std": 10.253844261293706
+      }
+    }
+  },
+  "135_1570_cleaned_with_flags.parquet": {
+    "filepath": "/Users/lab/Documents/vsm-freezerdata-demo-backend/features/telemetry/timeseries_freezerdata/135_1570_cleaned_with_flags.parquet",
+    "filename": "135_1570_cleaned_with_flags.parquet",
+    "row_count": 785398,
+    "columns": {
+      "sGekoeldeRuimte": {
+        "dtype": "float64",
+        "missing_count": 29139,
+        "missing_percent": 3.71,
+        "min": -37.5,
+        "max": 0.0,
+        "mean": -33.27435579106327,
+        "median": -34.2,
+        "std": 5.455944081266179
+      },
+      "p:42_s:_a:standard_n:Gekoelderuimte(2)_inactive": {
+        "dtype": "float64",
+        "missing_count": 48212,
+        "missing_percent": 6.14,
+        "min": -37.5,
+        "max": 0.0,
+        "mean": -34.134544023908624,
+        "median": -34.2,
+        "std": 1.0833796087628123
+      },
+      "sHeetgasLeiding": {
+        "dtype": "float64",
+        "missing_count": 29208,
+        "missing_percent": 3.72,
+        "min": 20.0,
+        "max": 77.5,
+        "mean": 49.8213835744022,
+        "median": 52.8,
+        "std": 9.052870790310182
+      },
+      "sVloeistofleiding": {
+        "dtype": "float64",
+        "missing_count": 29139,
+        "missing_percent": 3.71,
+        "min": 20.0,
+        "max": 50.0,
+        "mean": 33.66786097091049,
+        "median": 34.2,
+        "std": 2.518262967071803
+      },
+      "sZuigleiding": {
+        "dtype": "float64",
+        "missing_count": 29145,
+        "missing_percent": 3.71,
+        "min": 20.0,
+        "max": 40.0,
+        "mean": 31.104433839326052,
+        "median": 31.5,
+        "std": 2.5984633049879595
+      },
+      "sOmgeving": {
+        "dtype": "float64",
+        "missing_count": 29198,
+        "missing_percent": 3.72,
+        "min": -10.0,
+        "max": 50.0,
+        "mean": 29.70867625386865,
+        "median": 29.4,
+        "std": 3.5828846289258904
+      },
+      "sDeurcontact": {
+        "dtype": "float64",
+        "missing_count": 29177,
+        "missing_percent": 3.71,
+        "min": 0.0,
+        "max": 1.0,
+        "mean": 0.026547130192806776,
+        "median": 0.0,
+        "std": 0.1607506073733186,
+        "unique_values": 13,
+        "value_counts": {
+          "0.0": 736143,
+          "1.0": 20063,
+          "0.5": 5,
+          "0.9999091322126307": 1,
+          "0.9998182644252612": 1,
+          "0.9997273966378919": 1,
+          "0.9996365288505225": 1,
+          "0.9995456610631531": 1,
+          "0.9999136367561966": 1,
+          "0.9998272735123931": 1
+        }
+      },
+      "sRSSI": {
+        "dtype": "float64",
+        "missing_count": 29734,
+        "missing_percent": 3.79,
+        "min": -115.0,
+        "max": 0.0,
+        "mean": -80.67042309109442,
+        "median": -82.0,
+        "std": 5.10181177247844
+      },
+      "sBattery": {
+        "dtype": "float64",
+        "missing_count": 29195,
+        "missing_percent": 3.72,
+        "min": 0.0,
+        "max": 100.0,
+        "mean": 98.40149893613223,
+        "median": 100.0,
+        "std": 10.253844261293706
+      },
+      "_flag_secondary_error_code": {
+        "dtype": "bool",
+        "missing_count": 0,
+        "missing_percent": 0.0,
+        "min": 0.0,
+        "max": 1.0,
+        "mean": 0.0052533874545135075,
+        "median": 0.0,
+        "std": 0.07228966750828093,
+        "unique_values": 2,
+        "value_counts": {
+          "False": 781272,
+          "True": 4126
+        }
+      },
+      "_flag_main_temp_high": {
+        "dtype": "bool",
+        "missing_count": 0,
+        "missing_percent": 0.0,
+        "min": 0.0,
+        "max": 1.0,
+        "mean": 0.005397263553001154,
+        "median": 0.0,
+        "std": 0.0732675912943101,
+        "unique_values": 2,
+        "value_counts": {
+          "False": 781159,
+          "True": 4239
+        }
+      },
+      "_flag_hot_gas_low": {
+        "dtype": "bool",
+        "missing_count": 0,
+        "missing_percent": 0.0,
+        "min": 0.0,
+        "max": 1.0,
+        "mean": 0.003927944812693692,
+        "median": 0.0,
+        "std": 0.06255014823179617,
+        "unique_values": 2,
+        "value_counts": {
+          "False": 782313,
+          "True": 3085
+        }
+      },
+      "_flag_liquid_extreme": {
+        "dtype": "bool",
+        "missing_count": 0,
+        "missing_percent": 0.0,
+        "min": 0.0,
+        "max": 1.0,
+        "mean": 0.00384645746487768,
+        "median": 0.0,
+        "std": 0.0619004612945628,
+        "unique_values": 2,
+        "value_counts": {
+          "False": 782377,
+          "True": 3021
+        }
+      },
+      "_flag_suction_extreme": {
+        "dtype": "bool",
+        "missing_count": 0,
+        "missing_percent": 0.0,
+        "min": 0.0,
+        "max": 1.0,
+        "mean": 0.003939403970980318,
+        "median": 0.0,
+        "std": 0.062640961545835,
+        "unique_values": 2,
+        "value_counts": {
+          "False": 782304,
+          "True": 3094
+        }
+      },
+      "_flag_ambient_extreme": {
+        "dtype": "bool",
+        "missing_count": 0,
+        "missing_percent": 0.0,
+        "min": 0.0,
+        "max": 1.0,
+        "mean": 1.400563790587702e-05,
+        "median": 0.0,
+        "std": 0.0037423868827651365,
+        "unique_values": 2,
+        "value_counts": {
+          "False": 785387,
+          "True": 11
+        }
+      }
+    }
+  }
+}

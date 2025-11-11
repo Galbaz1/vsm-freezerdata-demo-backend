@@ -1,0 +1,104 @@
+{
+  "doc_id": "koelinstallaties-opbouw-en-werking_theorie_2016",
+  "filename": "koelinstallaties-opbouw-en-werking_theorie_2016.pdf",
+  "source_pdf": "/Users/lab/Documents/vsm-freezerdata-demo-backend/features/extraction/source_files/koelinstallaties-opbouw-en-werking_theorie_2016.pdf",
+  "page_count": 163,
+  "title": null,
+  "version": "7 januari 2021",
+  "languages": [
+    "en",
+    "nl"
+  ],
+  "batches": [
+    {
+      "start": 0,
+      "end": 9,
+      "batch_file": "koelinstallaties-opbouw-en-werking_theorie_2016_batch_001-010.pdf"
+    },
+    {
+      "start": 10,
+      "end": 19,
+      "batch_file": "koelinstallaties-opbouw-en-werking_theorie_2016_batch_011-020.pdf"
+    },
+    {
+      "start": 20,
+      "end": 29,
+      "batch_file": "koelinstallaties-opbouw-en-werking_theorie_2016_batch_021-030.pdf"
+    },
+    {
+      "start": 30,
+      "end": 39,
+      "batch_file": "koelinstallaties-opbouw-en-werking_theorie_2016_batch_031-040.pdf"
+    },
+    {
+      "start": 40,
+      "end": 49,
+      "batch_file": "koelinstallaties-opbouw-en-werking_theorie_2016_batch_041-050.pdf"
+    },
+    {
+      "start": 50,
+      "end": 59,
+      "batch_file": "koelinstallaties-opbouw-en-werking_theorie_2016_batch_051-060.pdf"
+    },
+    {
+      "start": 60,
+      "end": 69,
+      "batch_file": "koelinstallaties-opbouw-en-werking_theorie_2016_batch_061-070.pdf"
+    },
+    {
+      "start": 70,
+      "end": 79,
+      "batch_file": "koelinstallaties-opbouw-en-werking_theorie_2016_batch_071-080.pdf"
+    },
+    {
+      "start": 80,
+      "end": 89,
+      "batch_file": "koelinstallaties-opbouw-en-werking_theorie_2016_batch_081-090.pdf"
+    },
+    {
+      "start": 90,
+      "end": 99,
+      "batch_file": "koelinstallaties-opbouw-en-werking_theorie_2016_batch_091-100.pdf"
+    },
+    {
+      "start": 100,
+      "end": 109,
+      "batch_file": "koelinstallaties-opbouw-en-werking_theorie_2016_batch_101-110.pdf"
+    },
+    {
+      "start": 110,
+      "end": 119,
+      "batch_file": "koelinstallaties-opbouw-en-werking_theorie_2016_batch_111-120.pdf"
+    },
+    {
+      "start": 120,
+      "end": 129,
+      "batch_file": "koelinstallaties-opbouw-en-werking_theorie_2016_batch_121-130.pdf"
+    },
+    {
+      "start": 130,
+      "end": 139,
+      "batch_file": "koelinstallaties-opbouw-en-werking_theorie_2016_batch_131-140.pdf"
+    },
+    {
+      "start": 140,
+      "end": 149,
+      "batch_file": "koelinstallaties-opbouw-en-werking_theorie_2016_batch_141-150.pdf"
+    },
+    {
+      "start": 150,
+      "end": 159,
+      "batch_file": "koelinstallaties-opbouw-en-werking_theorie_2016_batch_151-160.pdf"
+    },
+    {
+      "start": 160,
+      "end": 169,
+      "batch_file": "koelinstallaties-opbouw-en-werking_theorie_2016_batch_161-170.pdf"
+    },
+    {
+      "start": 170,
+      "end": 170,
+      "batch_file": "koelinstallaties-opbouw-en-werking_theorie_2016_batch_171-171.pdf"
+    }
+  ]
+}

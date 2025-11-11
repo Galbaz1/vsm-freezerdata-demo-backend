@@ -1,0 +1,49 @@
+{
+  "doc_id": "koelinstallaties-inspectie-en-onderhoud_theorie_168",
+  "filename": "koelinstallaties-inspectie-en-onderhoud_theorie_168.pdf",
+  "source_pdf": "/Users/lab/Documents/vsm-freezerdata-demo-backend/features/extraction/source_files/koelinstallaties-inspectie-en-onderhoud_theorie_168.pdf",
+  "page_count": 61,
+  "title": null,
+  "version": "20 maart 2018",
+  "languages": [
+    "en",
+    "nl"
+  ],
+  "batches": [
+    {
+      "start": 0,
+      "end": 9,
+      "batch_file": "koelinstallaties-inspectie-en-onderhoud_theorie_168_batch_001-010.pdf"
+    },
+    {
+      "start": 10,
+      "end": 19,
+      "batch_file": "koelinstallaties-inspectie-en-onderhoud_theorie_168_batch_011-020.pdf"
+    },
+    {
+      "start": 20,
+      "end": 29,
+      "batch_file": "koelinstallaties-inspectie-en-onderhoud_theorie_168_batch_021-030.pdf"
+    },
+    {
+      "start": 30,
+      "end": 39,
+      "batch_file": "koelinstallaties-inspectie-en-onderhoud_theorie_168_batch_031-040.pdf"
+    },
+    {
+      "start": 40,
+      "end": 49,
+      "batch_file": "koelinstallaties-inspectie-en-onderhoud_theorie_168_batch_041-050.pdf"
+    },
+    {
+      "start": 50,
+      "end": 59,
+      "batch_file": "koelinstallaties-inspectie-en-onderhoud_theorie_168_batch_051-060.pdf"
+    },
+    {
+      "start": 60,
+      "end": 66,
+      "batch_file": "koelinstallaties-inspectie-en-onderhoud_theorie_168_batch_061-067.pdf"
+    }
+  ]
+}
