@@ -1,0 +1,177 @@
+graph TB
+    subgraph "FastAPI Application"
+        App[FastAPI App Instance]
+        App --> Lifespan[Lifespan Context Manager]
+        App --> CORS[CORS Middleware]
+        App --> ErrorHandlers[Error Handlers]
+        App --> Routes[API Routes]
+        App --> Static[Static File Serving]
+    end
+    
+    subgraph "Lifespan Management"
+        Lifespan --> Startup[Startup]
+        Lifespan --> Shutdown[Shutdown]
+        
+        Startup --> InitUserMgr[Get User Manager]
+        Startup --> InitScheduler[Create AsyncIOScheduler]
+        Startup --> ScheduleJobs[Schedule Background Jobs]
+        
+        ScheduleJobs --> Job1[check_timeouts: every 29s]
+        ScheduleJobs --> Job2[check_restart_clients: every 31s]
+        ScheduleJobs --> Job3[output_resources: every 1103s]
+        
+        Shutdown --> StopScheduler[Stop scheduler]
+        Shutdown --> CloseClients[Close all Weaviate clients]
+    end
+    
+    subgraph "Route Modules"
+        Routes --> InitRoute[/init - Initialization]
+        Routes --> QueryRoute[/ws/query - WebSocket Query]
+        Routes --> ProcessorRoute[/ws/processor - WebSocket Preprocessing]
+        Routes --> CollectionsRoute[/collections - Collection Management]
+        Routes --> UserConfigRoute[/user/config - User Configuration]
+        Routes --> TreeConfigRoute[/tree/config - Tree Configuration]
+        Routes --> FeedbackRoute[/feedback - Feedback System]
+        Routes --> UtilsRoute[/util - Utilities]
+        Routes --> ToolsRoute[/tools - Custom Tools]
+        Routes --> DBRoute[/db - Database Operations]
+        Routes --> HealthRoute[/api/health - Health Check]
+    end
+    
+    subgraph "Init Route (/init)"
+        InitRoute --> InitConfig[GET /settings]
+        InitRoute --> InitCollections[GET /collections]
+        InitRoute --> InitMetadata[GET /metadata]
+    end
+    
+    subgraph "Query Route (/ws/query)"
+        QueryRoute --> WSQuery[WebSocket /query]
+        WSQuery --> AcceptWS[Accept WebSocket connection]
+        AcceptWS --> ParseMessage[Parse incoming message]
+        ParseMessage --> GetTree[Get or create Tree instance]
+        GetTree --> StreamRun[Stream tree.async_run()]
+        StreamRun --> YieldResults[Yield results as JSON]
+        YieldResults --> SendWS[Send via WebSocket]
+    end
+    
+    subgraph "Processor Route (/ws/processor)"
+        ProcessorRoute --> WSPreprocess[WebSocket /preprocess]
+        WSPreprocess --> AcceptWSP[Accept WebSocket]
+        AcceptWSP --> ParseCollection[Parse collection name]
+        ParseCollection --> RunPreprocess[Run preprocess()]
+        RunPreprocess --> StreamProgress[Stream progress updates]
+        StreamProgress --> SendProgress[Send via WebSocket]
+    end
+    
+    subgraph "Collections Route (/collections)"
+        CollectionsRoute --> ListCols[GET / - List collections]
+        CollectionsRoute --> GetCol[GET /{name} - Get collection]
+        CollectionsRoute --> SampleCol[GET /{name}/sample - Sample data]
+        CollectionsRoute --> UpdateCol[PUT /{name} - Update metadata]
+        CollectionsRoute --> DeleteCol[DELETE /{name} - Delete collection]
+    end
+    
+    subgraph "User Config Route (/user/config)"
+        UserConfigRoute --> GetConfigs[GET / - List configs]
+        UserConfigRoute --> GetConfig[GET /{id} - Get config]
+        UserConfigRoute --> CreateConfig[POST / - Create config]
+        UserConfigRoute --> UpdateConfig[PUT /{id} - Update config]
+        UserConfigRoute --> DeleteConfig[DELETE /{id} - Delete config]
+    end
+    
+    subgraph "Tree Config Route (/tree/config)"
+        TreeConfigRoute --> GetTreeConfig[GET /{conversation_id}]
+        TreeConfigRoute --> UpdateTreeConfig[PUT /{conversation_id}]
+        TreeConfigRoute --> DeleteTreeConfig[DELETE /{conversation_id}]
+        TreeConfigRoute --> ExportTree[GET /{conversation_id}/export]
+        TreeConfigRoute --> ImportTree[POST /import]
+    end
+    
+    subgraph "Feedback Route (/feedback)"
+        FeedbackRoute --> SubmitFeedback[POST / - Submit feedback]
+        FeedbackRoute --> GetFeedback[GET /{query_id} - Get feedback]
+        FeedbackRoute --> UpdateFeedbackReq[PUT /{id} - Update feedback]
+    end
+    
+    subgraph "Dependencies"
+        Deps[Dependencies Module]
+        Deps --> GetUserManager[get_user_manager]
+        Deps --> GetTreeManager[get_tree_manager]
+        Deps --> GetClientManager[get_client_manager]
+        Deps --> GetSettings[get_settings]
+        
+        GetUserManager --> UserMgrSingleton[UserManager Singleton]
+        GetTreeManager --> TreeMgrInstance[TreeManager per user]
+        GetClientManager --> ClientMgrInstance[ClientManager per user]
+        GetSettings --> SettingsFromConfig[Settings from config]
+    end
+    
+    QueryRoute -.->|Uses| Deps
+    ProcessorRoute -.->|Uses| Deps
+    CollectionsRoute -.->|Uses| Deps
+    
+    subgraph "Services Layer"
+        Services[Services]
+        Services --> UserService[UserManager]
+        Services --> TreeService[TreeManager]
+        Services --> PreprocessService[PreprocessManager]
+        
+        UserService --> ManageUsers[Manage user sessions]
+        UserService --> ManageTrees[Manage user trees]
+        UserService --> ManageClients[Manage Weaviate clients]
+        
+        TreeService --> CreateTree[Create Tree instances]
+        TreeService --> ExecuteTree[Execute queries]
+        TreeService --> StoreConv[Store conversations]
+        
+        PreprocessService --> RunPreprocess[Run preprocessing]
+        PreprocessService --> CacheMetadata[Cache metadata]
+    end
+    
+    Deps -.->|Provides| Services
+    
+    subgraph "Static File Serving"
+        Static --> NextAssets[/_next/ - Next.js assets]
+        Static --> StaticFiles[/static/ - Other static files]
+        Static --> IndexHTML[/ - Serve index.html]
+        
+        NextAssets --> JS[JavaScript bundles]
+        NextAssets --> CSS[CSS files]
+        NextAssets --> Fonts[Font files]
+        
+        IndexHTML --> Frontend[Next.js Frontend]
+    end
+    
+    subgraph "Error Handling"
+        ErrorHandlers --> HTTPExcept[HTTPException handler]
+        ErrorHandlers --> ValidationErr[Validation error handler]
+        ErrorHandlers --> GeneralErr[General exception handler]
+        
+        HTTPExcept --> Return4xx[Return 4xx/5xx]
+        ValidationErr --> Return422[Return 422]
+        GeneralErr --> Return500[Return 500]
+    end
+    
+    subgraph "Middleware Stack"
+        CORS --> AllowOrigins[allow_origins: *]
+        CORS --> AllowMethods[allow_methods: *]
+        CORS --> AllowHeaders[allow_headers: *]
+        CORS --> AllowCreds[allow_credentials: True]
+    end
+
+    classDef app fill:#e1f5ff,stroke:#01579b
+    classDef lifecycle fill:#f3e5f5,stroke:#4a148c
+    classDef routes fill:#fff3e0,stroke:#e65100
+    classDef websocket fill:#e8f5e9,stroke:#1b5e20
+    classDef deps fill:#fff9c4,stroke:#f57f17
+    classDef services fill:#fce4ec,stroke:#880e4f
+    classDef static fill:#e1bee7,stroke:#4a148c
+    
+    class App,Lifespan,CORS,ErrorHandlers,Routes,Static app
+    class Startup,Shutdown,InitUserMgr,InitScheduler,ScheduleJobs,Job1,Job2,Job3,StopScheduler,CloseClients lifecycle
+    class InitRoute,QueryRoute,ProcessorRoute,CollectionsRoute,UserConfigRoute,TreeConfigRoute,FeedbackRoute,UtilsRoute,ToolsRoute,DBRoute,HealthRoute routes
+    class WSQuery,AcceptWS,ParseMessage,GetTree,StreamRun,YieldResults,SendWS,WSPreprocess,AcceptWSP,ParseCollection,RunPreprocess,StreamProgress,SendProgress websocket
+    class Deps,GetUserManager,GetTreeManager,GetClientManager,GetSettings,UserMgrSingleton,TreeMgrInstance,ClientMgrInstance,SettingsFromConfig deps
+    class Services,UserService,TreeService,PreprocessService,ManageUsers,ManageTrees,ManageClients,CreateTree,ExecuteTree,StoreConv,RunPreprocess,CacheMetadata services
+    class Static,NextAssets,StaticFiles,IndexHTML,JS,CSS,Fonts,Frontend static
+

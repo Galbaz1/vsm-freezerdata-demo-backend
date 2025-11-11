@@ -1,0 +1,72 @@
+graph TB
+    subgraph "Pillar 1: Decision Tree Architecture"
+        PreDefTree[Pre-defined Tree Structure]
+        DecisionAgent[Decision Agent per Node]
+        GlobalContext[Global Context Awareness]
+        ErrorHandling[Advanced Error Handling]
+        
+        PreDefTree --> DecisionAgent
+        DecisionAgent --> GlobalContext
+        GlobalContext --> ErrorHandling
+        
+        PreDefTree -.->|"Unlike simple agents<br/>with all tools available"| Advantage1[Structured workflow]
+        DecisionAgent -.->|Evaluates| Past[Past Actions]
+        DecisionAgent -.->|Evaluates| Future[Future Actions]
+        DecisionAgent -.->|Outputs| Reasoning[Reasoning Chain]
+        
+        ErrorHandling -.->|Sets| ImpossibleFlag[Impossible Flag]
+        ErrorHandling -.->|Or| RetryDecision[Retry with Corrections]
+        ErrorHandling -.->|Or| AlternativeRoute[Try Different Approach]
+    end
+
+    subgraph "Pillar 2: Dynamic Display Types"
+        DisplayTypes[7+ Display Formats]
+        AutoDetect[AI-Driven Detection]
+        ManualOverride[User Override]
+        
+        DisplayTypes --> T1[Generic Data]
+        DisplayTypes --> T2[Tables]
+        DisplayTypes --> T3[E-commerce Cards]
+        DisplayTypes --> T4[Tickets/Issues]
+        DisplayTypes --> T5[Conversations]
+        DisplayTypes --> T6[Documents]
+        DisplayTypes --> T7[Charts]
+        
+        AutoDetect -->|Analyzes| DataStructure[Data Structure]
+        AutoDetect -->|Samples| DataFields[Fields & Content]
+        AutoDetect -->|Recommends| BestDisplay[Best Display Format]
+        
+        ManualOverride -->|User can| AdjustMappings[Adjust Display Mappings]
+    end
+
+    subgraph "Pillar 3: Data Awareness & Analysis"
+        CollectionAnalysis[Collection Analysis]
+        MetadataGen[Metadata Generation]
+        ContextAware[Context-Aware Queries]
+        
+        CollectionAnalysis -->|LLM examines| Structure[Data Structure]
+        CollectionAnalysis -->|Creates| Summaries[Collection Summaries]
+        CollectionAnalysis -->|Identifies| FieldTypes[Field Types & Ranges]
+        CollectionAnalysis -->|Suggests| DisplayChoices[Display Types]
+        
+        MetadataGen -->|Stores in| WeaviateMetadata[ELYSIA_METADATA__]
+        MetadataGen -->|Includes| PropertyDesc[Property Descriptions]
+        MetadataGen -->|Includes| ExampleQueries[Example Queries]
+        
+        ContextAware -->|Enables| SmartFiltering[Smart Filtering]
+        ContextAware -->|Enables| RelevantSearch[Relevant Searches]
+        ContextAware -->|Enables| InformedDecisions[Informed Decisions]
+    end
+
+    PreDefTree ===|Combined with| AutoDetect
+    AutoDetect ===|Combined with| CollectionAnalysis
+    CollectionAnalysis ===|Results in| UnifiedSystem[Unified Intelligent System]
+
+    classDef pillar1 fill:#e1f5ff,stroke:#01579b,stroke-width:3px
+    classDef pillar2 fill:#f3e5f5,stroke:#4a148c,stroke-width:3px
+    classDef pillar3 fill:#fff3e0,stroke:#e65100,stroke-width:3px
+    
+    class PreDefTree,DecisionAgent,GlobalContext,ErrorHandling,Advantage1,Past,Future,Reasoning,ImpossibleFlag,RetryDecision,AlternativeRoute pillar1
+    class DisplayTypes,AutoDetect,ManualOverride,T1,T2,T3,T4,T5,T6,T7,DataStructure,DataFields,BestDisplay,AdjustMappings pillar2
+    class CollectionAnalysis,MetadataGen,ContextAware,Structure,Summaries,FieldTypes,DisplayChoices,WeaviateMetadata,PropertyDesc,ExampleQueries,SmartFiltering,RelevantSearch,InformedDecisions pillar3
+

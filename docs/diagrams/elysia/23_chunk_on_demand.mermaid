@@ -1,0 +1,163 @@
+graph TB
+    Start[Query Received]
+    Start --> QueryGen[Generate query with LLM]
+    
+    QueryGen --> Evaluate[Evaluate each collection]
+    
+    Evaluate --> CheckCriteria{Needs Chunking?}
+    
+    subgraph "Chunking Criteria"
+        C1[display_type == 'document'?]
+        C2[content_field mean > 400 tokens?]
+        C3[search_type != 'filter_only'?]
+        C4[content_field exists?]
+        
+        C1 --> AllTrue{All True?}
+        C2 --> AllTrue
+        C3 --> AllTrue
+        C4 --> AllTrue
+    end
+    
+    CheckCriteria -->|No| DirectQuery[Query original collection]
+    CheckCriteria -->|Yes| ChunkingFlow
+    
+    subgraph "Chunking Flow"
+        ChunkingFlow[Start Chunking Process]
+        
+        ChunkingFlow --> CreateChunker[Create AsyncCollectionChunker]
+        CreateChunker --> CheckChunkedCol{Chunked collection<br/>exists?}
+        
+        CheckChunkedCol -->|No| CreateChunkedCol
+        CheckChunkedCol -->|Yes| AddRefProp
+        
+        subgraph "Create Chunked Collection"
+            CreateChunkedCol[Create ELYSIA_CHUNKED_<br/>collection_name__]
+            CreateChunkedCol --> CCConfig[Configure collection]
+            CCConfig --> CCVectorizer[Vectorizer: None initially]
+            CCConfig --> CCQuant[Quantization: enabled]
+            CCConfig --> CCProps[Properties]
+            
+            CCProps --> PropChunk[chunk: TEXT]
+            CCProps --> PropChunkNum[chunk_number: INT]
+            CCProps --> PropStart[start_char: INT]
+            CCProps --> PropEnd[end_char: INT]
+        end
+        
+        CreateChunkedCol --> AddRefProp
+        
+        AddRefProp[Add cross-reference property]
+        AddRefProp --> RefConfig[Configure cross-ref]
+        RefConfig --> RefName[Name: 'isChunked']
+        RefConfig --> RefTarget[Target: original collection]
+        
+        RefConfig --> QueryUnchunked[Query unchunked collection]
+    end
+    
+    QueryUnchunked --> ModifyQuery[Modify query]
+    ModifyQuery --> IncreaseLimitincrement limit × 3]
+    IncreaseLimitincrement --> UseOrigFilters[Keep original filters]
+    
+    UseOrigFilters --> ExecuteUnchunked[Execute on original collection]
+    ExecuteUnchunked --> GetUnchunkedDocs[Get top relevant documents]
+    
+    GetUnchunkedDocs --> YieldStatus1[Yield Status: 'Chunking X objects...']
+    
+    YieldStatus1 --> ChunkDocs[Chunk each document]
+    
+    subgraph "Document Chunking"
+        ChunkDocs --> GetContent[Extract content_field]
+        GetContent --> TokenSplit[Split by tokens/characters]
+        TokenSplit --> ChunkSize[Chunk size: ~500 tokens]
+        ChunkSize --> Overlap[Overlap: ~50 tokens]
+        
+        Overlap --> CreateChunks[Create chunk objects]
+        CreateChunks --> ChunkLoop[For each chunk]
+        ChunkLoop --> ChunkObj[Chunk object]
+        
+        ChunkObj --> ObjChunk[chunk: text]
+        ChunkObj --> ObjNum[chunk_number: int]
+        ChunkObj --> ObjStart[start_char: int]
+        ChunkObj --> ObjEnd[end_char: int]
+        ChunkObj --> ObjRef[isChunked: ref to original]
+    end
+    
+    CreateChunks --> BatchInsert[Batch insert chunks]
+    BatchInsert --> WeaviateInsert[Insert into ELYSIA_CHUNKED_*]
+    
+    WeaviateInsert --> Vectorize[Vectorize chunks]
+    Vectorize --> UseVectorizer[Use collection's vectorizer]
+    
+    UseVectorizer --> UpdateQuery[Update query target]
+    UpdateQuery --> NewTarget[target_collections = ['ELYSIA_CHUNKED_*']]
+    
+    NewTarget --> ResetLimit[Reset limit to original]
+    ResetLimit --> QueryChunked[Query chunked collection]
+    
+    subgraph "Query Chunked Collection"
+        QueryChunked --> VectorSearch[Vector search on chunks]
+        VectorSearch --> ChunkResults[Get relevant chunks]
+        ChunkResults --> CrossRef[Follow cross-references]
+        CrossRef --> OrigDocs[Get original documents]
+        OrigDocs --> MergeChunks[Merge chunk info with docs]
+    end
+    
+    DirectQuery --> FormatResults[Format results]
+    MergeChunks --> FormatResults
+    
+    FormatResults --> ReturnToUser[Return to user]
+    
+    subgraph "Benefits"
+        B1[Storage Savings]
+        B2[Flexible Chunking]
+        B3[Better Retrieval]
+        B4[On-Demand Processing]
+        
+        B1 --> Benefit[Advantages]
+        B2 --> Benefit
+        B3 --> Benefit
+        B4 --> Benefit
+        
+        Benefit --> Exp1[Only chunk what's needed]
+        Benefit --> Exp2[Adapt to query context]
+        Benefit --> Exp3[Reduce pre-processing]
+        Benefit --> Exp4[Lower storage costs]
+    end
+    
+    subgraph "Subsequent Queries"
+        NextQuery[Future Similar Query]
+        NextQuery --> CheckChunkedExists{Chunked collection<br/>exists?}
+        CheckChunkedExists -->|Yes| ReuseChunked[Reuse existing chunks]
+        CheckChunkedExists -->|No| NewChunking[Create new chunks]
+        
+        ReuseChunked --> Efficient[Efficient retrieval]
+    end
+    
+    WeaviateInsert -.->|Cached for| NextQuery
+    
+    subgraph "Cross-Reference Mechanism"
+        CR1[Original Doc UUID]
+        CR2[Chunk references original]
+        CR3[Filter on original props]
+        CR4[Return merged data]
+        
+        CR1 --> CR2
+        CR2 --> CR3
+        CR3 --> CR4
+    end
+    
+    CrossRef -.->|Uses| CR1
+
+    classDef start fill:#e1f5ff,stroke:#01579b
+    classDef decision fill:#fff3e0,stroke:#e65100
+    classDef chunk fill:#f3e5f5,stroke:#4a148c
+    classDef query fill:#e8f5e9,stroke:#1b5e20
+    classDef benefit fill:#fff9c4,stroke:#f57f17
+    classDef mechanism fill:#fce4ec,stroke:#880e4f
+    
+    class Start,QueryGen start
+    class CheckCriteria,AllTrue,CheckChunkedCol,CheckChunkedExists decision
+    class ChunkingFlow,CreateChunker,CreateChunkedCol,CCConfig,AddRefProp,ChunkDocs,GetContent,TokenSplit,ChunkSize,Overlap,CreateChunks,BatchInsert,WeaviateInsert,Vectorize chunk
+    class DirectQuery,QueryUnchunked,ExecuteUnchunked,UpdateQuery,QueryChunked,VectorSearch,ChunkResults,CrossRef,OrigDocs,MergeChunks query
+    class B1,B2,B3,B4,Benefit,Exp1,Exp2,Exp3,Exp4 benefit
+    class CR1,CR2,CR3,CR4 mechanism
+

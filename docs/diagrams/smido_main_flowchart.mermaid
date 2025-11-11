@@ -1,0 +1,76 @@
+flowchart TD
+    Start([Storing Gemeld<br/>Fault Reported]) --> M
+    
+    M[M - MELDING<br/>Report/Symptoms<br/>Wat is het probleem?]
+    M --> M1{Symptomen<br/>begrijpelijk?}
+    M1 -->|Nee| M2[Aanvullende<br/>vragen stellen]
+    M2 --> M
+    M1 -->|Ja| T
+    
+    T[T - TECHNISCH<br/>Quick Technical Check<br/>Waarneembaar defect?]
+    T --> T1{Direct zichtbaar<br/>defect?}
+    T1 -->|Ja| Fix1[Repareer<br/>direct]
+    Fix1 --> End
+    T1 -->|Nee| I
+    
+    I[I - INSTALLATIE VERTROUWD<br/>Installation Familiarity<br/>Ken je het systeem?]
+    I --> I1{Schema's &<br/>componenten<br/>bekend?}
+    I1 -->|Nee| I2[Bestudeer<br/>documentatie]
+    I2 --> I
+    I1 -->|Ja| D
+    
+    D[D - DIAGNOSE: De 3 P's<br/>Systematic Diagnosis]
+    D --> P1[P1: POWER<br/>Voeding/Spanning]
+    P1 --> P1Check{Spanning<br/>OK?}
+    P1Check -->|Nee| Fix2[Controleer<br/>voeding]
+    Fix2 --> End
+    P1Check -->|Ja| P2
+    
+    P2[P2: PROCESINSTELLINGEN<br/>Process Settings<br/>Parameters/Setpoints]
+    P2 --> P2Check{Instellingen<br/>correct?}
+    P2Check -->|Nee| Fix3[Corrigeer<br/>instellingen]
+    Fix3 --> End
+    P2Check -->|Ja| P3
+    
+    P3[P3: PROCESPARAMETERS<br/>Process Measurements<br/>Drukken/Temperaturen]
+    P3 --> P3Check{Metingen<br/>normaal?}
+    P3Check -->|Nee| P4
+    P3Check -->|Ja| O
+    
+    P4[P4: PRODUCTINPUT<br/>Environmental Conditions<br/>Belading/Condities]
+    P4 --> P4Check{Condities<br/>normaal?}
+    P4Check -->|Nee| Fix4[Corrigeer<br/>condities]
+    Fix4 --> End
+    P4Check -->|Ja| O
+    
+    O[O - ONDERDELEN UITSLUITEN<br/>Component Isolation<br/>Welk onderdeel faalt?]
+    O --> O1[Test ketens &<br/>signaalgevers]
+    O1 --> O2{Defect<br/>onderdeel<br/>gevonden?}
+    O2 -->|Ja| Fix5[Vervang/repareer<br/>onderdeel]
+    Fix5 --> End
+    O2 -->|Nee| Balance
+    
+    Balance[Koelproces<br/>Uit Balans?]
+    Balance --> BalCheck{Verdamper/<br/>Condensor<br/>problemen?}
+    BalCheck -->|Ja| Fix6[Herstel balans<br/>Clean/Defrost]
+    Fix6 --> End
+    BalCheck -->|Nee| Escalate
+    
+    Escalate[Escaleer naar<br/>specialist]
+    Escalate --> End
+    
+    End([Storing Verholpen<br/>Fault Resolved])
+    
+    style M fill:#e1f5ff,stroke:#01579b,stroke-width:3px
+    style T fill:#fff9c4,stroke:#f57f17,stroke-width:3px
+    style I fill:#f3e5f5,stroke:#4a148c,stroke-width:3px
+    style D fill:#e8f5e9,stroke:#1b5e20,stroke-width:3px
+    style P1 fill:#c8e6c9,stroke:#2e7d32,stroke-width:2px
+    style P2 fill:#c8e6c9,stroke:#2e7d32,stroke-width:2px
+    style P3 fill:#c8e6c9,stroke:#2e7d32,stroke-width:2px
+    style P4 fill:#c8e6c9,stroke:#2e7d32,stroke-width:2px
+    style O fill:#ffe0b2,stroke:#e65100,stroke-width:3px
+    style Balance fill:#ffccbc,stroke:#bf360c,stroke-width:2px
+    style Start fill:#b2dfdb,stroke:#004d40,stroke-width:3px
+    style End fill:#c5cae9,stroke:#1a237e,stroke-width:3px
+

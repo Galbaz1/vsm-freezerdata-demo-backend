@@ -1,0 +1,140 @@
+classDiagram
+    class DecisionNode {
+        +str id
+        +str instruction
+        +dict options
+        +bool root
+        +Logger logger
+        +bool use_elysia_collections
+        
+        +add_option(id, description, inputs, action, end, status, next) None
+        +remove_option(id) None
+        +decide_from_route(route) tuple
+        +async load_model_from_examples(decision_executor, client_manager, user_prompt) dspy.Module
+        +async __call__(tree_data, base_lm, complex_lm, available_tools, unavailable_tools, successive_actions, client_manager) tuple
+        +detailed_memory_usage() dict
+        
+        -_get_options() dict
+        -_options_to_json(available_tools) dict
+        -_unavailable_options_to_json(unavailable_tools) dict
+        -_tool_assertion(kwargs, pred) tuple
+    }
+    
+    class Decision {
+        +str function_name
+        +dict function_inputs
+        +str reasoning
+        +bool impossible
+        +bool end_actions
+        +bool last_in_tree
+        
+        +__init__(function_name, function_inputs, reasoning, impossible, end_actions, last_in_tree)
+    }
+    
+    class OptionStructure {
+        <<dict entry>>
+        description str
+        inputs dict
+        action Tool or None
+        end bool
+        status str
+        next DecisionNode or None
+    }
+    
+    DecisionNode "1" *-- "many" OptionStructure : contains
+    DecisionNode ..> Decision : creates
+    
+    class AssertedModule {
+        +ElysiaChainOfThought module
+        +Callable assertion
+        +int max_tries
+        +list previous_feedbacks
+        +list previous_attempts
+        
+        +modify_signature_on_feedback(pred, feedback, **kwargs) CopiedModule
+        +async aforward(**kwargs) Prediction
+        +async aforward_with_feedback_examples(**kwargs) tuple
+    }
+    
+    class CopiedModule {
+        +ElysiaChainOfThought module
+        
+        +_format_feedbacks(previous_feedbacks, previous_attempts) str
+        +async aforward(previous_feedbacks, previous_attempts, **kwargs) Prediction
+        +async aforward_with_feedback_examples(previous_feedbacks, previous_attempts, **kwargs) tuple
+    }
+    
+    DecisionNode ..> AssertedModule : uses
+    AssertedModule ..> CopiedModule : creates on retry
+    
+    class DecisionFlowDetails {
+        <<execution flow>>
+        1_Check_Single_Option
+        └── If only one option, no inputs needed
+            └── Return Decision immediately
+        2_Build_Prompt
+        └── Create ElysiaChainOfThought(DecisionPrompt)
+        └── Include environment, schemas, tasks
+        3_Wrap_In_Assertion
+        └── AssertedModule ensures valid tool choice
+        4_Execute_LLM
+        └── With or without feedback examples
+        5_Validate_Output
+        └── _tool_assertion checks function_name in options
+        6_Retry_If_Failed
+        └── Up to max_tries (default 2-3)
+        7_Return_Decision
+        └── Decision + results (TrainingUpdate, Status, Response)
+    }
+    
+    DecisionNode -- DecisionFlowDetails : follows
+    
+    note for DecisionNode "Central decision maker\nEvaluates available actions\nConsiders past & future\nOutputs reasoning"
+    
+    note for AssertedModule "Validation wrapper\nRetries with feedback\nImproves over attempts"
+    
+    note for OptionStructure "Each option represents:\n- Another branch (action=None)\n- A tool to execute (action=Tool)\n- Or completion (end=True)"
+    
+    class DecisionPromptInputs {
+        <<prompt components>>
+        instruction str
+        └── Branch-specific instruction
+        tree_count str
+        └── Iteration count (e.g., '2/5')
+        available_actions dict
+        └── function_name, description, inputs
+        unavailable_actions dict
+        └── function_name, description, available_at
+        successive_actions dict
+        └── What actions follow each choice
+        environment dict
+        └── Retrieved objects, results
+        collection_schemas dict
+        └── Data structure & metadata
+        tasks_completed str
+        └── LLM-formatted task log
+        conversation_history list
+        └── Past user/assistant messages
+    }
+    
+    DecisionNode ..> DecisionPromptInputs : builds
+    
+    class DecisionOutput {
+        <<prediction fields>>
+        function_name str
+        └── Chosen tool/branch ID
+        function_inputs dict
+        └── Parameters for the tool
+        reasoning str
+        └── Why this choice was made
+        impossible bool
+        └── Task deemed impossible
+        end_actions bool
+        └── Ready to end conversation
+        message_update str
+        └── Optional status message
+    }
+    
+    AssertedModule ..> DecisionOutput : produces
+    Decision -- DecisionOutput : maps to
+

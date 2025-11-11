@@ -1,0 +1,198 @@
+classDiagram
+    class Tree {
+        +str user_id
+        +str conversation_id
+        +Settings settings
+        +bool use_elysia_collections
+        +dict~str,DecisionNode~ decision_nodes
+        +list decision_history
+        +int tree_index
+        +list suggestions
+        +dict actions_called
+        +dict query_id_to_prompt
+        +dict prompt_to_query_id
+        +list retrieved_objects
+        +bool store_retrieved_objects
+        +str conversation_title
+        +bool low_memory
+        +str root
+        +dict tree
+        +dict tools
+        +TreeData tree_data
+        +Tracker tracker
+        +TreeReturner returner
+        +dict history
+        +list training_updates
+        +list action_information
+        
+        +__init__(branch_initialisation, style, agent_description, end_goal, user_id, conversation_id, low_memory, use_elysia_collections, settings)
+        +property base_lm() dspy.LM
+        +property complex_lm() dspy.LM
+        +property conversation_history() list
+        +property environment() Environment
+        
+        +multi_branch_init() None
+        +one_branch_init() None
+        +empty_init() None
+        +clear_tree() None
+        +set_branch_initialisation(initialisation) None
+        
+        +smart_setup() None
+        +configure(**kwargs) None
+        +change_style(style) None
+        +change_agent_description(description) None
+        +change_end_goal(end_goal) None
+        
+        +add_tool(tool, branch_id, from_tool_ids, root, **kwargs) None
+        +remove_tool(tool_name, branch_id, from_tool_ids, root) None
+        +add_branch(branch_id, instruction, description, root, from_branch_id, from_tool_ids, status) None
+        +remove_branch(branch_id) None
+        
+        +view(indent, prefix, max_width, tree_dict) str
+        
+        +async set_collection_names(collection_names, client_manager) None
+        +async create_conversation_title_async() str
+        +create_conversation_title() str
+        +async get_follow_up_suggestions_async(context, num_suggestions) list~str~
+        +get_follow_up_suggestions(context, num_suggestions) list~str~
+        
+        +async async_run(user_prompt, collection_names, client_manager, training_route, query_id, close_clients_after_completion, _first_run) AsyncGenerator
+        +run(user_prompt, collection_names, client_manager, training_route, query_id, close_clients_after_completion) tuple
+        
+        +soft_reset() None
+        +save_history(query_id, time_taken_seconds) None
+        +set_start_time() None
+        +set_conversation_id(conversation_id) None
+        +set_user_id(user_id) None
+        
+        +log_token_usage() None
+        +detailed_memory_usage() dict
+        
+        +export_to_json() dict
+        +async export_to_weaviate(collection_name, client_manager) None
+        +import_from_json(json_data) Tree$
+        +async import_from_weaviate(collection_name, conversation_id, client_manager) Tree$
+        
+        +__call__(*args, **kwargs) tuple
+        
+        -_get_root() None
+        -_construct_tree(node_id, tree, branch) dict
+        -_remove_empty_branches() list~str~
+        -_get_function_inputs(tool_name, inputs) dict
+        -async _check_rules(branch_id, client_manager) tuple
+        -async _evaluate_result(result, decision) tuple
+        -async _get_available_tools(current_decision_node, client_manager) tuple
+        -_get_successive_actions(successive_actions, current_options) dict
+        -_update_conversation_history(role, message) None
+        -_update_actions_called(result, decision) None
+        -_add_refs(objects, tool_name, name) None
+        -_update_environment(result, decision) None
+        -_add_error(function_name, error) None
+    }
+    
+    class TreeData {
+        +Settings settings
+        +str user_prompt
+        +list conversation_history
+        +Environment environment
+        +list tasks_completed
+        +int num_trees_completed
+        +int recursion_limit
+        +Atlas atlas
+        +CollectionData collection_data
+        +list collection_names
+        +dict errors
+        +str current_task
+        
+        +set_property(property, value) None
+        +update_string(property, value) None
+        +update_list(property, value) None
+        +update_dict(property, key, value) None
+        +delete_from_dict(property, key) None
+        +soft_reset() None
+        
+        +update_tasks_completed(prompt, task, num_trees_completed, **kwargs) None
+        +set_current_task(task) None
+        +get_errors() list
+        +clear_error(task) None
+        +tasks_completed_string() str
+        +async set_collection_names(collection_names, client_manager) list
+        +tree_count_string() str
+        +output_collection_metadata(collection_names, with_mappings) dict
+        +output_collection_return_types() dict
+        
+        +to_json(remove_unserialisable) dict
+        +from_json(json_data) TreeData$
+    }
+    
+    class Settings {
+        +str SETTINGS_ID
+        +str WCD_URL
+        +str WCD_API_KEY
+        +dict API_KEYS
+        +str BASE_PROVIDER
+        +str BASE_MODEL
+        +str COMPLEX_PROVIDER
+        +str COMPLEX_MODEL
+        +bool BASE_USE_REASONING
+        +bool COMPLEX_USE_REASONING
+        +bool USE_FEEDBACK
+        +str LOGGING_LEVEL
+        +int LOGGING_LEVEL_INT
+        +Logger logger
+        
+        +smart_setup() None
+        +configure(**kwargs) None
+        +to_json() dict
+        +from_json(json_data) Settings$
+    }
+    
+    class TreeReturner {
+        +str user_id
+        +str conversation_id
+        +int tree_index
+        +list store
+        
+        +set_tree_index(tree_index) None
+        +clear_store() None
+        +add_prompt(prompt, query_id) None
+        +async __call__(result, query_id) dict
+    }
+    
+    class Tracker {
+        +list tracker_names
+        +Logger logger
+        +dict trackers
+        
+        +add_tracker(name) None
+        +remove_tracker(name) None
+        +start_tracking(name) None
+        +end_tracking(name, label, base_lm, complex_lm) None
+        +get_average_time(name) float
+        +get_total_time(name) float
+        +get_num_calls(name) int
+        +get_average_input_tokens(name) float
+        +get_average_output_tokens(name) float
+        +get_total_input_tokens(name) int
+        +get_total_output_tokens(name) int
+        +get_average_cost(name) float
+        +get_total_cost(name) float
+    }
+    
+    Tree "1" *-- "1" TreeData : contains
+    Tree "1" *-- "1" Settings : uses
+    Tree "1" *-- "1" TreeReturner : uses
+    Tree "1" *-- "1" Tracker : uses
+    Tree "1" *-- "many" DecisionNode : manages
+    Tree "1" *-- "many" Tool : manages
+    
+    TreeData "1" *-- "1" Environment : contains
+    TreeData "1" *-- "1" Atlas : contains
+    TreeData "1" *-- "1" CollectionData : contains
+    
+    note for Tree "Main orchestrator class\nManages entire decision tree\nCoordinates all components"
+    note for TreeData "Global state container\nShared across all nodes/tools"
+    note for Settings "Configuration manager\nModel settings, API keys"
+    note for TreeReturner "Frontend communication\nFormats results for UI"
+    note for Tracker "Performance monitoring\nToken usage tracking"
+

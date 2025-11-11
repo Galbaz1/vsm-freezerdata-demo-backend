@@ -127,9 +127,13 @@ mkdocs build
 
 ### ✅ Manuals - READY
 - **Location**: `features/extraction/production_output/`
-- **Count**: 3 manuals (108 pages total, ~300 chunks)
-- **Primary**: `storingzoeken-koeltechniek_theorie` (SMIDO methodology)
+- **Count**: 3 manuals (253 pages total, 689 text chunks, 233 visual chunks)
+- **Primary**: `storingzoeken-koeltechniek_theorie_179` (SMIDO methodology, 29 pages, 79 chunks)
+- **Other manuals**: 
+  - `koelinstallaties-opbouw-en-werking_theorie_2016` (163 pages, 422 chunks)
+  - `koelinstallaties-inspectie-en-onderhoud_theorie_168` (61 pages, 188 chunks)
 - **Format**: Landing AI parsed (JSON, JSONL, Markdown)
+- **Note**: Archive versions in `archive_output/` have 108 pages/300 chunks (older, less complete)
 - **Documentation**: [docs/data/manuals_structure.md](docs/data/manuals_structure.md)
 
 ### ✅ Vlogs - PROCESSED
@@ -160,6 +164,46 @@ elysia/
 ├── tools/              # Built-in and custom tools
 └── util/               # Utilities (client, logging, etc.)
 ```
+
+### Elysia Architecture Documentation
+
+**Comprehensive low-level diagrams and documentation available:**
+- **Start here**: [docs/diagrams/elysia/INDEX.md](docs/diagrams/elysia/INDEX.md) - Complete navigation guide
+- **Overview**: [docs/diagrams/elysia/README.md](docs/diagrams/elysia/README.md) - Documentation structure
+- **Summary**: [docs/diagrams/elysia/COMPREHENSIVE_SUMMARY.md](docs/diagrams/elysia/COMPREHENSIVE_SUMMARY.md) - 47-page technical deep-dive
+
+**Key diagram topics covered** (16 Mermaid diagrams):
+- System architecture and three pillars (decision trees, dynamic display, data awareness)
+- Decision tree structure, lifecycle, and recursion control
+- Core components: Tree, TreeData, Environment, DecisionNode
+- Tool system and Query tool internals
+- DSPy integration and multi-model strategy
+- Feedback system and few-shot learning
+- Collection preprocessing pipeline
+- Chunk-on-demand implementation
+- FastAPI backend structure
+
+**When to use**: Reference these diagrams when you need to understand Elysia's internals for building VSM-specific tools, designing the SMIDO decision tree, or integrating with telemetry/manuals/vlogs data.
+
+### VSM Domain Diagrams
+
+**Machine-readable SMIDO and troubleshooting logic diagrams:**
+- **Start here**: [docs/diagrams/INDEX.md](docs/diagrams/INDEX.md) - Complete catalog of all diagrams
+- **Implementation guide**: [docs/diagrams/DIAGRAMS_FOR_AGENT.md](docs/diagrams/DIAGRAMS_FOR_AGENT.md) - Agent integration patterns
+- **Detailed catalog**: [docs/diagrams/DIAGRAM_CATALOG.md](docs/diagrams/DIAGRAM_CATALOG.md) - Full metadata for each diagram
+
+**VSM-specific Mermaid diagrams** (9 created, traced to source chunks):
+- **SMIDO Methodology** (4): Main flowchart, 3 P's diagnosis, frozen evaporator example, data integration
+- **System Fundamentals** (3): Basic refrigeration cycle, instrumentation schema, balance diagram  
+- **Troubleshooting Tools** (2): Response template, pressostat adjustment logic
+
+**Key features**:
+- Every diagram links to original manual chunk ID (full traceability)
+- Indexed by SMIDO phase, failure mode, and components
+- Includes agent usage guidance and code examples
+- Converted from 233 visual chunks (3.9% selectivity - logic diagrams only)
+
+**When to use**: Reference when implementing SMIDO decision tree, formatting troubleshooting responses, explaining system fundamentals, or guiding technician through diagnosis. Use INDEX.md to find relevant diagrams by SMIDO phase or failure mode.
 
 ### VSM-Specific Additions
 
@@ -312,12 +356,19 @@ The troubleshooting decision tree follows **SMIDO**:
 
 ## Demo Scenarios
 
-### Recommended: A3 "Ingevroren Verdamper" (Frozen Evaporator)
-- **Manual**: Explicit case on page ~7 with photo
-- **Vlog**: Perfect match with A3_1, A3_2, A3_3
-- **Telemetry**: `_flag_main_temp_high`, `_flag_suction_extreme`
-- **SMIDO**: Complete M→T→I→D→O flow
-- **Why**: Perfect alignment across all data sources
+**⭐ PRIMARY RECOMMENDED SCENARIO: A3 "Ingevroren Verdamper" (Frozen Evaporator)**
+
+This is the **best case scenario** with perfect alignment across ALL data sources (manual + vlog + telemetry). All development and demo efforts should prioritize this scenario.
+
+### Recommended: A3 "Ingevroren Verdamper" (Frozen Evaporator) ⭐ PRIMARY
+- **Manual**: Explicit case on page ~7 with photo + "Koelproces uit balans" section
+- **Vlog**: Perfect match with A3_1, A3_2, A3_3 (complete problem-triage-solution workflow)
+- **Telemetry**: Flags: `_flag_main_temp_high`, `_flag_suction_extreme`
+- **SMIDO**: Complete M→T→I→D→O flow (full methodology coverage)
+- **Why**: Perfect alignment across all data sources - the star case for demo
+- **Problem**: Koelcel bereikt temperatuur niet, verdamper volledig bevroren
+- **Root cause**: Defrost cycle malfunction + vervuilde luchtkanalen
+- **Solution**: Manual defrost + clean air ducts + calibrate thermostat
 
 ### Alternative: A1 "Condensor Ventilator" (Condenser Fan)
 - **Problem**: Pressostaat + electrical connection issue
@@ -356,8 +407,10 @@ The troubleshooting decision tree follows **SMIDO**:
 - SMIDO decision tree nodes
 
 ### Phase 3: Demo Flow
-- Test with A3 "Frozen Evaporator" scenario
-- Verify end-to-end workflow
+- **PRIMARY**: Test with A3 "Ingevroren Verdamper" (Frozen Evaporator) scenario ⭐
+  - This is the best case scenario with perfect data alignment
+  - Verify end-to-end workflow: manual + vlog + telemetry integration
+  - Test complete SMIDO flow (M→T→I→D→O)
 - Polish and document
 
 **See**: `todo.md` for detailed implementation tasks
@@ -373,7 +426,7 @@ The troubleshooting decision tree follows **SMIDO**:
 
 ### Data
 - `features/telemetry/timeseries_freezerdata/135_1570_cleaned_with_flags.parquet`
-- `features/extraction/production_output/storingzoeken-koeltechniek_theorie/*.jsonl`
+- `features/extraction/production_output/storingzoeken-koeltechniek_theorie_179/*.jsonl`
 - `features/vlogs_vsm/output/vlogs_vsm_annotations.jsonl`
 
 ### Documentation

@@ -1,0 +1,137 @@
+stateDiagram-v2
+    [*] --> Initialization
+    
+    state Initialization {
+        [*] --> CreateTree
+        CreateTree --> SetBranchInit
+        SetBranchInit --> AddTools
+        AddTools --> ConstructTree
+        ConstructTree --> [*]
+    }
+    
+    Initialization --> Idle: Tree ready
+    
+    Idle --> Configuration: User configures
+    
+    state Configuration {
+        [*] --> SetCollections
+        SetCollections --> ConfigureSettings
+        ConfigureSettings --> SetAtlas
+        SetAtlas --> [*]
+    }
+    
+    Configuration --> Idle: Config saved
+    
+    Idle --> Executing: tree.run() or tree.async_run()
+    
+    state Executing {
+        [*] --> SoftReset
+        SoftReset --> PreprocessCollections
+        PreprocessCollections --> StartTree
+        
+        state "Tree Iteration" as Iteration {
+            [*] --> RootNode
+            RootNode --> DecisionMaking
+            
+            state DecisionMaking {
+                [*] --> CheckAvailableTools
+                CheckAvailableTools --> CheckRules
+                CheckRules --> DecideAction
+                DecideAction --> ValidateDecision
+                ValidateDecision --> [*]
+            }
+            
+            DecisionMaking --> ExecuteTool: Action exists
+            DecisionMaking --> NextBranch: Branch chosen
+            
+            state ExecuteTool {
+                [*] --> CallTool
+                CallTool --> YieldResults
+                YieldResults --> UpdateEnvironment
+                UpdateEnvironment --> UpdateTasksCompleted
+                UpdateTasksCompleted --> [*]
+            }
+            
+            ExecuteTool --> CheckCompletion
+            NextBranch --> CheckCompletion
+            
+            state CheckCompletion {
+                [*] --> EvaluateEnd
+                EvaluateEnd --> CheckImpossible
+                CheckImpossible --> CheckRecursionLimit
+                CheckRecursionLimit --> DetermineComplete
+                DetermineComplete --> [*]
+            }
+            
+            CheckCompletion --> MoreActions: Not complete, has next
+            CheckCompletion --> EndOfBranch: End of branch
+            
+            MoreActions --> DecisionMaking
+        }
+        
+        StartTree --> Iteration
+        
+        state EndOfBranch <<choice>>
+        EndOfBranch --> ForceTextResponse: No response yet
+        EndOfBranch --> IncrementCounter: Response exists
+        
+        ForceTextResponse --> IncrementCounter
+        
+        state IncrementCounter {
+            [*] --> IncTreeCompleted
+            IncTreeCompleted --> CheckRecursion
+            CheckRecursion --> [*]
+        }
+        
+        IncrementCounter --> RecurseTree: Under limit & not done
+        IncrementCounter --> SaveHistory: Complete or limit
+        
+        RecurseTree --> Iteration
+        
+        SaveHistory --> [*]
+    }
+    
+    Executing --> Completed: Tree finished
+    Executing --> Error: Error occurred
+    
+    Error --> Idle: Reset
+    Completed --> Idle: Ready for next query
+    
+    Completed --> Export: Optional
+    
+    state Export {
+        [*] --> ExportToJSON
+        ExportToJSON --> ExportToWeaviate
+        ExportToWeaviate --> [*]
+    }
+    
+    Export --> [*]: Exported
+    
+    note right of Initialization
+        Tree creation with:
+        - branch_initialisation
+        - Settings
+        - user_id, conversation_id
+    end note
+    
+    note right of Configuration
+        Runtime configuration:
+        - Collection names
+        - Atlas (style, description, goal)
+        - Recursion limit
+    end note
+    
+    note right of Executing
+        Main execution loop:
+        - Can recurse up to recursion_limit
+        - Maintains environment
+        - Tracks decision history
+    end note
+    
+    note right of Completed
+        Returns:
+        - Text response
+        - Retrieved objects
+        - Saved in history
+    end note
+

@@ -1,0 +1,83 @@
+sequenceDiagram
+    participant Tree as Tree Instance
+    participant DN as Decision Node
+    participant AM as AssertedModule
+    participant CoT as ElysiaChainOfThought
+    participant LM as Base LM
+    participant TD as TreeData
+
+    Tree->>Tree: async_run(user_prompt)
+    Tree->>DN: __call__(tree_data, available_tools, ...)
+    
+    Note over DN: Check if only one option available
+    
+    alt Single Option, No Inputs
+        DN->>DN: Create decision automatically
+        DN->>Tree: Return Decision + Status
+    else Multiple Options OR Inputs Required
+        DN->>DN: _options_to_json(available_tools)
+        DN->>DN: _unavailable_options_to_json()
+        
+        DN->>CoT: Create ElysiaChainOfThought(DecisionPrompt)
+        DN->>AM: Wrap in AssertedModule(assertion=_tool_assertion)
+        
+        alt USE_FEEDBACK enabled
+            AM->>AM: aforward_with_feedback_examples()
+            AM->>TD: Retrieve feedback examples
+            AM->>CoT: Add few-shot examples
+        end
+        
+        AM->>CoT: aforward(instruction, available_actions, ...)
+        CoT->>TD: Build prompt with environment
+        CoT->>TD: Include conversation history
+        CoT->>TD: Include tasks completed
+        CoT->>TD: Include collection schemas
+        CoT->>LM: Generate decision
+        
+        LM-->>CoT: Output with function_name, inputs, reasoning
+        CoT-->>AM: Prediction
+        
+        AM->>AM: _tool_assertion(pred)
+        
+        alt Assertion Failed
+            AM->>AM: Add to previous_feedbacks
+            AM->>CoT: CopiedModule with feedback
+            AM->>CoT: Retry with feedback context
+            Note over AM: Max 2-3 retries
+        end
+        
+        AM-->>DN: Valid prediction
+        
+        DN->>DN: Create Decision object
+        DN->>DN: Gather results (TrainingUpdate, Status, Response)
+        DN-->>Tree: Return (Decision, results)
+    end
+    
+    Tree->>Tree: Evaluate decision
+    Tree->>Tree: Get function inputs (with defaults)
+    Tree->>Tree: Check completion criteria
+    
+    alt Action exists (not branch)
+        Tree->>Tool: action_fn(tree_data, inputs, ...)
+        Tool-->>Tree: Yield results (Result, Status, etc.)
+    end
+    
+    alt Next node exists AND not completed
+        Tree->>DN: Move to next Decision Node
+        Note over Tree,DN: Recursively continue tree traversal
+    else End of branch OR completed
+        Tree->>Tree: Check if truly completed
+        alt Not marked as end but reached end
+            Tree->>ForcedText: Call forced_text_response
+            ForcedText-->>Tree: Generate final response
+        end
+        Tree->>Tree: Increment num_trees_completed
+        alt Recursion limit not reached AND not completed
+            Tree->>Tree: Recursively call async_run()
+            Note over Tree: Start tree from root again
+        else Fully completed
+            Tree->>Tree: save_history()
+            Tree->>Tree: Yield Completed()
+        end
+    end
+

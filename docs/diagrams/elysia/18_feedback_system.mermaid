@@ -1,0 +1,170 @@
+graph TB
+    Start[User Interaction]
+    Start --> Query[Execute Query]
+    
+    Query --> CheckFeedback{USE_FEEDBACK<br/>enabled?}
+    
+    CheckFeedback -->|No| DirectLLM[Direct LLM call<br/>No few-shot examples]
+    CheckFeedback -->|Yes| FeedbackFlow
+    
+    subgraph "Feedback Collection"
+        FeedbackFlow[Feedback System Active]
+        FeedbackFlow --> SearchSimilar[Search for similar<br/>past queries]
+        
+        SearchSimilar --> VectorSearch[Vector search in<br/>ELYSIA_FEEDBACK__]
+        
+        VectorSearch --> FilterUser[Filter by user_id]
+        FilterUser --> FilterModel[Filter by model name<br/>e.g., 'query', 'decision']
+        FilterModel --> FilterPositive[Filter by positive rating]
+        
+        FilterPositive --> RetrieveExamples[Retrieve top k examples]
+        RetrieveExamples --> FormatExamples[Format as few-shot demos]
+    end
+    
+    FormatExamples --> LLMWithFS[LLM call with<br/>few-shot examples]
+    DirectLLM --> Execute[Execute & return results]
+    LLMWithFS --> Execute
+    
+    Execute --> StoreTraining[Store TrainingUpdate]
+    
+    subgraph "Training Update Structure"
+        TrainingUpdate[TrainingUpdate object]
+        TrainingUpdate --> ModuleName[module_name: 'query'/'decision']
+        TrainingUpdate --> Inputs[inputs: Full context dict]
+        TrainingUpdate --> Outputs[outputs: LLM prediction dict]
+        
+        Inputs --> InputDetails[tree_data, collection info,<br/>available actions, etc.]
+        Outputs --> OutputDetails[Prediction._store dict]
+    end
+    
+    StoreTraining --> AddToList[tree.training_updates.append]
+    
+    AddToList --> SaveHistory[tree.save_history]
+    
+    SaveHistory --> HistoryObj[history dict]
+    HistoryObj --> TrainingData[training_updates: list]
+    
+    subgraph "User Feedback UI"
+        UI[Frontend Feedback Interface]
+        UI --> ThumbsUp[👍 Positive]
+        UI --> ThumbsDown[👎 Negative]
+        UI --> NoFeedback[No feedback]
+        
+        ThumbsUp --> RatingPos[rating: 1]
+        ThumbsDown --> RatingNeg[rating: -1]
+        NoFeedback --> RatingNone[rating: 0]
+    end
+    
+    RatingPos --> StoreFeedback
+    RatingNeg --> StoreFeedback
+    RatingNone --> NoStore[Don't store]
+    
+    subgraph "Feedback Storage"
+        StoreFeedback[Store in Weaviate]
+        StoreFeedback --> FeedbackCol[ELYSIA_FEEDBACK__ collection]
+        
+        FeedbackCol --> FBProps[Properties]
+        FBProps --> UserID[user_id]
+        FBProps --> ConvID[conversation_id]
+        FBProps --> QueryID[query_id]
+        FBProps --> ModName[model: 'query'/'decision']
+        FBProps --> Rating[rating: -1/0/1]
+        FBProps --> InputData[input: JSON string]
+        FBProps --> OutputData[output: JSON string]
+        FBProps --> Timestamp[timestamp]
+        
+        FeedbackCol --> FBVector[Vectorized on input JSON]
+    end
+    
+    subgraph "Feedback Retrieval Logic"
+        Retrieve[retrieve_feedback function]
+        Retrieve --> BuildQuery[Build Weaviate query]
+        
+        BuildQuery --> NearText[near_text: user_prompt]
+        BuildQuery --> FiltersChain[Filters]
+        
+        FiltersChain --> F1[user_id matches]
+        FiltersChain --> F2[model matches]
+        FiltersChain --> F3[rating == 1]
+        
+        F1 --> ExecuteQuery[Execute query]
+        F2 --> ExecuteQuery
+        F3 --> ExecuteQuery
+        
+        ExecuteQuery --> TopK[Get top k results]
+        TopK --> ParseExamples[Parse to DSPy Example objects]
+    end
+    
+    subgraph "Few-Shot Example Format"
+        FSExample[DSPy Example]
+        FSExample --> FSInputs[Input fields]
+        FSExample --> FSOutputs[Output fields]
+        
+        FSInputs --> OrigInputs[Original query context]
+        FSOutputs --> OrigOutputs[High-quality LLM response]
+    end
+    
+    ParseExamples --> FSExample
+    FSExample --> ReturnExamples[Return examples list]
+    ReturnExamples --> FeedbackFlow
+    
+    subgraph "Example Usage in Prompt"
+        PromptBuild[Build LLM prompt]
+        PromptBuild --> SystemMsg[System instructions]
+        
+        SystemMsg --> FSSection[Few-shot examples section]
+        FSSection --> Ex1[Example 1: Input → Output]
+        FSSection --> Ex2[Example 2: Input → Output]
+        FSSection --> ExN[Example N: Input → Output]
+        
+        ExN --> CurrentInput[Current user input]
+        CurrentInput --> GenOutput[Generate output]
+    end
+    
+    ReturnExamples -.->|Used in| PromptBuild
+    
+    subgraph "Performance Improvements"
+        Improve[Over time improvements]
+        Improve --> SmallModel[Smaller models improve]
+        Improve --> ConsistentFormat[More consistent outputs]
+        Improve --> UserSpecific[User-specific optimizations]
+        
+        SmallModel --> CostReduction[Reduce costs]
+        ConsistentFormat --> FewerErrors[Fewer errors]
+        UserSpecific --> Personalization[Personalized responses]
+    end
+    
+    FSExample -.->|Enables| Improve
+    
+    subgraph "Feedback Loop Cycle"
+        Cycle1[1. User query]
+        Cycle2[2. Retrieve similar<br/>positive examples]
+        Cycle3[3. LLM generates<br/>with examples]
+        Cycle4[4. User rates response]
+        Cycle5[5. Store if positive]
+        Cycle6[6. Future queries benefit]
+        
+        Cycle1 --> Cycle2
+        Cycle2 --> Cycle3
+        Cycle3 --> Cycle4
+        Cycle4 --> Cycle5
+        Cycle5 --> Cycle6
+        Cycle6 -.->|Loop| Cycle1
+    end
+
+    classDef start fill:#e1f5ff,stroke:#01579b
+    classDef feedback fill:#f3e5f5,stroke:#4a148c
+    classDef storage fill:#fff3e0,stroke:#e65100
+    classDef ui fill:#e8f5e9,stroke:#1b5e20
+    classDef retrieval fill:#fff9c4,stroke:#f57f17
+    classDef example fill:#fce4ec,stroke:#880e4f
+    classDef improvement fill:#e1bee7,stroke:#4a148c
+    
+    class Start,Query start
+    class FeedbackFlow,SearchSimilar,VectorSearch,FilterUser,FilterModel,FilterPositive,RetrieveExamples,FormatExamples feedback
+    class StoreFeedback,FeedbackCol,FBProps,UserID,ConvID,QueryID,ModName,Rating,InputData,OutputData,Timestamp,FBVector storage
+    class UI,ThumbsUp,ThumbsDown,NoFeedback,RatingPos,RatingNeg,RatingNone ui
+    class Retrieve,BuildQuery,NearText,FiltersChain,F1,F2,F3,ExecuteQuery,TopK,ParseExamples retrieval
+    class FSExample,FSInputs,FSOutputs,OrigInputs,OrigOutputs,ReturnExamples example
+    class Improve,SmallModel,ConsistentFormat,UserSpecific,CostReduction,FewerErrors,Personalization improvement
+

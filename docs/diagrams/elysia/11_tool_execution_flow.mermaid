@@ -1,0 +1,111 @@
+sequenceDiagram
+    participant Tree as Tree
+    participant DN as DecisionNode
+    participant Tool as Tool Instance
+    participant LLM as LLM (via CoT)
+    participant Weaviate as Weaviate Client
+    participant Env as Environment
+    participant Frontend as Frontend (via Returner)
+
+    Note over Tree: User query received
+    Tree->>Tree: soft_reset()
+    Tree->>Tree: Start at root node
+    
+    Tree->>DN: Check available tools
+    DN->>Tool: is_tool_available()?
+    Tool-->>DN: True/False
+    
+    DN->>Tool: run_if_true()?
+    alt Has auto-run rule
+        Tool->>Tool: Check condition
+        Tool-->>DN: (True, inputs)
+        Note over Tree: Tool will run automatically
+    else No auto-run
+        Tool-->>DN: (False, {})
+    end
+    
+    alt Tool auto-runs
+        Tree->>Tool: __call__(tree_data, rule_inputs, ...)
+        Note over Tool: Skip LLM decision, execute directly
+    else Normal LLM decision
+        DN->>LLM: Create decision prompt
+        LLM-->>DN: function_name, function_inputs, reasoning
+        
+        DN->>DN: Validate function_name in options
+        DN->>DN: Get default inputs
+        DN->>DN: Merge LLM inputs with defaults
+        
+        Tree->>Tree: Update decision_history
+        Tree->>Tree: Start tracking tool
+        
+        Tree->>Tool: __call__(tree_data, merged_inputs, base_lm, complex_lm, client_manager)
+    end
+    
+    Note over Tool: Tool execution begins (async generator)
+    
+    loop For each yielded result
+        alt Result is Status
+            Tool->>Frontend: Status update
+            Frontend-->>Tool: Acknowledged
+        
+        else Result is Result/Retrieval
+            Tool->>Weaviate: Query/Fetch data
+            Weaviate-->>Tool: Data objects
+            
+            Tool->>Tool: Process & format
+            Tool->>Env: Add to environment
+            Tool->>Frontend: Display data
+            
+        else Result is Error
+            Tool->>Tree: Yield Error
+            Tree->>Tree: _add_error(function_name, error)
+            Tree->>Tree: Store in tree_data.errors
+            Tree->>Frontend: Send error
+            Note over Tree: Error available for next decision
+            
+        else Result is Response/Text
+            Tool->>LLM: Generate text (if needed)
+            LLM-->>Tool: Text response
+            Tool->>Tree: Update conversation_history
+            Tool->>Frontend: Send text
+            
+        else Result is TrainingUpdate
+            Tool->>Tree: Store training data
+            Note over Tree: For feedback system
+            
+        else Result is TreeUpdate
+            Tool->>Frontend: Update tree visualization
+        end
+        
+        Tree->>Tree: _evaluate_result(result, decision)
+        Tree->>Env: _update_environment(result, decision)
+        Tree->>Tree: _update_actions_called(result, decision)
+    end
+    
+    Note over Tool: Tool execution complete
+    
+    Tree->>Tree: End tracking tool
+    Tree->>Tree: Log token usage
+    
+    alt Tool succeeded
+        Tree->>Tree: Clear errors for this tool
+        Tree->>DN: Check if end of branch
+        
+        alt Has next node AND not completed
+            Tree->>DN: Move to next node
+            Note over Tree: Continue tree traversal
+        else End of branch OR completed
+            Tree->>Tree: Evaluate completion
+        end
+        
+    else Tool failed (error)
+        Tree->>Tree: Errors stored
+        Tree->>DN: Return to decision point
+        Note over DN: Next decision can see errors<br/>May retry or choose different tool
+    end
+    
+    alt Tool has next actions (from_tool_ids)
+        Tree->>Tree: Create/navigate to sub-branch
+        Tree->>DN: Execute next decision node
+    end
+

@@ -1,0 +1,184 @@
+classDiagram
+    class Tool {
+        <<abstract>>
+        +str name
+        +str description
+        +dict inputs
+        +bool end
+        +str status
+        
+        +get_metadata() dict$
+        +get_default_inputs() dict
+        +async run_if_true(tree_data, base_lm, complex_lm, client_manager) tuple
+        +async is_tool_available(tree_data, base_lm, complex_lm, client_manager) bool
+        +async __call__(tree_data, inputs, base_lm, complex_lm, client_manager, **kwargs) AsyncGenerator
+    }
+    
+    class ToolMeta {
+        <<metaclass>>
+        +str _tool_name
+        +str _tool_description
+        +dict _tool_inputs
+        +bool _tool_end
+        
+        +_convert_ast_dict(ast_dict) dict$
+        +_convert_ast_list(ast_list) list$
+        +__new__(cls, name, bases, namespace) type
+    }
+    
+    Tool --|> ToolMeta : uses metaclass
+    
+    class Query {
+        +Logger logger
+        +bool summariser_in_tree
+        +dict retrieval_map
+        
+        +async is_tool_available(...) bool
+        +async __call__(tree_data, inputs, base_lm, complex_lm, client_manager) AsyncGenerator
+        
+        -_find_previous_queries(environment, collection_names) dict
+        -_evaluate_content_field(metadata_fields) tuple
+        -_evaluate_needs_chunking(display_type, query_type, schema, threshold) bool
+        -_fix_collection_names(collection_names, schemas) list
+        -_fix_collection_names_in_dict(collection_dict, schemas) dict
+        -_parse_weaviate_error(error_message) str
+    }
+    
+    class Aggregate {
+        +Logger logger
+        
+        +async is_tool_available(...) bool
+        +async __call__(tree_data, inputs, base_lm, complex_lm, client_manager) AsyncGenerator
+    }
+    
+    class Visualise {
+        +Logger logger
+        
+        +async is_tool_available(...) bool
+        +async __call__(tree_data, inputs, base_lm, complex_lm, client_manager) AsyncGenerator
+    }
+    
+    class CitedSummarizer {
+        +Logger logger
+        
+        +async __call__(tree_data, inputs, base_lm, complex_lm, client_manager) AsyncGenerator
+    }
+    
+    class FakeTextResponse {
+        +Logger logger
+        
+        +async __call__(tree_data, inputs, base_lm, complex_lm, client_manager) AsyncGenerator
+    }
+    
+    class ForcedTextResponse {
+        +async __call__(tree_data, inputs, base_lm, complex_lm, client_manager) AsyncGenerator
+    }
+    
+    class SummariseItems {
+        +Logger logger
+        +str from_tool
+        
+        +async run_if_true(...) tuple
+        +async __call__(tree_data, inputs, base_lm, complex_lm, client_manager) AsyncGenerator
+    }
+    
+    Tool <|-- Query : extends
+    Tool <|-- Aggregate : extends
+    Tool <|-- Visualise : extends
+    Tool <|-- CitedSummarizer : extends
+    Tool <|-- FakeTextResponse : extends
+    Tool <|-- ForcedTextResponse : extends
+    Tool <|-- SummariseItems : extends
+    
+    class ToolDecorator {
+        <<function>>
+        +tool(function, status, end, tree, branch_id) Tool
+    }
+    
+    ToolDecorator ..> Tool : creates
+    
+    note for Tool "Base class for all tools\nMust have async __call__\nMust yield results\nNot return them"
+    
+    note for Query "Main retrieval tool\nHybrid/semantic/keyword search\nDynamic filtering & sorting\nChunk-on-demand support"
+    
+    note for Aggregate "Aggregation & analytics\nGroupBy operations\nSummary statistics\nMetrics calculation"
+    
+    note for SummariseItems "Conditional execution\nrun_if_true checks environment\nSummarises retrieved items"
+    
+    class ToolInputStructure {
+        <<dict schema>>
+        input_name str
+        └── input_details dict
+            ├── description str
+            ├── type type_hint
+            ├── default Any
+            └── required bool
+    }
+    
+    Tool -- ToolInputStructure : defines inputs
+    
+    class ToolLifecycle {
+        <<sequence>>
+        1_Registration
+        └── Tree.add_tool(tool, branch_id)
+        2_Availability_Check
+        └── is_tool_available() called
+        3_Rule_Check
+        └── run_if_true() checked
+        4_LLM_Decision
+        └── DecisionNode chooses tool
+        5_Input_Resolution
+        └── Defaults + LLM outputs merged
+        6_Execution
+        └── __call__() invoked
+        7_Result_Yield
+        └── Yields Result, Status, Error, etc.
+        8_Environment_Update
+        └── Tree adds to environment
+    }
+    
+    Tool -- ToolLifecycle : follows
+    
+    class ToolReturnTypes {
+        <<yield types>>
+        Result
+        └── Retrieved/computed data
+        Retrieval
+        └── Query results
+        Text
+        └── Text responses
+        Response
+        └── Assistant messages
+        Status
+        └── Progress updates
+        Update
+        └── System updates
+        Error
+        └── Error feedback
+        Warning
+        └── Warning messages
+        TrainingUpdate
+        └── Feedback data
+        TreeUpdate
+        └── Tree state changes
+    }
+    
+    Tool ..> ToolReturnTypes : yields
+    
+    class CustomToolPattern {
+        <<example>>
+        @tool(tree=tree, branch_id="base")
+        async def my_custom_tool(
+            param1: str,
+            param2: int = 10,
+            tree_data: TreeData = None,
+            base_lm: dspy.LM = None
+        ):
+            # Tool logic here
+            yield Status("Working...")
+            result = do_something(param1, param2)
+            yield Result(objects=[result])
+    }
+    
+    ToolDecorator ..> CustomToolPattern : creates from
+

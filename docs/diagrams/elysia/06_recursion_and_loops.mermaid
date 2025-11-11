@@ -1,0 +1,120 @@
+graph TB
+    Start[User Query Received]
+    Start --> Init[Initialize Tree<br/>num_trees_completed = 0]
+    
+    Init --> TreeStart[Start at Root Node]
+    
+    subgraph "Tree Iteration Loop"
+        TreeStart --> TraverseNodes[Traverse Decision Nodes]
+        
+        TraverseNodes --> MakeDecision[Decision Agent<br/>Choose Action/Branch]
+        
+        MakeDecision --> ExecuteAction[Execute Action if exists]
+        
+        ExecuteAction --> CheckEnd{End of Branch?}
+        
+        CheckEnd -->|Has next node<br/>Not completed| TraverseNodes
+        CheckEnd -->|No next node<br/>OR completed flag| EndBranch[End of Branch Reached]
+    end
+    
+    EndBranch --> EvalCompletion{Evaluate Completion}
+    
+    EvalCompletion -->|impossible flag set| ForceComplete[Force Completion]
+    EvalCompletion -->|end_actions flag set| ForceComplete
+    EvalCompletion -->|text_response chosen| ForceComplete
+    EvalCompletion -->|recursion limit reached| ForceComplete
+    EvalCompletion -->|Branch ended naturally| CheckGoal{Goal Achieved?}
+    
+    CheckGoal -->|Agent believes<br/>goal complete| ForceComplete
+    CheckGoal -->|More work needed| Recurse[Increment num_trees_completed]
+    
+    Recurse --> CheckLimit{num_trees_completed <<br/>recursion_limit?}
+    
+    CheckLimit -->|Yes, under limit| TreeStart
+    CheckLimit -->|No, at limit| ForceDone[Force Completion<br/>Limit Reached]
+    
+    ForceDone --> ForceComplete
+    
+    ForceComplete --> NeedResponse{Text response<br/>generated?}
+    
+    NeedResponse -->|No| CallForced[Call forced_text_response]
+    NeedResponse -->|Yes| SaveHistory
+    
+    CallForced --> SaveHistory[Save History]
+    
+    SaveHistory --> Return[Return Results]
+    
+    subgraph "Error Handling & Self-Healing"
+        Error[Error Detected]
+        Error --> StoreError[Store in tree_data.errors]
+        StoreError --> PropBack[Propagate to Decision Agent]
+        PropBack --> NextDec{Next Decision}
+        NextDec -->|Retry same tool| ToolRetry[Retry with Corrections]
+        NextDec -->|Different approach| ToolSwitch[Switch to Different Tool]
+        NextDec -->|Too many errors| GiveUp[Mark Impossible]
+        
+        ToolRetry --> TraverseNodes
+        ToolSwitch --> TraverseNodes
+        GiveUp --> ForceComplete
+    end
+    
+    ExecuteAction -.->|Error occurs| Error
+    
+    subgraph "Recursion Prevention"
+        MaxIterations[Max Iterations: recursion_limit]
+        HardLimit[Default: 3-5 iterations]
+        WarningMessage["Warning in LLM prompt<br/>when approaching limit"]
+        CutoffMessage["Cutoff message if limit reached<br/>'Question not fully answered'"]
+        
+        MaxIterations --> HardLimit
+        HardLimit --> WarningMessage
+        WarningMessage --> CutoffMessage
+    end
+    
+    CheckLimit -.->|Enforces| MaxIterations
+    
+    subgraph "Decision History Tracking"
+        DH1[decision_history: list of lists]
+        DH2[Each iteration = new sublist]
+        DH3[Track: node -> action -> node -> ...]
+        DH4[Used for logging & debugging]
+        
+        DH1 --> DH2
+        DH2 --> DH3
+        DH3 --> DH4
+    end
+    
+    TreeStart -.->|Appends to| DH1
+    MakeDecision -.->|Records| DH1
+    
+    subgraph "Impossible Flag Mechanism"
+        IF1[Model sets impossible=True]
+        IF2[Reasons: Data mismatch]
+        IF3[Reasons: Query impossible]
+        IF4[Reasons: Repeated failures]
+        IF5[Stops further iterations]
+        
+        IF1 --> IF5
+        IF2 --> IF1
+        IF3 --> IF1
+        IF4 --> IF1
+    end
+    
+    EvalCompletion -.->|Checks| IF1
+
+    classDef start fill:#e1f5ff,stroke:#01579b
+    classDef loop fill:#f3e5f5,stroke:#4a148c
+    classDef decision fill:#fff3e0,stroke:#e65100
+    classDef error fill:#ffebee,stroke:#c62828
+    classDef prevention fill:#e8f5e9,stroke:#1b5e20
+    classDef tracking fill:#fff9c4,stroke:#f57f17
+    classDef flag fill:#fce4ec,stroke:#880e4f
+    
+    class Start,Init,Return start
+    class TreeStart,TraverseNodes,MakeDecision,ExecuteAction,CheckEnd,EndBranch loop
+    class EvalCompletion,CheckGoal,Recurse,CheckLimit,NeedResponse decision
+    class Error,StoreError,PropBack,NextDec,ToolRetry,ToolSwitch,GiveUp error
+    class MaxIterations,HardLimit,WarningMessage,CutoffMessage prevention
+    class DH1,DH2,DH3,DH4 tracking
+    class IF1,IF2,IF3,IF4,IF5 flag
+

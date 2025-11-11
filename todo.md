@@ -23,7 +23,7 @@ Alle basis-analyses van de data
 - `data/vlogs_files.md`
 - `data/vlogs_processing_results.md`
 
-Lees die eerst; de vragen in de todo_old.md over "hoe zien de data eruit?" zijn daar al beantwoord.
+
 
 ---
 
@@ -299,19 +299,31 @@ We willen 1 of meerdere agents die de SMIDO-methodiek + WorldState (W) gebruiken
 
 ### 7.1. Demo-scenario's
 
+**⭐ PRIMARY SCENARIO: A3 "Ingevroren Verdamper" (Frozen Evaporator)**
+
+This is the **best case scenario** identified in `data/data_analysis_summary.md` and `data/README.md` with perfect alignment across ALL data sources (manual + vlog + telemetry). All demo development should prioritize this scenario.
+
 - [ ] 📝 PLANNED: Op basis van `data/data_analysis_summary.md` en `vlogs_processing_results.md`:
-  - Kies minimaal 2 demo-scenario's (bv. A3 = ingevroren verdamper, A1 = condensorventilator).
-  - Definieer voor elk:
-    - Welk tijdwindow in telemetry hoort bij de storing.
-    - Welke manual-secties en vlogs "ground truth" zijn.
+  - **PRIMARY**: A3 = ingevroren verdamper (Frozen Evaporator) ⭐
+    - Perfect match: Manual page ~7 + A3_1/A3_2/A3_3 vlogs + telemetry flags
+    - Complete SMIDO flow: M→T→I→D→O
+    - Definieer tijdwindow in telemetry en ground truth manual-secties/vlogs
+  - **ALTERNATIVE**: A1 = condensorventilator (Condenser Fan)
+    - Good for demonstrating 3P-Procesinstellingen
+    - Definieer tijdwindow en ground truth voor secundaire demo
 
 ### 7.2. Golden answers / tests
 
 - [ ] 📝 PLANNED: Bouw een klein testscript dat:
-  - Voor een demo-scenario een prompt stuurt naar Elysia.
-  - Checkt of de agent:
-    - De juiste componenten en waarschijnlijk probleem noemt.
-    - Minstens één relevante manual section en vlog-case citeert.
+  - **PRIMARY**: Test met A3 "Ingevroren Verdamper" scenario ⭐
+    - Prompt stuurt naar Elysia met A3 context
+    - Checkt of de agent:
+      - De juiste componenten noemt (verdamper, defrost, thermostaat, luchtkanalen)
+      - Het probleem correct identificeert (frozen evaporator)
+      - Relevante manual section citeert (page ~7, "Koelproces uit balans")
+      - Relevante vlog-case citeert (A3_1, A3_2, A3_3)
+      - SMIDO flow correct volgt (M→T→I→D→O)
+  - **ALTERNATIVE**: Test met A1 scenario voor secundaire validatie
 
 ---
 
@@ -321,13 +333,17 @@ Deze kan de code agent waarschijnlijk niet zelf beantwoorden en moeten nog samen
 
 1. **Taal UI / output**
    - Moet *alles* (UI-tekst, agent-antwoord, tags) strikt in het Nederlands zijn, of is Engels toegestaan voor meta-velden?
-2. **Aantal assets / installatietypes**
-   - Willen we in de demo expliciet doen alsof dit één specifiek installatietype is (bv. “supermarkt vriescel”), of meerdere verschillende?
-3. **Privacy / deployment**
-   - Komt de demo alleen lokaal te draaien (classroom / lab) of moet deze in een (demo-)cloudomgeving kunnen?
-4. **Logging / telemetry-logging in Weaviate**
-   - Wil je interactie-logs (agent reasoning, vragen/antwoorden) óók als documenten in Weaviate opslaan voor later leren?
-5. **Granulariteit events**
-   - Wil je per storing meerdere events (onbalans → beveiliging trip → herstart), of 1 geaggregeerd event per casus?
 
-Zodra deze keuzes helder zijn, kunnen de schema’s en cross-refs nog verder worden aangescherpt.
+   Antwoord: Nederlands voor prompts, Engels voor metadata (bv. tags, labels).
+2. **Aantal assets / installatietypes**
+   - Willen we in de demo expliciet doen alsof dit één specifiek installatietype is 
+
+   Ja: zie de verkozen usecase  
+
+3. **Privacy / deployment**
+   - Komt de demo alleen lokaal te draaien (classroom / lab) of moet deze in een (demo-)cloudomgeving kunnen? Lokaal voor nu, maar weaviate cloud!
+4. **Logging / telemetry-logging in Weaviate**
+   - Wil je interactie-logs (agent reasoning, vragen/antwoorden) óók als documenten in Weaviate opslaan voor later leren? 
+   Volg de huidige set up van Elysia, er is al een oplossing voor dit.
+
+

@@ -1,0 +1,40 @@
+%% ============================================================
+%% Diagram: Basic Refrigeration Cycle (De koelkringloop - 4 components)
+%% Source: koelinstallaties-opbouw-en-werking_theorie_2016
+%% Chunk: e91e4028-a83e-48a3-8798-ba7d216ad2cd
+%% Page: 8 (page-009 in assets)
+%% Asset: features/extraction/production_output/koelinstallaties-opbouw-en-werking_theorie_2016/koelinstallaties-opbouw-en-werking_theorie_2016/assets/page-009/chunk-e91e4028-a83e-48a3-8798-ba7d216ad2cd.png
+%% SMIDO: I (Installatie Vertrouwd) - System familiarity
+%% Usage: Agent uses this to explain basic cooling cycle
+%%        Foundation for understanding component relationships
+%%        Reference for normal operation sequence
+%% Created: 2024-11-11
+%% ============================================================
+
+graph TD
+    Compressor["🔴 COMPRESSOR<br/>────────<br/>Drukverhogend<br/>(Pressure increase)<br/><br/>Input: Gas (oververhit)<br/>Output: Gas (hoge druk)"]
+    
+    Condensor["🟡 CONDENSOR<br/>────────<br/>Warmteafvoer<br/>(Heat rejection)<br/><br/>Input: Gas (hoge druk, hoge temp)<br/>Output: Vloeistof (onderkoeld)"]
+    
+    Expansion["🟢 EXPANSIEVENTIEL<br/>────────<br/>Drukverlaging<br/>(Pressure drop)<br/><br/>Input: Vloeistof (hoge druk)<br/>Output: Vloeistof/Gas (lage druk)"]
+    
+    Evaporator["🔵 VERDAMPER<br/>────────<br/>Warmteopname<br/>(Heat absorption)<br/><br/>Input: Vloeistof/Gas (twee fasen)<br/>Output: Gas (oververhit)"]
+    
+    Compressor -->|"Hoge druk<br/>Hoge temp<br/>(Hot gas)"| Condensor
+    Condensor -->|"Vloeibaar<br/>Onderkoeld<br/>(Liquid)"| Expansion
+    Expansion -->|"Lage druk<br/>Twee fasen<br/>(Low pressure)"| Evaporator
+    Evaporator -->|"Gas<br/>Oververhit<br/>(Superheated)"| Compressor
+    
+    subgraph Zones[" "]
+        direction LR
+        HiPress["HOGE DRUK ZIJDE<br/>(High Pressure Side)<br/>Compressor → Condensor → Expansieventiel"]
+        LoPress["LAGE DRUK ZIJDE<br/>(Low Pressure Side)<br/>Expansieventiel → Verdamper → Compressor"]
+    end
+    
+    style Compressor fill:#ffcdd2,stroke:#c62828,stroke-width:3px
+    style Condensor fill:#fff9c4,stroke:#f57f17,stroke-width:3px
+    style Expansion fill:#c8e6c9,stroke:#2e7d32,stroke-width:3px
+    style Evaporator fill:#bbdefb,stroke:#1565c0,stroke-width:3px
+    style HiPress fill:#ffe0b2,stroke:#e65100,stroke-width:2px
+    style LoPress fill:#e1f5ff,stroke:#0277bd,stroke-width:2px
+

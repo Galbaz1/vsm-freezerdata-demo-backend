@@ -1,0 +1,50 @@
+flowchart TD
+    Start([Melding:<br/>Koelcel bereikt<br/>temperatuur niet]) --> M
+    
+    M[M - MELDING<br/>Symptomen verzamelen]
+    M --> M_Data[Temperatuur te hoog<br/>IJsvorming waargenomen<br/>Alarm actief]
+    
+    M_Data --> T[T - TECHNISCH<br/>Visuele inspectie]
+    T --> T_Find[Verdamper volledig<br/>bevroren<br/>Dikke ijslaag]
+    
+    T_Find --> I[I - INSTALLATIE<br/>Schema raadplegen]
+    I --> I_Check[Ontdooicyclus<br/>instellingen bekijken<br/>Luchtkanalen bekijken]
+    
+    I_Check --> D[D - DIAGNOSE<br/>3 P's checken]
+    D --> P3[P3: Procesparameters]
+    P3 --> P3_Measure[Zuigleiding extreem koud<br/>Verdampdruk te laag<br/>Oververhitting te hoog]
+    
+    P3_Measure --> O[O - ONDERDELEN<br/>Oorzaak isoleren]
+    O --> O_Find[Ontdooitimer defect<br/>Luchtkanalen vervuild<br/>Thermostaat verkeerd]
+    
+    O_Find --> Solution[OPLOSSING]
+    Solution --> S1[1. Handmatig ontdooien]
+    Solution --> S2[2. Luchtkanalen reinigen]
+    Solution --> S3[3. Thermostaat kalibreren]
+    Solution --> S4[4. Ontdooitimer vervangen]
+    
+    S1 --> Verify[Verificatie]
+    S2 --> Verify
+    S3 --> Verify
+    S4 --> Verify
+    
+    Verify --> Check{IJsvorming<br/>verdwenen?<br/>Temperatuur<br/>normaal?}
+    Check -->|Ja| End([Storing verholpen])
+    Check -->|Nee| Escalate[Escaleer naar<br/>specialist]
+    
+    subgraph Data_Sources[Data Sources Used]
+        Tel[Telemetry:<br/>_flag_main_temp_high<br/>_flag_suction_extreme]
+        Man[Manual:<br/>Page 7 - Frozen evaporator case<br/>Koelproces uit balans]
+        Vlog[Vlog A3:<br/>Problem-Triage-Solution<br/>Complete workflow]
+    end
+    
+    style Start fill:#ffebee,stroke:#c62828,stroke-width:3px
+    style M fill:#e1f5ff,stroke:#01579b,stroke-width:3px
+    style T fill:#fff9c4,stroke:#f57f17,stroke-width:3px
+    style I fill:#f3e5f5,stroke:#4a148c,stroke-width:3px
+    style D fill:#e8f5e9,stroke:#1b5e20,stroke-width:3px
+    style O fill:#ffe0b2,stroke:#e65100,stroke-width:3px
+    style Solution fill:#c8e6c9,stroke:#2e7d32,stroke-width:3px
+    style End fill:#c5cae9,stroke:#1a237e,stroke-width:3px
+    style Data_Sources fill:#e0f2f1,stroke:#00695c,stroke-width:2px
+

@@ -1,0 +1,148 @@
+graph TB
+    Start[Query Tool Called]
+    Start --> GetSchemas[Get Collection Schemas<br/>from TreeData]
+    
+    GetSchemas --> FixNames[Fix Collection Names<br/>Case sensitivity]
+    
+    FixNames --> CheckVectorized{Collections<br/>Vectorized?}
+    
+    CheckVectorized -->|Yes| VectorPrompt[Use QueryOutput<br/>with vector search]
+    CheckVectorized -->|No| NonVectorPrompt[Use NonVectorisedQueryOutput<br/>BM25 only]
+    
+    VectorPrompt --> BuildPrompt[Build Query Creator Prompt]
+    NonVectorPrompt --> BuildPrompt
+    
+    BuildPrompt --> GetMetadata[Get Previous Queries<br/>Display Types<br/>Searchable Fields]
+    
+    GetMetadata --> CreateCoT[Create ElysiaChainOfThought<br/>with QueryCreatorPrompt]
+    
+    CreateCoT --> UseFeedback{USE_FEEDBACK<br/>enabled?}
+    
+    UseFeedback -->|Yes| WithFeedback[aforward_with_feedback_examples]
+    UseFeedback -->|No| WithoutFeedback[aforward with complex_lm]
+    
+    WithFeedback --> ParseOutput[Parse Query Output]
+    WithoutFeedback --> ParseOutput
+    
+    ParseOutput --> YieldResponse[Yield Response message_update]
+    YieldResponse --> YieldFeedback{Feedback<br/>examples used?}
+    YieldFeedback -->|Yes| YieldFewShot[Yield FewShotExamples]
+    YieldFeedback -->|No| CheckImpossible
+    YieldFewShot --> CheckImpossible
+    
+    CheckImpossible{Impossible<br/>or No Queries?}
+    
+    CheckImpossible -->|Yes| ReturnEmpty[Yield empty Retrieval<br/>with impossible metadata]
+    
+    CheckImpossible -->|No| LoopQueries[For each query_output]
+    
+    subgraph "Per Query Processing"
+        LoopQueries --> FixQueryNames[Fix target_collections names]
+        FixQueryNames --> ValidateCollections{Collections<br/>valid?}
+        ValidateCollections -->|No| YieldError[Yield Error]
+        ValidateCollections -->|Yes| CheckChunking{Needs<br/>Chunking?}
+        
+        CheckChunking -->|Yes| ChunkFlow
+        CheckChunking -->|No| DirectQuery
+        
+        subgraph "Chunking Flow"
+            ChunkFlow[Create CollectionChunker]
+            ChunkFlow --> CreateRef[create_chunked_reference]
+            CreateRef --> QueryUnchunked[Query unchunked collection<br/>limit × 3]
+            QueryUnchunked --> YieldChunkStatus[Yield Status 'Chunking...']
+            YieldChunkStatus --> DoChunk[Chunk response objects]
+            DoChunk --> UpdateQuery[Modify query to use<br/>ELYSIA_CHUNKED_*]
+        end
+        
+        subgraph "Direct Query"
+            DirectQuery[Keep original collection]
+        end
+        
+        UpdateQuery --> ExecuteQuery
+        DirectQuery --> ExecuteQuery
+        
+        ExecuteQuery[execute_weaviate_query]
+        ExecuteQuery --> HandleErrors{Query<br/>Error?}
+        HandleErrors -->|Yes| YieldQueryError[Yield Error with feedback]
+        HandleErrors -->|No| YieldStatus[Yield Status 'Retrieved X objects']
+        
+        YieldStatus --> FormatResults[Format Results]
+        
+        FormatResults --> GetDisplayType[Get display_type from data_display]
+        GetDisplayType --> GetSummarize[Get summarise_items flag]
+        
+        GetSummarize --> CreateMetadata[Create metadata<br/>collection_name, display_type,<br/>query_text, query_type, code]
+        
+        CreateMetadata --> MapDisplay{Display type<br/>in retrieval_map?}
+        
+        MapDisplay -->|Conversation| ConvRetrieval[ConversationRetrieval]
+        MapDisplay -->|Message| MsgRetrieval[MessageRetrieval]
+        MapDisplay -->|Document| DocRetrieval[DocumentRetrieval]
+        MapDisplay -->|Other| GenRetrieval[Generic Retrieval]
+        
+        ConvRetrieval --> AsyncInit[await async_init]
+        DocRetrieval --> AsyncInit
+        MsgRetrieval --> CheckSummarize
+        GenRetrieval --> CheckSummarize
+        AsyncInit --> CheckSummarize
+        
+        CheckSummarize{summarise_items<br/>AND summariser_in_tree?}
+        
+        CheckSummarize -->|Yes| AddToHidden[Add to hidden_environment<br/>'items_to_summarise']
+        CheckSummarize -->|No| YieldRetrieval[Yield Retrieval object]
+    end
+    
+    YieldRetrieval --> MoreQueries{More<br/>queries?}
+    MoreQueries -->|Yes| LoopQueries
+    MoreQueries -->|No| YieldTraining[Yield TrainingUpdate]
+    
+    AddToHidden --> MoreQueries
+    YieldError --> MoreQueries
+    YieldQueryError --> MoreQueries
+    
+    YieldTraining --> Done[Done]
+    ReturnEmpty --> Done
+    
+    subgraph "Query Output Structure"
+        QO[QueryOutput]
+        QO --> QO1[target_collections: list]
+        QO --> QO2[search_query: str]
+        QO --> QO3[search_type: hybrid/semantic/keyword/filter_only]
+        QO --> QO4[filters: Filter or None]
+        QO --> QO5[limit: int]
+        QO --> QO6[sort_by: list or None]
+        QO --> QO7[alpha: float for hybrid]
+    end
+    
+    subgraph "Display Type Mapping"
+        DT[data_display dict]
+        DT --> DT1[collection_name: DataDisplay]
+        DataDisplay --> DD1[display_type: str]
+        DataDisplay --> DD2[summarise_items: bool]
+    end
+    
+    subgraph "Chunking Logic"
+        CL1[Evaluate content_field]
+        CL2[Check mean token length > 400]
+        CL3[Check display_type == 'document']
+        CL4[Check query_type != 'filter_only']
+        CL1 --> NeedsChunk{All true?}
+        CL2 --> NeedsChunk
+        CL3 --> NeedsChunk
+        CL4 --> NeedsChunk
+    end
+
+    classDef start fill:#e1f5ff,stroke:#01579b
+    classDef process fill:#f3e5f5,stroke:#4a148c
+    classDef decision fill:#fff3e0,stroke:#e65100
+    classDef error fill:#ffebee,stroke:#c62828
+    classDef yield fill:#e8f5e9,stroke:#1b5e20
+    classDef structure fill:#fff9c4,stroke:#f57f17
+    
+    class Start,Done start
+    class GetSchemas,FixNames,BuildPrompt,GetMetadata,CreateCoT,ParseOutput,LoopQueries,FixQueryNames,ExecuteQuery,FormatResults,GetDisplayType,GetSummarize,CreateMetadata process
+    class CheckVectorized,UseFeedback,YieldFeedback,CheckImpossible,ValidateCollections,CheckChunking,HandleErrors,MapDisplay,CheckSummarize,MoreQueries,NeedsChunk decision
+    class YieldError,YieldQueryError,ReturnEmpty error
+    class YieldResponse,YieldFewShot,YieldStatus,YieldRetrieval,YieldTraining yield
+    class QO,QO1,QO2,QO3,QO4,QO5,QO6,QO7,DT,DT1,DataDisplay,DD1,DD2,CL1,CL2,CL3,CL4 structure
+

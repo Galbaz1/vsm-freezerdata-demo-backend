@@ -1,0 +1,98 @@
+graph TB
+    subgraph "Frontend (Next.js - Served as Static HTML)"
+        UI[Web Interface]
+        WS[WebSocket/SSE Client]
+        DataExplorer[Data Explorer]
+        TreeViz[Tree Visualizer]
+        ConfigUI[Config Manager]
+    end
+
+    subgraph "Backend (FastAPI)"
+        API[FastAPI App]
+        Routes[API Routes]
+        WSHandler[WebSocket Handler]
+        UserMgr[User Manager]
+        TreeMgr[Tree Manager]
+        Middleware[CORS & Error Handlers]
+    end
+
+    subgraph "Core Elysia Engine"
+        Tree[Tree Class]
+        DecisionNodes[Decision Nodes]
+        Tools[Tool System]
+        TreeData[TreeData/Environment]
+        Returner[TreeReturner]
+    end
+
+    subgraph "LLM Layer (DSPy)"
+        BaseLM[Base LM<br/>Small/Fast Models]
+        ComplexLM[Complex LM<br/>Large/Powerful Models]
+        ChainOfThought[Elysia CoT Module]
+        Feedback[Feedback Examples]
+    end
+
+    subgraph "Data Layer (Weaviate)"
+        Collections[User Collections]
+        Metadata[ELYSIA_METADATA__]
+        Conversations[Conversation Store]
+        FeedbackDB[Feedback Store]
+        ChunkedCols[ELYSIA_CHUNKED_*]
+    end
+
+    subgraph "Preprocessing"
+        Preprocessor[Collection Analyzer]
+        Schema[Schema Extractor]
+        DisplayMapper[Display Type Selector]
+        SummaryGen[Summary Generator]
+    end
+
+    UI --> API
+    WS --> WSHandler
+    DataExplorer --> Routes
+    ConfigUI --> Routes
+
+    API --> UserMgr
+    Routes --> TreeMgr
+    WSHandler --> TreeMgr
+
+    TreeMgr --> Tree
+    Tree --> DecisionNodes
+    Tree --> Tools
+    Tree --> TreeData
+    Tree --> Returner
+
+    DecisionNodes --> ChainOfThought
+    Tools --> ChainOfThought
+    ChainOfThought --> BaseLM
+    ChainOfThought --> ComplexLM
+    ChainOfThought --> Feedback
+
+    Tools --> Collections
+    Tools --> ChunkedCols
+    Tree --> Metadata
+    Tree --> Conversations
+    Feedback --> FeedbackDB
+
+    Preprocessor --> Metadata
+    Preprocessor --> Schema
+    Preprocessor --> DisplayMapper
+    Preprocessor --> SummaryGen
+
+    Returner --> WSHandler
+    WSHandler --> WS
+    WS --> TreeViz
+
+    classDef frontend fill:#e1f5ff,stroke:#01579b
+    classDef backend fill:#fff3e0,stroke:#e65100
+    classDef core fill:#f3e5f5,stroke:#4a148c
+    classDef llm fill:#e8f5e9,stroke:#1b5e20
+    classDef data fill:#fce4ec,stroke:#880e4f
+    classDef preprocess fill:#fff9c4,stroke:#f57f17
+
+    class UI,WS,DataExplorer,TreeViz,ConfigUI frontend
+    class API,Routes,WSHandler,UserMgr,TreeMgr,Middleware backend
+    class Tree,DecisionNodes,Tools,TreeData,Returner core
+    class BaseLM,ComplexLM,ChainOfThought,Feedback llm
+    class Collections,Metadata,Conversations,FeedbackDB,ChunkedCols data
+    class Preprocessor,Schema,DisplayMapper,SummaryGen preprocess
+

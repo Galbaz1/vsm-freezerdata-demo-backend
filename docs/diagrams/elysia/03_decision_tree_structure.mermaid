@@ -1,0 +1,101 @@
+graph TB
+    Tree[Tree Instance]
+    
+    subgraph "Tree Components"
+        Root[Root Decision Node]
+        Branches[Branch Nodes]
+        Tools[Tool Nodes]
+        
+        Tree -->|has one| Root
+        Tree -->|contains| DecisionNodes[decision_nodes: dict]
+        Tree -->|contains| ToolRegistry[tools: dict]
+        Tree -->|maintains| TreeData[tree_data: TreeData]
+        Tree -->|tracks| History[decision_history: list]
+    end
+
+    subgraph "Decision Node Structure"
+        DN1[Decision Node ID]
+        DN2[Instruction]
+        DN3[Options Dict]
+        DN4[Root Flag]
+        
+        DN3 -->|Each option has| OptDesc[description: str]
+        DN3 -->|Each option has| OptInputs[inputs: dict]
+        DN3 -->|Each option has| OptAction[action: Tool or None]
+        DN3 -->|Each option has| OptEnd[end: bool]
+        DN3 -->|Each option has| OptStatus[status: str]
+        DN3 -->|Each option has| OptNext[next: DecisionNode or None]
+    end
+
+    subgraph "Branch Initialization Modes"
+        Init[branch_initialisation]
+        Init --> Default[default/one_branch]
+        Init --> Multi[multi_branch]
+        Init --> Empty[empty]
+        
+        Default --> DB1[Single base branch]
+        Default --> DB2[All tools in one level]
+        
+        Multi --> MB1[base branch]
+        Multi --> MB2[search branch]
+        Multi --> MB3[Hierarchical structure]
+        
+        Empty --> EB1[No branches/tools]
+        Empty --> EB2[Manually add everything]
+    end
+
+    subgraph "Example: one_branch Mode"
+        Base[base Branch<br/>Root=True]
+        Base -->|option| CitedSum[cited_summarizer<br/>Tool]
+        Base -->|option| TextResp[text_response<br/>Tool]
+        Base -->|option| Agg[aggregate<br/>Tool]
+        Base -->|option| Qry[query<br/>Tool]
+        Base -->|option| Vis[visualise<br/>Tool]
+        
+        Qry -->|next| SumItems[summarise_items<br/>Tool]
+    end
+
+    subgraph "Example: multi_branch Mode"
+        BaseM[base Branch<br/>Root=True]
+        BaseM -->|option| CitedSumM[cited_summarizer<br/>Tool]
+        BaseM -->|option| TextRespM[text_response<br/>Tool]
+        BaseM -->|option| SearchBranch[search Branch<br/>Root=False]
+        BaseM -->|option| VisM[visualise<br/>Tool]
+        
+        SearchBranch -->|option| QryM[query<br/>Tool]
+        SearchBranch -->|option| AggM[aggregate<br/>Tool]
+        
+        QryM -->|next| SumItemsM[summarise_items<br/>Tool]
+    end
+
+    subgraph "Tree Construction"
+        Construct[_construct_tree method]
+        Construct -->|Traverses from| RootNode[root node]
+        Construct -->|Builds| TreeDict[tree: dict]
+        Construct -->|Orders| TreeKeys[Keys in order]
+        
+        TreeDict -->|Contains| NodeName[name]
+        TreeDict -->|Contains| NodeID[id]
+        TreeDict -->|Contains| NodeDesc[description]
+        TreeDict -->|Contains| NodeInst[instruction]
+        TreeDict -->|Contains| NodeReason[reasoning]
+        TreeDict -->|Contains| NodeBranch[branch]
+        TreeDict -->|Contains| NodeOpts[options]
+    end
+
+    Root -.->|Is a| DN1
+    Branches -.->|Are| DN1
+    Tools -.->|Referenced in| OptAction
+
+    classDef tree fill:#e1f5ff,stroke:#01579b
+    classDef node fill:#f3e5f5,stroke:#4a148c
+    classDef init fill:#fff3e0,stroke:#e65100
+    classDef example fill:#e8f5e9,stroke:#1b5e20
+    classDef construct fill:#fff9c4,stroke:#f57f17
+
+    class Tree,Root,Branches,Tools,DecisionNodes,ToolRegistry,TreeData,History tree
+    class DN1,DN2,DN3,DN4,OptDesc,OptInputs,OptAction,OptEnd,OptStatus,OptNext node
+    class Init,Default,Multi,Empty,DB1,DB2,MB1,MB2,MB3,EB1,EB2 init
+    class Base,CitedSum,TextResp,Agg,Qry,Vis,SumItems,BaseM,CitedSumM,TextRespM,SearchBranch,VisM,QryM,AggM,SumItemsM example
+    class Construct,RootNode,TreeDict,TreeKeys,NodeName,NodeID,NodeDesc,NodeInst,NodeReason,NodeBranch,NodeOpts construct
+

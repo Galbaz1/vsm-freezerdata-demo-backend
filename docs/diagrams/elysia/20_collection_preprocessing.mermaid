@@ -1,0 +1,116 @@
+sequenceDiagram
+    participant User as User/Script
+    participant Preprocess as preprocess()
+    participant Weaviate as Weaviate Client
+    participant LLM as LLM (Complex)
+    participant Metadata as ELYSIA_METADATA__
+
+    User->>Preprocess: preprocess(collection_name)
+    
+    Preprocess->>Weaviate: Connect to collection
+    Weaviate-->>Preprocess: Collection object
+    
+    Preprocess->>Weaviate: Get collection config
+    Weaviate-->>Preprocess: Schema, vectorizer, properties
+    
+    Preprocess->>Weaviate: Sample objects (up to 50)
+    Weaviate-->>Preprocess: Sample data
+    
+    Note over Preprocess: Analyze schema & samples
+    
+    Preprocess->>Preprocess: Extract property info
+    loop For each property
+        Preprocess->>Preprocess: Determine type (text, number, etc.)
+        Preprocess->>Preprocess: Calculate statistics
+        alt Numeric property
+            Preprocess->>Preprocess: Calculate mean, min, max
+        else Text property
+            Preprocess->>Preprocess: Calculate avg length
+        else Boolean/UUID
+            Preprocess->>Preprocess: Count unique values
+        end
+        
+        alt Categorical (few unique values)
+            Preprocess->>Preprocess: Store groups: {value: count}
+        end
+    end
+    
+    Preprocess->>Preprocess: Format schema description
+    
+    Note over Preprocess: LLM Analysis Phase
+    
+    Preprocess->>LLM: Generate property descriptions
+    Note over LLM: Prompt: Describe each property<br/>based on name, type, samples
+    LLM-->>Preprocess: Property descriptions
+    
+    Preprocess->>LLM: Generate collection summary
+    Note over LLM: Prompt: Summarize entire collection<br/>purpose and content
+    LLM-->>Preprocess: Collection summary
+    
+    Preprocess->>LLM: Generate example queries
+    Note over LLM: Prompt: Create 3-5 example queries<br/>users might ask
+    LLM-->>Preprocess: Example queries list
+    
+    Preprocess->>Preprocess: Analyze named vectors
+    loop For each named vector
+        Preprocess->>Preprocess: Extract source properties
+        Preprocess->>Preprocess: Check if enabled
+    end
+    
+    Note over Preprocess: Display Type Selection
+    
+    Preprocess->>LLM: Determine display types
+    Note over LLM: Prompt: Which display formats<br/>fit this data?<br/>Options: table, document,<br/>product, ticket, conversation,<br/>message, chart
+    LLM-->>Preprocess: Recommended display types
+    
+    Preprocess->>Preprocess: Create mapping templates
+    loop For each display type
+        Preprocess->>LLM: Map properties to display fields
+        Note over LLM: Prompt: Map data properties to<br/>frontend display schema
+        LLM-->>Preprocess: Property mappings
+        Preprocess->>Preprocess: Validate mappings
+    end
+    
+    Note over Preprocess: Build Metadata Object
+    
+    Preprocess->>Preprocess: Compile all metadata
+    Preprocess->>Preprocess: Add index properties
+    Preprocess->>Preprocess: Add vectorizer info
+    Preprocess->>Weaviate: Get object count
+    Weaviate-->>Preprocess: Total count
+    
+    Note over Preprocess: Store in Weaviate
+    
+    Preprocess->>Metadata: Check if collection exists
+    
+    alt Collection doesn't exist
+        Preprocess->>Metadata: Create ELYSIA_METADATA__
+        Note over Metadata: Properties: name, summary,<br/>fields, mappings, length,<br/>named_vectors, etc.
+    end
+    
+    Preprocess->>Metadata: Check if entry exists (by name)
+    
+    alt Entry exists
+        Preprocess->>Metadata: Update existing entry
+    else Entry doesn't exist
+        Preprocess->>Metadata: Insert new entry
+    end
+    
+    Metadata-->>Preprocess: Success
+    
+    Preprocess-->>User: Metadata saved
+    
+    Note over Preprocess: Usage in Tree
+    
+    User->>Preprocess: Tree.set_collection_names([...])
+    Preprocess->>Metadata: Query metadata by names
+    Metadata-->>Preprocess: Metadata objects
+    Preprocess->>Preprocess: Cache in tree_data.collection_data
+    Preprocess-->>User: Ready to use
+    
+    Note over Preprocess: Metadata Structure
+    
+    rect rgb(240, 240, 255)
+        Note over Preprocess: {<br/>  "name": "MyCollection",<br/>  "summary": "...",<br/>  "fields": [<br/>    {<br/>      "name": "title",<br/>      "type": "text",<br/>      "description": "...",<br/>      "mean": 45.2,<br/>      "groups": null<br/>    },<br/>    ...<br/>  ],<br/>  "mappings": {<br/>    "table": {...},<br/>    "document": {...}<br/>  },<br/>  "length": 1000,<br/>  "vectorizer": "text2vec-openai",<br/>  "named_vectors": [<br/>    {<br/>      "name": "default",<br/>      "enabled": true,<br/>      "source_properties": ["title", "content"]<br/>    }<br/>  ],<br/>  "index_properties": {<br/>    "isNullIndexed": true,<br/>    "isLengthIndexed": false,<br/>    "isTimestampIndexed": true<br/>  }<br/>}
+    end
+

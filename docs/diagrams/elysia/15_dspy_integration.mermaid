@@ -1,0 +1,150 @@
+graph TB
+    subgraph "DSPy in Elysia"
+        DSPy[DSPy Library]
+        DSPy --> LM[dspy.LM]
+        DSPy --> Signature[dspy.Signature]
+        DSPy --> Module[dspy.Module]
+        DSPy --> Predict[dspy.Predict]
+        DSPy --> CoT[dspy.ChainOfThought]
+    end
+    
+    subgraph "Elysia Extensions"
+        ElysiaCoT[ElysiaChainOfThought]
+        ElysiaCoT --|extends| Module
+        
+        ElysiaCoT --> BuildPrompt[_build_llm_prompt]
+        ElysiaCoT --> ForwardBase[aforward with base_lm]
+        ElysiaCoT --> ForwardComplex[aforward with complex_lm]
+        ElysiaCoT --> ForwardFeedback[aforward_with_feedback_examples]
+        
+        BuildPrompt --> AddEnv{Include<br/>environment?}
+        BuildPrompt --> AddSchemas{Include<br/>schemas?}
+        BuildPrompt --> AddTasks{Include<br/>tasks?}
+        BuildPrompt --> AddMessage{Include<br/>message_update?}
+        
+        AddEnv -->|Yes| EnvStr[environment_string]
+        AddSchemas -->|Yes| SchemaStr[collection_schemas_string]
+        AddTasks -->|Yes| TaskStr[tasks_completed_string]
+        AddMessage -->|Yes| MsgField[message_update field]
+    end
+    
+    subgraph "Signature System"
+        BaseSig[Base Signature]
+        BaseSig --> Input[InputFields]
+        BaseSig --> Output[OutputFields]
+        
+        BaseSig --> Append[append method]
+        BaseSig --> Prepend[prepend method]
+        
+        Append --> NewField[Add new field dynamically]
+        Prepend --> FeedbackField[Add feedback field]
+    end
+    
+    subgraph "Prompt Templates"
+        DecisionPrompt[DecisionPrompt]
+        QueryPrompt[QueryCreatorPrompt]
+        TextPrompt[TextResponsePrompt]
+        TitlePrompt[TitleCreatorPrompt]
+        SuggestPrompt[FollowUpSuggestionsPrompt]
+        
+        DecisionPrompt --> DPInputs[instruction, tree_count,<br/>available_actions, etc.]
+        DecisionPrompt --> DPOutputs[function_name, function_inputs,<br/>reasoning, impossible, end_actions]
+        
+        QueryPrompt --> QPInputs[available_collections,<br/>previous_queries, etc.]
+        QueryPrompt --> QPOutputs[query_outputs, data_display,<br/>fields_to_search]
+    end
+    
+    subgraph "Model Loading & Configuration"
+        Settings[Settings object]
+        Settings --> BaseProvider[BASE_PROVIDER<br/>BASE_MODEL]
+        Settings --> ComplexProvider[COMPLEX_PROVIDER<br/>COMPLEX_MODEL]
+        
+        BaseProvider --> LoadBase[load_base_lm]
+        ComplexProvider --> LoadComplex[load_complex_lm]
+        
+        LoadBase --> ConfigBase[Configure dspy.LM<br/>with provider-specific params]
+        LoadComplex --> ConfigComplex[Configure dspy.LM<br/>with provider-specific params]
+        
+        ConfigBase --> BaseLMInstance[base_lm: dspy.LM]
+        ConfigComplex --> ComplexLMInstance[complex_lm: dspy.LM]
+    end
+    
+    subgraph "Multi-Model Strategy"
+        Strategy[Task-Based Routing]
+        Strategy --> Simple[Simple Tasks]
+        Strategy --> Complex[Complex Tasks]
+        
+        Simple --> UseBase[Use base_lm]
+        Complex --> UseComplex[Use complex_lm]
+        
+        UseBase --> Examples[Decision agents<br/>Simple queries<br/>Text responses<br/>Titles & suggestions]
+        
+        UseComplex --> ExamplesC[Query generation<br/>Complex aggregations<br/>Analysis tasks]
+    end
+    
+    subgraph "LLM Call Flow"
+        Call[ElysiaChainOfThought.aforward]
+        Call --> SelectLM{Which LM?}
+        
+        SelectLM -->|base| SetBase[dspy.settings.configure(lm=base_lm)]
+        SelectLM -->|complex| SetComplex[dspy.settings.configure(lm=complex_lm)]
+        
+        SetBase --> BuildFullPrompt[Build full prompt]
+        SetComplex --> BuildFullPrompt
+        
+        BuildFullPrompt --> CallPredict[self.predict.aforward]
+        CallPredict --> DSPyProcess[DSPy processes signature]
+        DSPyProcess --> LLMCall[Actual LLM API call]
+        LLMCall --> ParseResponse[Parse response]
+        ParseResponse --> ValidateOutput[Validate against signature]
+        ValidateOutput --> ReturnPred[Return dspy.Prediction]
+    end
+    
+    subgraph "Context Key Manager"
+        KeyMgr[ElysiaKeyManager]
+        KeyMgr --> ContextMgr[Context manager]
+        
+        ContextMgr --> Enter[__enter__: Set env vars]
+        ContextMgr --> Exit[__exit__: Restore env vars]
+        
+        Enter --> SetKeys[Set API keys temporarily]
+        SetKeys --> CallLLM[LLM call happens]
+        CallLLM --> Exit
+        Exit --> RestoreKeys[Restore original env]
+    end
+    
+    ElysiaCoT --> Call
+    Call --> KeyMgr
+    
+    subgraph "Tracking & Metrics"
+        Tracker[Tracker object]
+        Tracker --> StartTrack[start_tracking]
+        Tracker --> EndTrack[end_tracking]
+        
+        EndTrack --> ExtractTokens[Extract from LM.history]
+        ExtractTokens --> CalcCost[Calculate costs]
+        CalcCost --> StoreMetrics[Store metrics]
+        
+        StoreMetrics --> TokenCounts[Input/output tokens]
+        StoreMetrics --> Costs[Model costs]
+        StoreMetrics --> Times[Execution times]
+    end
+    
+    ReturnPred -.->|After call| Tracker
+
+    classDef dspy fill:#e1f5ff,stroke:#01579b
+    classDef elysia fill:#f3e5f5,stroke:#4a148c
+    classDef signature fill:#fff3e0,stroke:#e65100
+    classDef template fill:#e8f5e9,stroke:#1b5e20
+    classDef config fill:#fff9c4,stroke:#f57f17
+    classDef strategy fill:#fce4ec,stroke:#880e4f
+    classDef flow fill:#f3e5f5,stroke:#4a148c
+    
+    class DSPy,LM,Signature,Module,Predict,CoT dspy
+    class ElysiaCoT,BuildPrompt,ForwardBase,ForwardComplex,ForwardFeedback elysia
+    class BaseSig,Input,Output,Append,Prepend,NewField,FeedbackField signature
+    class DecisionPrompt,QueryPrompt,TextPrompt,TitlePrompt,SuggestPrompt,DPInputs,DPOutputs,QPInputs,QPOutputs template
+    class Settings,BaseProvider,ComplexProvider,LoadBase,LoadComplex,ConfigBase,ConfigComplex,BaseLMInstance,ComplexLMInstance config
+    class Strategy,Simple,Complex,UseBase,UseComplex,Examples,ExamplesC strategy
+    class Call,SelectLM,SetBase,SetComplex,BuildFullPrompt,CallPredict,DSPyProcess,LLMCall,ParseResponse,ValidateOutput,ReturnPred flow
+
