@@ -1,249 +1,333 @@
-# todo.md
+# TODO – VSM demo op Elysia skeleton
 
-> Doel van dit document:  
-> Jij (Claude, AI coding editor) gaat eerst **onderzoek doen naar de data** in deze repo, zodat we daarna gerichte opdrachten kunnen geven voor ETL, ingestie en Elysia-integratie.
+Deze TODO is voor de AI coding agent (/ Cursor) met volledige toegang tot de codebase, data en docs.
 
-Gebruik waar nodig Python-scripts / notebooks in de repo of nieuwe files in `notebooks/` of `scripts/`. Geef je antwoorden bij voorkeur terug in de vorm van **markdown-bestanden in de repo** (bijv. `docs/data/telemetry_schema.md`, etc.).
+Doel:  
+Een werkende VSM-demo bouwen bovenop Elysia + Weaviate, waarin een (junior) servicemonteur met een agent samen een storing triageert op basis van:
 
----
+- Telemetry (timeseries)
+- Manuals (parsed PDFs)
+- Vlogs (problem → triage → oplossing)
+- Synthetic WorldState/Context (C, W) rondom de installatie
 
-## 1. Timeseries / Telemetry (parquet)
+Alle basis-analyses van de data 
+- `data/README.md`
+- `data/data_analysis_summary.md`
+- `data/telemetry_schema.md`
+- `data/telemetry_features.md`
+- `data/telemetry_files.md`
+- `data/manuals_structure.md`
+- `data/manuals_files.md`
+- `data/manuals_weaviate_design.md`
+- `data/vlogs_structure.md`
+- `data/vlogs_files.md`
+- `data/vlogs_processing_results.md`
 
-### 1.1 Vind en beschrijf alle relevante bestanden
-
-1. Zoek in de repo naar alle **parquet files** met telemetry:
-   - Identificeer:
-     - Bestandsnamen,
-     - Paden,
-     - Eventuele naming conventies (bijv. `*_cleaned.parquet`, `*_with_flags.parquet`).
-2. Maak een kort overzicht in een nieuw markdown-bestand, bijv.  
-   `docs/data/telemetry_files.md` met:
-   - Tabel: `filename` | `path` | `description` (als er iets uit de context/naam duidelijk is).
-
-### 1.2 Schema-analyse
-
-Voor **elke** relevante parquet (in ieder geval voor de “cleaned with flags” variant):
-
-1. Lees de parquet in (Python) en beschrijf de **schema** in `docs/data/telemetry_schema.md`:
-   - Kolomnaam,
-   - Dtype,
-   - Eventuele obvious betekenis (als die herleidbaar is uit naam of bestaande EDA-code).
-
-2. Geef per kolom:
-   - `min`, `max`, `mean` (voor numerieke),
-   - Aantal unieke waarden (voor categorische/bool),
-   - Percentage missing values.
-
-3. Identificeer expliciet:
-   - Tijdsas:
-     - Welke kolom is de timestamp?
-     - Is de data per asset gescheiden (heeft elke rij een asset-id)? Zo ja, hoe heet die kolom?
-   - Flags:
-     - Welke `_flag_*` kolommen zijn er?
-     - Wat is hun type en waarde-distributie?
-
-### 1.3 Semantiek van belangrijke kolommen
-
-We hebben al een vermoeden, maar we willen dat jij het **precies bevestigt** op basis van de echte data:
-
-1. Probeer de volgende kolommen (of equivalenten) te vinden en te beschrijven:
-   - Sensoren:
-     - `sGekoeldeRuimte` of equivalent,
-     - `sHeetgasLeiding`,
-     - `sVloeistofleiding`,
-     - `sZuigleiding`,
-     - `sOmgeving`.
-   - Status:
-     - `sDeurcontact`,
-     - `sRSSI`, `sBattery`.
-   - Flags:
-     - `_flag_main_temp_high`,
-     - `_flag_secondary_error_code`,
-     - Overige `_flag_*` kolommen.
-
-2. Beschrijf in `telemetry_schema.md` per kolom:
-   - Waarschijnlijk fysische betekenis (bv. “temperatuur in koelcel (°C)”),
-   - Waarde-range die in de data voorkomt (bijv. `-40` tot `+10`),
-   - Voor flags: in welke situaties staan ze meestal op `True`? (bijvoorbeeld: als `sGekoeldeRuimte` > X).
-
-### 1.4 Basisfeature-voorstellen (nog niet implementeren, wél opschrijven)
-
-Op basis van de schema-analyse:
-
-1. Stel in `docs/data/telemetry_features.md` een lijst voor van **WorldState-features** die we later willen berekenen, bijvoorbeeld:
-
-   - Actuele waarden:
-     - `current_room_temp`,
-     - `current_ambient_temp`,
-     - `current_door_open` (bool),
-   - Historische trends (laatste N minuten/uren):
-     - `room_temp_min_last_2h`,
-     - `room_temp_max_last_2h`,
-     - `door_open_ratio_last_2h`,
-   - Incidentfeatures:
-     - `is_temp_high` (op basis van flag of threshold),
-     - `is_ambient_high`,
-     - `has_recent_errors` (flags afgelopen X uur).
-
-2. Je hoeft ze **nog niet te implementeren**, alleen goed uit te schrijven met:
-   - Naam,
-   - Beschrijving,
-   - Benodigde kolommen,
-   - Tijdvenster (bijv. laatste 30 min / 2 uur / 24 uur).
+Lees die eerst; de vragen in de todo_old.md over "hoe zien de data eruit?" zijn daar al beantwoord.
 
 ---
 
-## 2. Manuals (parsed PDFs via Landing AI)
+## Data Storage Strategy
 
-### 2.1 Vind en beschrijf de parsed manual-bestanden
+### Weaviate vs Local Files
 
-1. Zoek in de repo naar de parsed versies van de 3 manuals (via Landing AI):
-   - Dit kunnen JSON, YAML, Markdown of andere gestructureerde formaten zijn.
-   - Noteer in `docs/data/manuals_files.md`:
-     - `filename`,
-     - `path`,
-     - Formaat (JSON/MD/etc.),
-     - Korte omschrijving (welk manual is het?).
+**Weaviate** (voor semantic search, RAG, discovery):
+- **VSM_TelemetryEvent**: ~500-1000 event summaries met WorldState features (aggregated metadata)
+- **VSM_ManualSections**: ~170-240 logische secties met SMIDO/failure mode tags
+- **VSM_VlogCase**: 5 geaggregeerde cases met problem-solution workflows
+- **VSM_VlogClip**: 15 individuele clips met timestamps en components
 
-### 2.2 Structuur en key-velden
+**Local Files** (voor raw data, detail queries, playback):
+- **Telemetry parquet**: 785K datapunten (1-min intervals, 2.2 jaar) - efficiënt voor tijdvenster-queries
+- **Manual JSONL**: 922 chunks (audit trail, source data)
+- **Vlog .mov files**: 15 videos (21.7 MB, voor playback)
 
-Voor elk parsed manual-bestand:
+### Hybrid Query Pattern
+1. Agent queries Weaviate voor incident discovery
+2. Tool leest parquet voor detailed WorldState computation
+3. Agent presenteert combined insights aan gebruiker
 
-1. Inspecteer de structuur en documenteer in `docs/data/manuals_structure.md`:
-   - Welke keys komen voor? (`title`, `content`, `page`, `bbox`, `section_id`, etc.),
-   - Hoe zijn paragrafen/secties georganiseerd (per pagina, per blok, per heading?).
-
-2. Probeer logische **sectie-grenzen** te identificeren:
-   - Bijvoorbeeld:
-     - SMIDO-hoofdstuk,
-     - Subsecties (Melding / Technisch / Installatie Vertrouwd / De 3 P’s / Ketens & Onderdelen uitsluiten),
-     - Specifieke cases zoals “Ingevroren verdamper”,
-     - Uitleg “Het koelproces uit balans”,
-     - Tabeldata (storings- en diagnosetabellen),
-     - Flowcharts (kunnen als tekst of als imagecaptions voorkomen).
-
-### 2.3 Voorstel voor Weaviate-schema `ManualSections`
-
-Schrijf in `docs/data/manuals_weaviate_design.md` een **schema-voorstel** voor een Weaviate-collectie `ManualSections`, o.b.v. wat er in de parsed files echt aanwezig is.
-
-Beantwoord daarbij:
-
-1. Welke properties kunnen we minimaal vullen, gegeven de huidige parsed data? Bijvoorbeeld:
-
-   - `manual_id` (TEXT),
-   - `section_id` (TEXT),
-   - `title` (TEXT),
-   - `body_text` (TEXT),
-   - `page_range` (ARRAY/STRING),
-   - `smido_step` (TEXT; bijvoorbeeld `melding`, `technisch`, `installatie_vertrouwd`, `3P`, `ketens_onderdelen`, `koelproces_uit_balans`, `overig`),
-   - `failure_mode` (TEXT; bv. `ingevroren_verdamper`, `te_hoge_temperatuur`, etc.),
-   - `component` (TEXT),
-   - `content_type` (TEXT; `uitleg`, `stappenplan`, `flowchart`, `tabel`, `voorbeeldcase`).
-
-2. Welke velden moeten we later **semi-automatisch labelen** via LLM (bijv. failure_mode, smido_step), en welke zijn al direct af te leiden uit de structuur?
-
-3. Welke tekstvelden zijn geschikt voor vectorisatie (Weaviate text2vec), en welke moeten we als gewone metadata gebruiken?
+**Voordeel**: Best of both worlds - semantic search + efficient timeseries
 
 ---
 
-## 3. Vlogs (service engineer video’s)
+## 1. Telemetry Data Strategy
 
-> Let op: het is mogelijk dat de ruwe vlogs nog niet in deze repo staan, of alleen referenties/paden.
+**Bestands- en schema-info vind je in:**
+- `data/telemetry_files.md`
+- `data/telemetry_schema.md`
+- `data/telemetry_features.md`
+- `data/data_analysis_summary.md`
 
-### 3.1 Inventarisatie
+### Data Storage Architecture
+- **Raw timeseries**: BLIJFT in parquet files (785K rows, efficiënt voor tijdvenster-queries)
+- **Events/Incidents**: IN Weaviate als VSM_TelemetryEvent (aggregated metadata, semantic search)
+- **Rationale**: 
+  - Parquet optimaal voor tijdreeks-queries en WorldState berekeningen
+  - Weaviate optimaal voor incident discovery en semantic matching
+  - Voorkomt 785K objecten in Weaviate (costly, slow)
 
-1. Zoek naar een map of bestandsnamen die wijzen op vlogs:
-   - Bijvoorbeeld folders `vlogs/`, `videos/`, `media/`, of JSON/MD met metadata.
-2. Documenteer in `docs/data/vlogs_files.md`:
-   - Welke vlogs/metadata-bestanden je vindt (naam, pad, formaat),
-   - Of er al transcripties of notities bestaan.
+### 1.1 Event Detection from Telemetry
 
-Als er **geen vlogs aanwezig** zijn:
+- [ ] 📝 PLANNED: Script: `features/telemetry_vsm/src/detect_events.py`
+  - Detecteert incidents op basis van flags (_flag_main_temp_high, etc.)
+  - Berekent WorldState features per event (min/max/avg, trends)
+  - Output: JSONL met event metadata (niet alle datapunten)
+  - Schatting: ~500-1000 events uit 785K datapunten
 
-- Noteer expliciet dat de vlogs nog ontbreken.
-- We gaan dan werken met een “verwacht formaat” i.p.v. bestaande data.
+### 1.2 VSM_TelemetryEvent Schema
 
-### 3.2 Voorstel voor JSON/tekst-structuur (verwacht formaat)
+- [ ] 📝 PLANNED: Schema properties (zie data/telemetry_features.md):
+  - Identification: event_id, asset_id, t_start, t_end, duration_minutes
+  - Classification: failure_mode, affected_components, severity
+  - Aggregates: temp_min/max/mean/trend per sensor
+  - Description: Nederlandse samenvatting voor RAG (vectorized)
+  - WorldState: JSON met key features
+  - File reference: parquet_path + time_range (voor detail-lookup)
 
-Maak in `docs/data/vlogs_structure.md` een voorstel voor het **doel-formaat** dat we later door Gemini 2.5 Pro willen laten produceren per vlog.
+### 1.3 WorldState Computation Tool (Elysia)
 
-Bijvoorbeeld per vlog:
+- [ ] 📝 PLANNED: Tool: `elysia/tools/vsm/compute_worldstate.py`
+  - Input: asset_id, timestamp, window_minutes
+  - Leest direct uit parquet file (niet Weaviate)
+  - Berekent 60+ features on-the-fly
+  - Output: WorldState dict voor agent reasoning
 
-- `vlog_id` (TEXT),
-- `title` (TEXT),
-- `raw_transcript` (TEXT),
-- `steps` (ARRAY of TEXT; elk element een stap in de troubleshooting),
-- `failure_mode` (TEXT),
-- `component` (TEXT),
-- `world_state_pattern` (TEXT; beschrijving van typische sensordata situatie),
-- `smido_path` (TEXT of ARRAY; bijv. `["melding", "technisch", "3P", "ketens_onderdelen"]`),
-- `skill_level` (TEXT; `junior`, `medior`, `senior`),
-- Eventueel links:
-  - `video_path` of `video_url`.
+### 1.4 Weaviate Import Script
 
-Leg uit:
-
-- Welke velden verplicht zijn,
-- Welke optioneel,
-- Welke later in Weaviate als properties gebruikt zullen worden.
-
----
-
-## 4. Samenvattende vragen die je expliciet moet beantwoorden
-
-In elk van de bovenstaande docs verwachten we dat je de volgende vragen **expliciet beantwoordt**:
-
-1. **Telemetry**
-   - Wat is de exacte schema (alle kolommen + types)?
-   - Welke kolommen corresponderen hoogstwaarschijnlijk met:
-     - Gekoelde ruimte temperatuur,
-     - Omgevingstemperatuur,
-     - Deurstatus,
-     - Relevante flags voor temperatuur/incidenten?
-   - Zijn er meerdere assets/installaties of één?
-   - Zijn er duidelijke tijdsintervallen (bijv. per minuut, per 5 minuten)?
-
-2. **Manuals**
-   - Hoe zijn de parsed manuals precies gestructureerd (keys, nesting, splitsing)?
-   - Kunnen we de SMIDO-stappen redelijk afleiden uit de structuur (headings/teksten)?
-   - Waar zitten de voorbeeldcases zoals “Ingevroren verdamper” en “Koelproces uit balans” in de data?
-   - Hoeveel logische secties verwacht je dat we uiteindelijk in `ManualSections` zullen hebben (ruwe schatting)?
-
-3. **Vlogs**
-   - Zijn er al vlogs of metadata aanwezig in de repo?
-   - Zo ja: in welk formaat?
-   - Zo nee: welk JSON/tekst-formaat stel je voor als eindproduct van de Gemini 2.5 Pro preprocessing?
-
-4. **Weaviate-voorbereiding**
-   - Gegeven de echte data, zijn de voorgestelde collections:
-     - `ManualSections`,
-     - `Incidents`,
-     - `ServiceVlogs`,
-     
-     nog steeds logisch, of stel je alternatieven/aanpassingen voor?
-
-   - Zijn er extra collections nodig (bijv. `RawTelemetryWindows`, `WorldStateSnapshots`)?
+- [ ] 📝 PLANNED: Script: `features/telemetry_vsm/src/import_telemetry_weaviate.py`
+  - Weaviate client bouwt (url/api-key uit `.env`)
+  - Creëert VSM_TelemetryEvent collection
+  - Import event JSONL naar Weaviate
+  - Verifieert collection is queryable
 
 ---
 
-## 5. Wat je *nog niet* hoeft te doen
+## 2. Manuals Data Strategy
 
-In deze fase:
+**Relevante docs:**
+- `data/manuals_structure.md`
+- `data/manuals_files.md`
+- `data/manuals_weaviate_design.md`
 
-- **Nog geen** ETL-code schrijven om data werkelijk naar Weaviate te pushen.
-- **Nog geen** Elysia tools/decision tree implementeren.
-- **Nog geen** definitieve schema’s in code maken.
+### Data Storage Architecture
+- **Logical sections**: IN Weaviate als VSM_ManualSections (grouped chunks, classified)
+- **Source chunks**: BLIJFT in JSONL files (audit trail)
+- **Test/exercise content**: IN Weaviate maar FLAGGED met content_type="opgave" voor filtering
+- **Rationale**:
+  - Sections beter voor semantic retrieval dan individuele chunks
+  - Test content nuttig voor prompt engineering, maar filterbaar
+  - ~170-240 sections vs 922 chunks (betere granulariteit)
 
-We willen eerst:
+### 2.1 Section Grouping Script
 
-1. 100% helderheid over:
-   - Wat er precies in de data zit,
-   - Hoe het nu is gestructureerd,
-   - Welke velden we kunnen en willen gebruiken.
-2. Duidelijke design-notities in `docs/data/*.md`.
+- [ ] 📝 PLANNED: Script: `features/manuals_vsm/src/parse_sections.py`
+  - Groepeert chunks op basis van heading hierarchy
+  - Combineert 2-4 chunks per logische section
+  - Detecteert content_type: uitleg, stappenplan, flowchart, tabel, voorbeeldcase, opgave
+  - Output: JSONL met section objects
 
-Zodra deze vragen beantwoord zijn en de docs bestaan, gaan we je vragen:
+### 2.2 SMIDO Classification Script
 
-- ETL-scripts te schrijven,
-- Weaviate-schema’s in code te definieren,
-- En daarna de Elysia-integratie op te zetten.
+- [ ] 📝 PLANNED: Script: `features/manuals_vsm/src/classify_smido.py`
+  - Automatische classificatie via heading keywords
+  - LLM-based classificatie voor ambiguous sections
+  - Tags per section: smido_step, failure_modes, components
+  - Output: Enriched section JSONL
+
+### 2.3 Filter Test Content
+
+- [ ] 📝 PLANNED: In section parsing:
+  - Detecteer "Theorie opgaven", "Werkplekopdracht" headings
+  - Flag met content_type="opgave"
+  - Include in Weaviate (nuttig voor agent training)
+  - Default queries filteren opgave content uit
+
+### 2.4 Weaviate Schema & Import
+
+- [ ] 📝 PLANNED: Schema: VSM_ManualSections (zie data/manuals_weaviate_design.md)
+  - Properties: manual_id, title, section_path, page_range, body, content_type, smido_step, failure_modes, components, tags
+  - Named vector op body, title, section_path
+  - Filterable op content_type, smido_step, failure_modes
+
+- [ ] 📝 PLANNED: Script: `features/manuals_vsm/src/import_manuals_weaviate.py`
+  - Creëert VSM_ManualSections collection
+  - Import enriched section JSONL
+  - Verifieert collection is queryable
+
+### 2.5 SMIDO Triage Flow Extraction
+
+- [ ] 📝 PLANNED: Script: `features/manuals_vsm/src/extract_triage_flow.py`
+  - Lokaliseer SMIDO-flowchart en storingstabellen in parsed manuals
+  - Exporteer in machineleesbaar format (JSON met nodes/edges)
+  - Sla op in Weaviate als VSM_TriageFlow (optioneel, voor structured knowledge)
+
+---
+
+## 3. Vlogs Data Strategy
+
+**Relevante docs:**
+- `data/vlogs_structure.md`
+- `data/vlogs_files.md`
+- `data/vlogs_processing_results.md`
+- Up-to-date `process_vlogs.py` in `features/vlogs_vsm/src/`
+
+### Data Storage Architecture
+- **Case metadata**: IN Weaviate als VSM_VlogCase (5 cases, aggregated)
+- **Clip metadata**: IN Weaviate als VSM_VlogClip (15 clips, individual)
+- **Video files**: BLIJFT als .mov files locally (21.7 MB total)
+- **Rationale**:
+  - Weaviate voor discovery en semantic matching
+  - Local files voor video playback
+  - Voorkomt grote blobs in vector database
+
+### 3.1 Metadata Enrichment
+
+- [ ] 📝 PLANNED: Script: `features/vlogs_vsm/src/enrich_vlog_metadata.py`
+  - Leest vlogs_vsm_annotations.jsonl (20 records)
+  - Voegt SMIDO step tags toe
+  - Standardiseert failure_modes naar controlled vocab
+  - Genereert sensor pattern mappings
+  - Output: Enriched JSONL
+
+### 3.2 Weaviate Schema & Import
+
+- [ ] 📝 PLANNED: Schema: VSM_VlogCase (zie data/vlogs_structure.md)
+  - Properties: case_id, problem_summary, solution_summary, smido_steps, failure_modes, components, related_manual_sections
+  - Named vector op problem_summary, solution_summary, transcript
+
+- [ ] 📝 PLANNED: Schema: VSM_VlogClip (zie data/vlogs_structure.md)
+  - Properties: case_id, clip_index, video_filename, video_path (local), duration, transcript, steps, tags, technical_components
+  - Named vector op transcript, problem_summary, solution_summary
+
+- [ ] 📝 PLANNED: Script: `features/vlogs_vsm/src/import_vlogs_weaviate.py`
+  - Creëert VSM_VlogCase collection (5 cases)
+  - Creëert VSM_VlogClip collection (15 clips)
+  - Import enriched metadata
+  - Video_path property verwijst naar local .mov file
+  - Verifieert collections zijn queryable
+
+### 3.3 Verify Processing Pipeline
+
+- [ ] ✅ IMPLEMENTED: `process_vlogs.py` bestaat en werkt
+  - Async, set-based verwerking (A1_1→A1_2→A1_3→case A1, etc.)
+  - CoolingCaseCore-schema (inclusief `transcript` in het Nederlands)
+  - Output: `features/vlogs_vsm/output/vlogs_vsm_annotations.jsonl` (20 records)
+
+---
+
+## 4. Cross-links tussen Telemetry ↔ Manuals ↔ Vlogs
+
+We willen uiteindelijk één geïntegreerde “wereld” in Weaviate / Elysia.
+
+### 4.1. Conceptuele mapping
+
+- [ ] 📝 PLANNED: Lees in `data/data_analysis_summary.md` welke synthetic scenario's zijn gedefinieerd (bv. "condenser fan failure", "liquid line blockage", etc.).
+- [ ] 📝 PLANNED: Leg een mapping vast (in code, bijv. Python dict) van:
+  - `scenario_id` → relevante:
+    - `VSM_VlogCase` (A1–A5)
+    - `VSM_ManualSections` subsets (storingstabellen, SMIDO-stappen, component-specific sections)
+- [ ] 📝 PLANNED: Bedenk en implementatie-voorstel:
+  - Cross-refs in Weaviate:
+    - `VSM_TelemetryEvent.related_manual_sections`
+    - `VSM_TelemetryEvent.related_vlog_cases`
+    - `VSM_VlogCase.related_manual_sections`
+    - etc.
+
+### 4.2. Implementatie cross-refs
+
+- [ ] 📝 PLANNED: Script (bv. `features/integration_vsm/src/link_entities_weaviate.py`) dat:
+  - Scenario/issue-tags vergelijkt tussen events, vlogs en manuals.
+  - Op basis van configuraties / mapping-tabel cross-references aanmaakt.
+  - Zoveel mogelijk deterministisch, niet alleen LLM-guessing.
+
+---
+
+## 5. Elysia + Weaviate configuratie
+
+We gaan er vanuit dat Elysia en Weaviate al draaien (`vsm-hva` env).
+
+### 5.1. Elysia Weaviate client & config
+
+- [ ] ✅ IMPLEMENTED: `.env` / `CLAUDE.md` bevatten:
+  - Weaviate URL + API-key configuratie
+  - LLM-provider keys (Gemini/OpenAI/etc.) setup
+- [ ] 📝 PLANNED: Zorg dat de Elysia backend:
+  - De VSM-Weaviate client kan pakken (eventueel via `ELYSIA_CUSTOM_WEAVIATE_URL`-achtig mechanisme, zie Elysia docs).
+  - De VSM-collecties ziet (`VSM_*`).
+
+### 5.2. Elysia preprocess
+
+- [ ] 📝 PLANNED: Gebruik Elysia's `preprocess`-mechanisme op de relevante collecties:
+  - `preprocess(["VSM_TelemetryEvent", "VSM_ManualSections", "VSM_VlogClip", "VSM_VlogCase"])`
+- [ ] 📝 PLANNED: Controleer in de Elysia UI (Data tab) of:
+  - Display types logisch zijn (bv. vlogs als "documents" + "timeline style", manuals als "documents", telemetry als "generic data" of "tables").
+  - Metadata en voorbeeld-queries zinvol zijn.
+
+---
+
+## 6. Agent / Tree design (SMIDO + WorldState)
+
+We willen 1 of meerdere agents die de SMIDO-methodiek + WorldState (W) gebruiken.
+
+### 6.1. Agent prompts / tools
+
+- [ ] 📝 PLANNED: Definieer in de Elysia tree:
+  - Een "VSM_ServiceAgent" node met instructies in het Nederlands:
+    - Werkt volgens SMIDO: Melding → Technisch → Installatie vertrouwd → 3 P's → Ketens.
+    - Gebruik Weaviate-tools om:
+      - TelemetryEvents te zoeken rond de huidige tijd (`t-now`, `t-history`).
+      - Relevante manual-sections (SMIDO-stappen, storingstabellen) op te halen.
+      - Passende vlogs te tonen (als voorbeeldcases).
+- [ ] 📝 PLANNED: Zorg dat:
+  - De agent snapt welke info van de user (monteur) komt (WorldState: visuele bevindingen, geluid, klantinfo).
+  - De agent vragen kan stellen om C/W completer te maken.
+
+### 6.2. Beslissingsboom (tree) aanpassen
+
+- [ ] 📝 PLANNED: Voeg (in Python) een VSM-specifieke branch toe aan de Elysia tree, bv.:
+  - Node "Detect_intent_VSM"
+  - Node "Fetch_telemetry_context"
+  - Node "Fetch_manual_knowledge"
+  - Node "Fetch_vlog_examples"
+  - Node "Generate_SMIDO_plan"
+- [ ] 📝 PLANNED: Koppel de juiste tools aan deze nodes (Weaviate query/aggregate, custom tools voor tijdvensters, etc.).
+
+---
+
+## 7. Demo-flow & evaluatie
+
+### 7.1. Demo-scenario's
+
+- [ ] 📝 PLANNED: Op basis van `data/data_analysis_summary.md` en `vlogs_processing_results.md`:
+  - Kies minimaal 2 demo-scenario's (bv. A3 = ingevroren verdamper, A1 = condensorventilator).
+  - Definieer voor elk:
+    - Welk tijdwindow in telemetry hoort bij de storing.
+    - Welke manual-secties en vlogs "ground truth" zijn.
+
+### 7.2. Golden answers / tests
+
+- [ ] 📝 PLANNED: Bouw een klein testscript dat:
+  - Voor een demo-scenario een prompt stuurt naar Elysia.
+  - Checkt of de agent:
+    - De juiste componenten en waarschijnlijk probleem noemt.
+    - Minstens één relevante manual section en vlog-case citeert.
+
+---
+
+## 8. Open vragen (voor de mens, niet voor de code agent)
+
+Deze kan de code agent waarschijnlijk niet zelf beantwoorden en moeten nog samen met jou worden besloten:
+
+1. **Taal UI / output**
+   - Moet *alles* (UI-tekst, agent-antwoord, tags) strikt in het Nederlands zijn, of is Engels toegestaan voor meta-velden?
+2. **Aantal assets / installatietypes**
+   - Willen we in de demo expliciet doen alsof dit één specifiek installatietype is (bv. “supermarkt vriescel”), of meerdere verschillende?
+3. **Privacy / deployment**
+   - Komt de demo alleen lokaal te draaien (classroom / lab) of moet deze in een (demo-)cloudomgeving kunnen?
+4. **Logging / telemetry-logging in Weaviate**
+   - Wil je interactie-logs (agent reasoning, vragen/antwoorden) óók als documenten in Weaviate opslaan voor later leren?
+5. **Granulariteit events**
+   - Wil je per storing meerdere events (onbalans → beveiliging trip → herstart), of 1 geaggregeerd event per casus?
+
+Zodra deze keuzes helder zijn, kunnen de schema’s en cross-refs nog verder worden aangescherpt.

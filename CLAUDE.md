@@ -203,22 +203,98 @@ The troubleshooting decision tree follows **SMIDO**:
 
 ---
 
-## Weaviate Collections (Planned)
+## Implementation Status
 
-### ManualSections
+### ✅ IMPLEMENTED
+- **Data Analysis Scripts**: All telemetry, manuals, and vlogs analyzed and documented
+- **Vlog Processing**: `features/vlogs_vsm/src/process_vlogs.py` - All 15 videos processed with Gemini 2.5 Pro
+- **Basic Collections**: Simple `FD_*` collections exist as MVP (FD_Assets, FD_Alarms via seed scripts)
+- **Data Documentation**: Complete analysis in `docs/data/` directory
+
+### 📝 PLANNED (Not Yet Implemented)
+- **VSM-Specific Tools**: No `elysia/tools/vsm/` directory exists yet
+- **SMIDO Decision Tree**: Tree nodes following SMIDO methodology not implemented
+- **WorldState Computation**: Tool for computing 60+ telemetry features not built
+- **Rich VSM Collections**: `VSM_ManualSections`, `VSM_TelemetryEvent`, `VSM_VlogCase` collections not created
+- **Weaviate Data Import**: No scripts exist to import telemetry events, manual sections, or vlog metadata
+
+### 🔄 IN DESIGN
+- **Collection Schemas**: Designed in `docs/data/manuals_weaviate_design.md` and `docs/data/vlogs_structure.md`
+- **Data Strategy**: Metadata-vs-raw-data split strategy (see Data Storage Strategy section below)
+- **ETL Pipelines**: Event detection, section grouping, and metadata enrichment scripts planned
+
+---
+
+## Data Storage Strategy
+
+### Weaviate vs Local Files Split
+
+**Rationale**: Weaviate is optimized for semantic search and RAG, not for storing massive timeseries or large binary files. Use a hybrid approach:
+
+**Weaviate** (for semantic search, RAG, discovery):
+- **VSM_TelemetryEvent**: ~500-1000 event summaries with WorldState features (aggregated metadata)
+- **VSM_ManualSections**: ~170-240 logical sections with SMIDO/failure mode tags (grouped chunks)
+- **VSM_VlogCase**: 5 aggregated cases with problem-solution workflows
+- **VSM_VlogClip**: 15 individual clips with timestamps and components
+
+**Local Files** (for raw data, detail queries, playback):
+- **Telemetry parquet**: 785K datapoints (1-min intervals, 2.2 years) - efficient for time-window queries
+- **Manual JSONL**: 922 chunks (audit trail, source data)
+- **Vlog .mov files**: 15 videos (21.7 MB total, for playback)
+
+### Hybrid Query Pattern
+
+1. **Agent queries Weaviate** for incident discovery and semantic matching
+2. **Tool reads parquet** for detailed WorldState computation on-demand
+3. **Agent presents combined insights** to user
+
+**Benefits**: Best of both worlds - semantic search + efficient timeseries queries
+
+### Telemetry Strategy
+- **Raw timeseries**: Keep in parquet files (785K rows, efficient for time-window queries)
+- **Events/Incidents**: In Weaviate as `VSM_TelemetryEvent` - aggregated, semantic, searchable
+- **Approach**: Tools query parquet for raw data, Weaviate for incident search
+
+### Manuals Strategy
+- **Logical sections**: In Weaviate as `VSM_ManualSections` - grouped, classified, vectorized
+- **Source chunks**: Keep in JSONL (reference/audit)
+- **Test content**: Include but flag with `content_type="opgave"` for filtering
+- **Approach**: Import logical sections, not individual chunks
+
+### Vlogs Strategy
+- **Metadata**: In Weaviate as `VSM_VlogCase` and `VSM_VlogClip` - searchable, semantic
+- **Videos**: Keep as .mov files locally (21.7 MB total)
+- **Approach**: Weaviate for discovery, local files for playback
+
+---
+
+## Weaviate Collections (Target Architecture)
+
+**Note**: Currently, simple `FD_*` collections exist as MVP. The target architecture uses rich `VSM_*` collections:
+
+### VSM_ManualSections
 - **Purpose**: Searchable manual sections tagged with SMIDO steps, failure modes, components
 - **Schema**: [docs/data/manuals_weaviate_design.md](docs/data/manuals_weaviate_design.md)
-- **Size**: ~110-140 sections
+- **Size**: ~170-240 sections (grouped from 922 chunks)
+- **Status**: 📝 PLANNED
 
-### ServiceVlogs
-- **Purpose**: Video metadata with problem-triage-solution workflows
-- **Schema**: [docs/data/vlogs_structure.md](docs/data/vlogs_structure.md)
-- **Size**: 5 cases (A1-A5) + 15 individual clips
-
-### Incidents
-- **Purpose**: Historical telemetry incidents with WorldState features
+### VSM_TelemetryEvent
+- **Purpose**: Historical telemetry incidents with WorldState features (not all 785K rows)
 - **Design**: Based on [docs/data/telemetry_features.md](docs/data/telemetry_features.md)
-- **Size**: ~500-1000 incidents
+- **Size**: ~500-1000 events (detected from 785K datapoints)
+- **Status**: 📝 PLANNED
+
+### VSM_VlogCase
+- **Purpose**: Aggregated video cases with problem-triage-solution workflows
+- **Schema**: [docs/data/vlogs_structure.md](docs/data/vlogs_structure.md)
+- **Size**: 5 cases (A1-A5)
+- **Status**: 📝 PLANNED
+
+### VSM_VlogClip
+- **Purpose**: Individual video clips with timestamps and components
+- **Schema**: [docs/data/vlogs_structure.md](docs/data/vlogs_structure.md)
+- **Size**: 15 clips
+- **Status**: 📝 PLANNED
 
 ---
 
@@ -251,37 +327,40 @@ The troubleshooting decision tree follows **SMIDO**:
 
 ## Next Development Steps
 
-### Phase 1: Vlog Metadata Enrichment (2-3 days)
-```bash
-# Create enrichment script to:
-# - Map Dutch tags to controlled vocabularies
-# - Add SMIDO step tags
-# - Add sensor pattern mappings
-# - Link A3 to "Ingevroren verdamper" manual section
-```
+### Phase 1: Data Import to Weaviate (Priority)
+**Goal**: Import telemetry events, manual sections, and vlog metadata into VSM_* collections
 
-### Phase 2: Weaviate Collections (2-3 days)
-```python
-# Implement collection schemas
-from elysia.util.client import ClientManager
+1. **Telemetry Event Detection** (`features/telemetry_vsm/src/detect_events.py`)
+   - Detect incidents from flags (_flag_main_temp_high, etc.)
+   - Compute WorldState features per event
+   - Output JSONL with event metadata (~500-1000 events)
 
-# Create ManualSections collection
-# Create ServiceVlogs collection
-# Create Incidents collection
-```
+2. **Manual Section Grouping** (`features/manuals_vsm/src/parse_sections.py`)
+   - Group chunks into logical sections
+   - Detect and flag test content (`content_type="opgave"`)
+   - Classify SMIDO steps and failure modes
 
-### Phase 3: ETL Pipelines (3-5 days)
-- Manual section parsing (group chunks → sections)
-- Incident detection (telemetry → incidents with WorldState)
-- Vlog enrichment integration
+3. **Vlog Metadata Enrichment** (`features/vlogs_vsm/src/enrich_vlog_metadata.py`)
+   - Add SMIDO step tags
+   - Standardize failure modes
+   - Generate sensor pattern mappings
 
-### Phase 4: Elysia Integration (5-7 days)
-- WorldState computation tool
+4. **Weaviate Import Scripts**
+   - Create VSM_* collection schemas
+   - Import enriched data
+   - Verify collections are queryable
+
+### Phase 2: Elysia Tools (After data import)
+- WorldState computation tool (reads parquet, computes 60+ features)
 - Weaviate query tools (by SMIDO step, failure mode, component)
 - SMIDO decision tree nodes
-- Demo flow implementation
 
-**Total to working demo**: ~2 weeks
+### Phase 3: Demo Flow
+- Test with A3 "Frozen Evaporator" scenario
+- Verify end-to-end workflow
+- Polish and document
+
+**See**: `todo.md` for detailed implementation tasks
 
 ---
 
@@ -332,12 +411,42 @@ from elysia.util.client import ClientManager
 async def search_manual_by_smido(smido_step: str, query: str):
     """Search manuals filtered by SMIDO step."""
     async with ClientManager().connect_to_client() as client:
-        result = client.collections.get("ManualSections").query.hybrid(
+        result = client.collections.get("VSM_ManualSections").query.hybrid(
             query=query,
             filters={"path": ["smido_step"], "operator": "Equal",
                      "valueText": smido_step}
         )
         return result
+```
+
+### Tool Construction Pattern (Example Reference)
+**Note**: These are example patterns from archived docs. Actual VSM tools not yet implemented.
+
+```python
+# Example: WorldState computation tool (PLANNED)
+from elysia import tool, Tree
+import pandas as pd
+
+tree = Tree()
+
+@tool(tree=tree)
+async def compute_worldstate(asset_id: str, timestamp: str, window_minutes: int = 60) -> dict:
+    """
+    Compute WorldState features for troubleshooting.
+    Reads from parquet file (not Weaviate) for efficiency.
+    """
+    # Load telemetry from parquet
+    df = pd.read_parquet('features/telemetry/timeseries_freezerdata/135_1570_cleaned_with_flags.parquet')
+    
+    # Filter time window
+    # Compute 60+ features (current state, trends, health scores)
+    # Return structured dict
+    
+    return {
+        "current_state": {...},
+        "trends": {...},
+        "health_scores": {...}
+    }
 ```
 
 ### Async/Await

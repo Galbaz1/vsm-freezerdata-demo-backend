@@ -11,7 +11,7 @@ readme = "README.md"
 authors = [
     {name = "Danny", email = "danny@weaviate.io"}
 ]
-requires-python = ">=3.11.0,<3.13.0"
+requires-python = ">=3.12.0,<3.13.0"
 classifiers = [
     "Development Status :: 4 - Beta"
 ]
