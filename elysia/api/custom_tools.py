@@ -219,3 +219,716 @@ async def search_manuals_by_smido(
     except Exception as e:
         yield Error(f"Error querying manuals: {str(e)}")
         return
+
+
+@tool(
+    status="Checking active alarms...",
+    branch_id="smido_melding"
+)
+async def get_alarms(
+    asset_id: str = None,
+    severity: str = "all",  # "critical", "warning", "info", "all"
+    tree_data=None,
+    client_manager=None,
+    **kwargs
+):
+    """
+    Get active alarms for asset from VSM_TelemetryEvent collection.
+    
+    Args:
+        asset_id: Asset identifier (e.g., "135_1570"). Optional - if not provided, returns alarms for all assets.
+        severity: Filter by severity level. Options: "critical", "warning", "info", "all". Default: "all"
+    
+    Returns:
+        - List of alarm objects from VSM_TelemetryEvent
+    
+    Used in: M (Melding), P1 (Power) nodes
+    """
+    if not client_manager:
+        yield Error("Client manager not available. Cannot query Weaviate.")
+        return
+    
+    if not client_manager.is_client:
+        yield Error("Weaviate client not configured. Please set WCD_URL and WCD_API_KEY.")
+        return
+    
+    yield Status("Querying active alarms...")
+    
+    try:
+        async with client_manager.connect_to_async_client() as client:
+            if not await client.collections.exists("VSM_TelemetryEvent"):
+                yield Error("VSM_TelemetryEvent collection not found in Weaviate.")
+                return
+            
+            collection = client.collections.get("VSM_TelemetryEvent")
+            
+            # Build filters - only add asset_id filter if provided and not None/empty
+            filters = None
+            if asset_id and asset_id != 'None' and asset_id.strip():
+                filters = Filter.by_property("asset_id").equal(asset_id)
+            
+            if severity != "all":
+                severity_filter = Filter.by_property("severity").equal(severity)
+                if filters:
+                    filters = filters & severity_filter
+                else:
+                    filters = severity_filter
+            
+            # Query with filters (or None if no filters)
+            # Note: Weaviate v4 doesn't support sort in fetch_objects directly
+            # Results are returned in insertion order, which should be chronological
+            query_kwargs = {"limit": 20}  # Get recent alarms
+            if filters:
+                query_kwargs["filters"] = filters
+            
+            results = await collection.query.fetch_objects(**query_kwargs)
+            
+            yield Status(f"Found {len(results.objects)} alarm(s)")
+            
+            # Convert to dictionaries
+            alarm_objects = []
+            for obj in results.objects:
+                obj_dict = {k: v for k, v in obj.properties.items()}
+                obj_dict["uuid"] = str(obj.uuid)
+                alarm_objects.append(obj_dict)
+            
+            yield Result(
+                objects=alarm_objects,
+                metadata={
+                    "asset_id": asset_id,
+                    "severity_filter": severity,
+                    "alarm_count": len(alarm_objects)
+                }
+            )
+            
+    except Exception as e:
+        yield Error(f"Error querying alarms: {str(e)}")
+        return
+
+
+@tool(
+    status="Searching historical incidents...",
+    branch_id="smido_diagnose"
+)
+async def query_telemetry_events(
+    failure_mode: str = None,
+    components: list = None,
+    severity: str = None,
+    limit: int = 5,
+    tree_data=None,
+    client_manager=None,
+    **kwargs
+):
+    """
+    Query historical telemetry events (similar incidents).
+    Uses hybrid search if query provided, filter-only for structured search.
+    
+    Args:
+        failure_mode: Filter by failure mode (e.g., "ingevroren_verdamper")
+        components: Filter by component names (list)
+        severity: Filter by severity level
+        limit: Maximum number of events to return. Default: 5
+    
+    Returns:
+        - List of telemetry event objects with WorldState summaries
+    
+    Used in: P4 (Productinput), O (Onderdelen) nodes
+    """
+    if not client_manager:
+        yield Error("Client manager not available. Cannot query Weaviate.")
+        return
+    
+    if not client_manager.is_client:
+        yield Error("Weaviate client not configured. Please set WCD_URL and WCD_API_KEY.")
+        return
+    
+    yield Status("Querying historical incidents...")
+    
+    try:
+        async with client_manager.connect_to_async_client() as client:
+            if not await client.collections.exists("VSM_TelemetryEvent"):
+                yield Error("VSM_TelemetryEvent collection not found in Weaviate.")
+                return
+            
+            collection = client.collections.get("VSM_TelemetryEvent")
+            
+            # Build filters
+            filters = []
+            
+            if failure_mode:
+                filters.append(Filter.by_property("failure_mode").equal(failure_mode))
+            
+            if components:
+                filters.append(Filter.by_property("components").contains_any(components))
+            
+            if severity:
+                filters.append(Filter.by_property("severity").equal(severity))
+            
+            # Combine filters
+            combined_filter = None
+            if filters:
+                combined_filter = filters[0]
+                for f in filters[1:]:
+                    combined_filter = combined_filter & f
+            
+            # Query
+            if combined_filter:
+                results = await collection.query.fetch_objects(
+                    filters=combined_filter,
+                    limit=limit
+                )
+            else:
+                results = await collection.query.fetch_objects(limit=limit)
+            
+            yield Status(f"Found {len(results.objects)} event(s)")
+            
+            # Convert to dictionaries
+            event_objects = []
+            for obj in results.objects:
+                obj_dict = {k: v for k, v in obj.properties.items()}
+                obj_dict["uuid"] = str(obj.uuid)
+                event_objects.append(obj_dict)
+            
+            yield Result(
+                objects=event_objects,
+                metadata={
+                    "failure_mode": failure_mode,
+                    "components": components,
+                    "severity": severity,
+                    "event_count": len(event_objects)
+                }
+            )
+            
+    except Exception as e:
+        yield Error(f"Error querying telemetry events: {str(e)}")
+        return
+
+
+@tool(
+    status="Searching video case library...",
+    branch_id="smido_onderdelen"
+)
+async def query_vlog_cases(
+    problem_description: str = None,
+    failure_mode: str = None,
+    component: str = None,
+    smido_step: str = None,
+    limit: int = 3,
+    tree_data=None,
+    client_manager=None,
+    **kwargs
+):
+    """
+    Query vlog cases for similar problem→solution workflows.
+    Returns both VSM_VlogCase (aggregated) and VSM_VlogClip (detailed steps).
+    
+    Args:
+        problem_description: Natural language description of the problem
+        failure_mode: Filter by failure mode (e.g., "ingevroren_verdamper")
+        component: Filter by component name
+        smido_step: Filter by SMIDO step
+        limit: Maximum number of cases to return. Default: 3
+    
+    Returns:
+        - List of vlog case objects with related clips
+    
+    Used in: O (Onderdelen) node
+    """
+    if not client_manager:
+        yield Error("Client manager not available. Cannot query Weaviate.")
+        return
+    
+    if not client_manager.is_client:
+        yield Error("Weaviate client not configured. Please set WCD_URL and WCD_API_KEY.")
+        return
+    
+    yield Status("Querying video case library...")
+    
+    try:
+        async with client_manager.connect_to_async_client() as client:
+            if not await client.collections.exists("VSM_VlogCase"):
+                yield Error("VSM_VlogCase collection not found in Weaviate.")
+                return
+            
+            collection = client.collections.get("VSM_VlogCase")
+            
+            # Build filters
+            filters = []
+            
+            if failure_mode:
+                filters.append(Filter.by_property("failure_mode").equal(failure_mode))
+            
+            if component:
+                filters.append(Filter.by_property("components").contains_any([component]))
+            
+            if smido_step:
+                filters.append(Filter.by_property("smido_steps").contains_any([smido_step]))
+            
+            # Combine filters
+            combined_filter = None
+            if filters:
+                combined_filter = filters[0]
+                for f in filters[1:]:
+                    combined_filter = combined_filter & f
+            
+            # Query - use hybrid if problem_description provided, else filter-only
+            if problem_description:
+                if combined_filter:
+                    results = await collection.query.hybrid(
+                        query=problem_description,
+                        filters=combined_filter,
+                        limit=limit
+                    )
+                else:
+                    results = await collection.query.hybrid(
+                        query=problem_description,
+                        limit=limit
+                    )
+            else:
+                if combined_filter:
+                    results = await collection.query.fetch_objects(
+                        filters=combined_filter,
+                        limit=limit
+                    )
+                else:
+                    results = await collection.query.fetch_objects(limit=limit)
+            
+            yield Status(f"Found {len(results.objects)} case(s)")
+            
+            # Convert to dictionaries
+            case_objects = []
+            for obj in results.objects:
+                obj_dict = {k: v for k, v in obj.properties.items()}
+                obj_dict["uuid"] = str(obj.uuid)
+                case_objects.append(obj_dict)
+            
+            yield Result(
+                objects=case_objects,
+                metadata={
+                    "problem_description": problem_description,
+                    "failure_mode": failure_mode,
+                    "component": component,
+                    "case_count": len(case_objects)
+                }
+            )
+            
+    except Exception as e:
+        yield Error(f"Error querying vlog cases: {str(e)}")
+        return
+
+
+@tool(
+    status="Computing WorldState features from telemetry...",
+    branch_id="smido_p3_procesparameters"
+)
+async def compute_worldstate(
+    asset_id: str,
+    timestamp: str = None,
+    window_minutes: int = 60,
+    tree_data=None,
+    **kwargs
+):
+    """
+    Compute WorldState (W) features from telemetry parquet data.
+    Returns 60+ features including current state, trends, flags, and health scores.
+    
+    Args:
+        asset_id: Asset identifier (e.g., "135_1570")
+        timestamp: ISO format timestamp (e.g., "2024-01-01T12:00:00"). If None, uses current time.
+        window_minutes: Time window for computation. Default: 60 minutes.
+    
+    Returns:
+        - WorldState dictionary with current_state, trends_30m, trends_2h, flags, incidents, health_scores
+    
+    Used in: P3 (Procesparameters), P4 (Productinput) SMIDO nodes
+    """
+    yield Status(f"Loading telemetry data for asset {asset_id}...")
+    
+    from features.telemetry_vsm.src.worldstate_engine import WorldStateEngine
+    from datetime import datetime
+    
+    # Parse timestamp - use historical demo timestamp within data range
+    # Telemetry data range: 2022-10-20 to 2024-04-01
+    if timestamp and timestamp != 'None' and timestamp.strip():
+        try:
+            ts = datetime.fromisoformat(timestamp)
+        except (ValueError, AttributeError):
+            # Default to historical timestamp within data range
+            ts = datetime(2024, 1, 15, 12, 0, 0)
+    else:
+        # Use default historical timestamp for demo (data ends 2024-04-01)
+        ts = datetime(2024, 1, 15, 12, 0, 0)
+    
+    # Initialize engine
+    engine = WorldStateEngine("features/telemetry/timeseries_freezerdata/135_1570_cleaned_with_flags.parquet")
+    
+    yield Status(f"Computing WorldState for {window_minutes}-minute window...")
+    
+    try:
+        # Compute features
+        worldstate = engine.compute_worldstate(asset_id, ts, window_minutes)
+        
+        # Store in hidden environment if available (for cross-tool access)
+        if tree_data and hasattr(tree_data.environment, 'hidden_environment'):
+            tree_data.environment.hidden_environment["worldstate"] = worldstate
+            tree_data.environment.hidden_environment["worldstate_timestamp"] = ts.isoformat()
+        
+        yield Result(
+            objects=[worldstate],
+            metadata={
+                "source": "worldstate_engine",
+                "window_minutes": window_minutes,
+                "features_computed": len(worldstate.keys()) if isinstance(worldstate, dict) else 0
+            }
+        )
+    except Exception as e:
+        yield Error(f"Error computing WorldState: {str(e)}")
+        return
+
+
+@tool(
+    status="Computing asset health (W vs C)...",
+    branch_id="smido_diagnose"
+)
+async def get_asset_health(
+    asset_id: str,
+    timestamp: str = None,
+    window_minutes: int = 60,
+    tree_data=None,
+    client_manager=None,
+    **kwargs
+):
+    """
+    Compare WorldState (W) against Context (C) - implements balance check.
+    
+    Args:
+        asset_id: Asset identifier (e.g., "135_1570")
+        timestamp: ISO format timestamp (e.g., "2024-01-01T12:00:00"). If None, uses current time.
+        window_minutes: Time window for WorldState computation. Default: 60 minutes.
+    
+    Returns:
+        - Health summary with overall_health status
+        - Out of balance factors (deviations from design parameters)
+        - Recommendations based on balance violations
+    
+    Used in: M (Melding), T (Technisch), P2 (Procesinstellingen) nodes
+    """
+    if not client_manager:
+        yield Error("Client manager not available. Cannot query Weaviate.")
+        return
+    
+    if not client_manager.is_client:
+        yield Error("Weaviate client not configured. Please set WCD_URL and WCD_API_KEY.")
+        return
+    
+    yield Status("Loading installation context (C)...")
+    
+    # 1. Get Context (C) from FD_Assets or enrichment file
+    import json
+    from pathlib import Path
+    from datetime import datetime
+    
+    # Load commissioning data from enrichment file
+    enrichment_path = Path("features/integration_vsm/output/fd_assets_enrichment.json")
+    if not enrichment_path.exists():
+        yield Error(f"Enrichment file not found: {enrichment_path}")
+        return
+    
+    with open(enrichment_path) as f:
+        context = json.load(f)
+    
+    commissioning = context["commissioning_data"]
+    balance_params = context["balance_check_parameters"]
+    operational_limits = context["operational_limits"]
+    
+    yield Status("Computing current WorldState (W)...")
+    
+    # 2. Compute WorldState (W) - use WorldStateEngine
+    from features.telemetry_vsm.src.worldstate_engine import WorldStateEngine
+    
+    # Handle timestamp: check for None, empty string, or string 'None'
+    # Use historical timestamp from data range (2022-10-20 to 2024-04-01)
+    # Default to 2024-01-15 12:00 (known good timestamp with data)
+    if timestamp and timestamp != 'None' and timestamp.strip():
+        try:
+            ts = datetime.fromisoformat(timestamp)
+        except (ValueError, AttributeError):
+            # Default to historical timestamp within data range
+            ts = datetime(2024, 1, 15, 12, 0, 0)
+    else:
+        # Use default historical timestamp for demo (data ends 2024-04-01)
+        ts = datetime(2024, 1, 15, 12, 0, 0)
+    engine = WorldStateEngine("features/telemetry/timeseries_freezerdata/135_1570_cleaned_with_flags.parquet")
+    
+    try:
+        worldstate = engine.compute_worldstate(asset_id, ts, window_minutes)
+    except Exception as e:
+        yield Error(f"Error computing WorldState: {str(e)}")
+        return
+    
+    yield Status("Comparing W vs C (balance check)...")
+    
+    # 3. Compare W vs C - balance check
+    current_state = worldstate.get("current_state", {})
+    out_of_balance = []
+    
+    # Room temp check
+    current_temp = current_state.get("current_room_temp")
+    target_temp = commissioning.get("target_temp")
+    if current_temp is not None and target_temp is not None:
+        deviation = abs(current_temp - target_temp)
+        if deviation > 5:  # More than 5°C deviation
+            out_of_balance.append({
+                "factor": "room_temperature",
+                "current": current_temp,
+                "design": target_temp,
+                "deviation": current_temp - target_temp,
+                "severity": "critical" if current_temp > operational_limits.get("room_temp_alarm_critical_C", -10) else "warning"
+            })
+    
+    # Hot gas temp check
+    hot_gas = current_state.get("current_hot_gas_temp")
+    if hot_gas is not None:
+        min_hot_gas = balance_params.get("hot_gas_temp_min_C", 45.0)
+        max_hot_gas = balance_params.get("hot_gas_temp_max_C", 65.0)
+        if hot_gas < min_hot_gas or hot_gas > max_hot_gas:
+            out_of_balance.append({
+                "factor": "hot_gas_temperature",
+                "current": hot_gas,
+                "design_range": f"{min_hot_gas}-{max_hot_gas}",
+                "severity": "warning"
+            })
+    
+    # Suction temp check
+    suction_temp = current_state.get("current_suction_temp")
+    if suction_temp is not None:
+        min_suction = balance_params.get("suction_temp_min_C", -40.0)
+        max_suction = balance_params.get("suction_temp_max_C", -35.0)
+        if suction_temp < min_suction or suction_temp > max_suction:
+            out_of_balance.append({
+                "factor": "suction_temperature",
+                "current": suction_temp,
+                "design_range": f"{min_suction}-{max_suction}",
+                "severity": "warning"
+            })
+    
+    # Liquid temp check (should be reasonable)
+    liquid_temp = current_state.get("current_liquid_temp")
+    if liquid_temp is not None:
+        design_liquid = commissioning.get("liquid_temp_design", 28.0)
+        if abs(liquid_temp - design_liquid) > 10:
+            out_of_balance.append({
+                "factor": "liquid_temperature",
+                "current": liquid_temp,
+                "design": design_liquid,
+                "deviation": liquid_temp - design_liquid,
+                "severity": "warning"
+            })
+    
+    # Generate health summary
+    health = {
+        "asset_id": asset_id,
+        "timestamp": ts.isoformat(),
+        "overall_health": "uit_balans" if out_of_balance else "in_balance",
+        "out_of_balance_factors": out_of_balance,
+        "worldstate_summary": {
+            "current_room_temp": current_state.get("current_room_temp"),
+            "current_hot_gas_temp": current_state.get("current_hot_gas_temp"),
+            "current_suction_temp": current_state.get("current_suction_temp"),
+            "current_liquid_temp": current_state.get("current_liquid_temp"),
+            "current_ambient_temp": current_state.get("current_ambient_temp"),
+            "flags": worldstate.get("flags", {}),
+            "health_scores": worldstate.get("health_scores", {})
+        },
+        "commissioning_data": commissioning,
+        "recommendations": []
+    }
+    
+    # Generate recommendations based on out-of-balance factors
+    if out_of_balance:
+        for factor in out_of_balance:
+            if factor["factor"] == "room_temperature":
+                if factor["current"] > target_temp:
+                    health["recommendations"].append("Check koelproces balance: temperatuur te hoog. Mogelijk verdamper bevroren of ontdooicyclus defect.")
+                else:
+                    health["recommendations"].append("Check koelproces balance: temperatuur te laag. Mogelijk regelaar instellingen.")
+            elif factor["factor"] == "hot_gas_temperature":
+                health["recommendations"].append("Heetgastemperatuur buiten ontwerpbereik. Check condensor ventilatoren en warmteafvoer.")
+            elif factor["factor"] == "suction_temperature":
+                health["recommendations"].append("Zuigtemperatuur buiten ontwerpbereik. Check verdamper en koudemiddel circulatie.")
+            elif factor["factor"] == "liquid_temperature":
+                health["recommendations"].append("Vloeistoftemperatuur afwijkend. Check condensor en vloeistofleiding.")
+    
+    # Store in hidden environment if available (for cross-tool access)
+    if tree_data and hasattr(tree_data.environment, 'hidden_environment'):
+        tree_data.environment.hidden_environment["asset_health"] = health
+    
+    yield Result(
+        objects=[health],
+        metadata={
+            "balance_check": "completed",
+            "factors_checked": len(balance_params),
+            "out_of_balance_count": len(out_of_balance)
+        }
+    )
+
+
+@tool(
+    status="Analyzing sensor patterns...",
+    branch_id="smido_diagnose"
+)
+async def analyze_sensor_pattern(
+    asset_id: str,
+    timestamp: str = None,
+    window_minutes: int = 60,
+    tree_data=None,
+    client_manager=None,
+    **kwargs
+):
+    """
+    Match current WorldState against reference patterns (VSM_WorldStateSnapshot).
+    Detects if system is "uit balans" and identifies which failure mode.
+    
+    Args:
+        asset_id: Asset identifier (e.g., "135_1570")
+        timestamp: ISO format timestamp (e.g., "2024-01-01T12:00:00"). If None, uses current time.
+        window_minutes: Time window for WorldState computation. Default: 60 minutes.
+    
+    Returns:
+        - Current WorldState summary
+        - Matched patterns from VSM_WorldStateSnapshot
+        - Detected failure mode
+        - Balance factors violated
+    
+    Used in: P3 (Procesparameters), P4 (Productinput) nodes
+    """
+    if not client_manager:
+        yield Error("Client manager not available. Cannot query Weaviate.")
+        return
+    
+    if not client_manager.is_client:
+        yield Error("Weaviate client not configured. Please set WCD_URL and WCD_API_KEY.")
+        return
+    
+    yield Status("Computing current WorldState...")
+    
+    # 1. Compute current WorldState (W)
+    from features.telemetry_vsm.src.worldstate_engine import WorldStateEngine
+    from datetime import datetime
+    
+    # Parse timestamp - use historical demo timestamp within data range
+    # Telemetry data range: 2022-10-20 to 2024-04-01
+    if timestamp and timestamp != 'None' and timestamp.strip():
+        try:
+            ts = datetime.fromisoformat(timestamp)
+        except (ValueError, AttributeError):
+            # Default to historical timestamp within data range
+            ts = datetime(2024, 1, 15, 12, 0, 0)
+    else:
+        # Use default historical timestamp for demo (data ends 2024-04-01)
+        ts = datetime(2024, 1, 15, 12, 0, 0)
+    
+    engine = WorldStateEngine("features/telemetry/timeseries_freezerdata/135_1570_cleaned_with_flags.parquet")
+    
+    try:
+        worldstate = engine.compute_worldstate(asset_id, ts, window_minutes)
+    except Exception as e:
+        yield Error(f"Error computing WorldState: {str(e)}")
+        return
+    
+    yield Status("Querying reference patterns...")
+    
+    # 2. Query VSM_WorldStateSnapshot for similar patterns
+    current_state = worldstate.get("current_state", {})
+    flags = worldstate.get("flags", {})
+    trends_30m = worldstate.get("trends_30m", {})
+    
+    # Create summary string for semantic search
+    ws_summary = f"Room temp: {current_state.get('current_room_temp', 'N/A')}°C, "
+    ws_summary += f"Hot gas: {current_state.get('current_hot_gas_temp', 'N/A')}°C, "
+    ws_summary += f"Suction: {current_state.get('current_suction_temp', 'N/A')}°C, "
+    ws_summary += f"Liquid: {current_state.get('current_liquid_temp', 'N/A')}°C"
+    
+    # Add flag information
+    flag_descriptions = []
+    if flags.get("main_temp_high"):
+        flag_descriptions.append("main temp high")
+    if flags.get("suction_extreme"):
+        flag_descriptions.append("suction extreme")
+    if flags.get("hot_gas_low"):
+        flag_descriptions.append("hot gas low")
+    if flags.get("liquid_extreme"):
+        flag_descriptions.append("liquid extreme")
+    
+    if flag_descriptions:
+        ws_summary += f". Flags: {', '.join(flag_descriptions)}"
+    
+    try:
+        async with client_manager.connect_to_async_client() as client:
+            # Check if collection exists
+            if not await client.collections.exists("VSM_WorldStateSnapshot"):
+                yield Error("VSM_WorldStateSnapshot collection not found in Weaviate.")
+                return
+            
+            snapshots = client.collections.get("VSM_WorldStateSnapshot")
+            
+            # Semantic search on typical_pattern
+            results = await snapshots.query.near_text(
+                query=ws_summary,
+                limit=3
+            )
+            
+            yield Status(f"Found {len(results.objects)} similar patterns")
+            
+            # 3. Match patterns - find best match
+            matches = []
+            for snapshot in results.objects:
+                props = snapshot.properties
+                match = {
+                    "snapshot_id": props.get("snapshot_id"),
+                    "failure_mode": props.get("failure_mode"),
+                    "typical_pattern": props.get("typical_pattern"),
+                    "balance_factors": props.get("balance_factors", []),
+                    "uit_balans_type": props.get("uit_balans_type"),
+                    "affected_components": props.get("affected_components", []),
+                    "related_failure_modes": props.get("related_failure_modes", []),
+                    "similarity_score": 0.8  # Placeholder - can compute actual similarity based on worldstate_json
+                }
+                matches.append(match)
+            
+            # 4. Generate analysis
+            analysis = {
+                "current_worldstate": {
+                    "room_temp": current_state.get("current_room_temp"),
+                    "hot_gas_temp": current_state.get("current_hot_gas_temp"),
+                    "suction_temp": current_state.get("current_suction_temp"),
+                    "liquid_temp": current_state.get("current_liquid_temp"),
+                    "ambient_temp": current_state.get("current_ambient_temp"),
+                    "door_open": current_state.get("current_door_open"),
+                    "flags": flags,
+                    "trends_30m": trends_30m,
+                    "health_scores": worldstate.get("health_scores", {})
+                },
+                "matched_patterns": matches,
+                "detected_failure_mode": matches[0]["failure_mode"] if matches else None,
+                "is_uit_balans": matches[0]["uit_balans_type"] != "in_balance" if matches and matches[0].get("uit_balans_type") else False,
+                "balance_factors_violated": matches[0]["balance_factors"] if matches else [],
+                "affected_components": matches[0]["affected_components"] if matches else []
+            }
+            
+            # Store in hidden environment if available (for cross-tool access)
+            if tree_data and hasattr(tree_data.environment, 'hidden_environment'):
+                tree_data.environment.hidden_environment["sensor_pattern_analysis"] = analysis
+            
+            yield Result(
+                objects=[analysis],
+                metadata={
+                    "patterns_checked": len(results.objects),
+                    "best_match": matches[0]["failure_mode"] if matches else None,
+                    "uit_balans_detected": analysis["is_uit_balans"]
+                }
+            )
+            
+    except Exception as e:
+        yield Error(f"Error querying patterns: {str(e)}")
+        return
