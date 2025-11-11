@@ -12,9 +12,9 @@ def analyze_manual_files():
     base_path = Path(__file__).parent.parent / "features" / "extraction" / "production_output"
 
     manuals = [
-        "storingzoeken-koeltechniek_theorie",
-        "koelinstallaties-inspectie-en-onderhoud_theorie",
-        "koelinstallaties-opbouw-en-werking_theorie"
+        "storingzoeken-koeltechniek_theorie_179",
+        "koelinstallaties-inspectie-en-onderhoud_theorie_168",
+        "koelinstallaties-opbouw-en-werking_theorie_2016"
     ]
 
     results = {}

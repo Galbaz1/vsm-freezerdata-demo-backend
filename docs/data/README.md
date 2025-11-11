@@ -52,11 +52,15 @@ This directory contains complete data analysis documentation for the VSM (Virtua
 - **Key flag**: `_flag_main_temp_high` (0.54% of data)
 
 ### Manuals
-- **3 manuals**: Troubleshooting, Inspection & Maintenance, Structure & Operation
+- **3 manuals** (Production): Troubleshooting, Inspection & Maintenance, Structure & Operation
+- **Location**: `features/extraction/production_output/` (current versions)
+- **Archive**: Previous versions stored in `features/extraction/archive_output/` (reprocessed Nov 2024)
 - **Primary**: "Storingzoeken koeltechniek" (29 pages) - Contains SMIDO methodology
-- **Total chunks**: 300 (text + visual)
-- **Estimated sections**: 110-140 logical sections for Weaviate
+- **Total chunks**: 922 (689 text + 233 visual)
+- **Total pages**: 253 pages
+- **Estimated sections**: 150-200 logical sections for Weaviate (increased due to expanded opbouw-en-werking manual)
 - **SMIDO explicit**: All steps documented with examples
+- **Note**: The `opbouw-en-werking` manual was significantly expanded from 18 to 163 pages during reprocessing
 
 ### Vlogs (COMPLETE! ✅)
 - **5 complete cases**: 15 videos (3 clips per case) + 5 aggregated case summaries

@@ -1,38 +1,43 @@
-# CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
+This file provides guidance to the agent when working with code in this repository.
 
 ## Project Overview
 
 **Virtual Service Mechanic (VSM) Demo** - An AI agent built on the Elysia framework that helps junior cooling technicians troubleshoot freezer/cooling cell installations using the SMIDO methodology.
 
-**Tech Stack**: Python 3.11-3.12, FastAPI, DSPy, Weaviate (vector DB), pandas (telemetry analysis)
+**Tech Stack**: Python 3.12.12, FastAPI, DSPy, Weaviate (vector DB), pandas (telemetry analysis)
 
 ---
 
-## Development Setup
+## ⚠️ CRITICAL: Environment Setup
 
-### Environment
+**BEFORE RUNNING ANY PYTHON COMMANDS**, you MUST activate the conda environment:
 
 ```bash
-# Using conda (recommended)
-conda create -n vsm-hva python=3.12
-conda activate vsm-hva
-pip install -e .
-
-# Or using venv
-python3.12 -m venv .venv
-source .venv/bin/activate
-pip install -e .
+source scripts/activate_env.sh
 ```
+
+**Why:** This repository requires Python 3.12.12 from the `vsm-hva` conda environment. The system may have Python 3.13 or other versions, but this codebase specifically needs 3.12.
+
+**Verification:**
+```bash
+source scripts/activate_env.sh
+python3 --version  # Should show: Python 3.12.12
+which python3      # Should point to: .../anaconda3/envs/vsm-hva/bin/python3
+```
+
+**Always activate the environment before:**
+- Running Python scripts (`python3 scripts/*.py`)
+- Running tests (`pytest`)
+- Installing packages (`pip install`)
+- Running Elysia commands (`elysia start`)
+
+---
 
 ### Configuration
 
-Copy `.env.example` to `.env` and configure:
-- `WCD_URL` and `WCD_API_KEY` - Weaviate Cloud cluster
-- `GOOGLE_API_KEY` - For Gemini (vlog processing)
-- `OPENAI_API_KEY` or `OPENROUTER_API_KEY` - For LLM models
-- Model configuration: `BASE_MODEL`, `COMPLEX_MODEL`, providers
+All required API keys and configuration are stored in the `.env` file at root of the repository (which may not be visible tot the agent due to security reasons).
 
 ### Running Elysia
 
@@ -52,26 +57,38 @@ elysia start --port 8080
 
 ### Data Analysis Scripts
 
+**⚠️ Always activate environment first:**
+```bash
+source scripts/activate_env.sh
+```
+
+Then run scripts:
 ```bash
 # Analyze telemetry parquet files
-python scripts/analyze_telemetry.py
+python3 scripts/analyze_telemetry.py
 
 # Analyze parsed manuals
-python scripts/analyze_manuals.py
+python3 scripts/analyze_manuals.py
 
 # Process vlogs with Gemini 2.5 Pro
-python features/vlogs_vsm/src/process_vlogs.py
+python3 features/vlogs_vsm/src/process_vlogs.py
 # Interactive: choose 1 video (test) or all 15 videos
 
 # Preprocess Weaviate collections
-python scripts/preprocess_collections.py
+python3 scripts/preprocess_collections.py
 
 # Seed test data
-python scripts/seed_assets_alarms.py
+python3 scripts/seed_assets_alarms.py
 ```
 
 ### Testing
 
+**⚠️ Always activate environment first:**
+```bash
+source scripts/activate_env.sh
+```
+
+Then run tests:
 ```bash
 # Run all tests
 pytest

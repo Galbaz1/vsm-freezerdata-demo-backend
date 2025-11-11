@@ -25,7 +25,7 @@ Store logical sections from the cooling technology manuals, enabling:
 | Property | Type | Description | Indexing | Example |
 |----------|------|-------------|----------|---------|
 | `section_id` | TEXT | Unique identifier for this section | Filterable | `"smido_melding_001"` |
-| `manual_id` | TEXT | Source manual identifier | Filterable | `"storingzoeken-koeltechniek_theorie"` |
+| `manual_id` | TEXT | Source manual identifier | Filterable | `"storingzoeken-koeltechniek_theorie_179"` |
 | `manual_title` | TEXT | Human-readable manual name | Filterable | `"Troubleshooting Cooling Technology"` |
 | `chunk_ids` | TEXT[] | Array of chunk UUIDs that comprise this section | None | `["11cdb058-316e-44ba-a0fb-1903707c51e2", ...]` |
 
@@ -278,7 +278,7 @@ response = client.query.get(
 ```json
 {
   "section_id": "storingzoeken_smido_melding_001",
-  "manual_id": "storingzoeken-koeltechniek_theorie",
+  "manual_id": "storingzoeken-koeltechniek_theorie_179",
   "manual_title": "Storingzoeken koeltechniek",
   "chunk_ids": [
     "e9a21e80-0792-4cf3-b85d-ad5d495679e3",
@@ -516,7 +516,7 @@ This is very small and easily manageable in Weaviate.
 - Better for pinpoint references
 
 **Cons**:
-- More objects (300+ chunks vs ~140 sections)
+- More objects (922 chunks vs ~150-200 sections)
 - May retrieve partial information
 - Harder to maintain context
 

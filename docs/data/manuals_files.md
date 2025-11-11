@@ -4,15 +4,41 @@
 
 This document catalogs all parsed manual files found in the repository. The manuals are technical training materials from ROVC (Dutch cooling technology training organization) and have been parsed using Landing AI.
 
-## Available Manuals
+**Status**: Manuals were reprocessed in November 2024. Current production versions are in `production_output/`, previous versions are archived in `archive_output/`.
 
-| Manual Name | Dutch Title | English Translation | Pages | Text Chunks | Visual Chunks | Version |
-|-------------|-------------|---------------------|-------|-------------|---------------|---------|
-| `storingzoeken-koeltechniek_theorie` | Storingzoeken koeltechniek | Troubleshooting cooling technology | 29 | 74 | 9 | 20 maart 2018 |
-| `koelinstallaties-inspectie-en-onderhoud_theorie` | Koelinstallaties inspectie en onderhoud | Cooling installations inspection and maintenance | 61 | 188 | 41 | 20 maart 2018 |
-| `koelinstallaties-opbouw-en-werking_theorie` | Koelinstallaties opbouw en werking | Cooling installations structure and operation | 18 | 38 | 15 | 7 januari 2021 |
+## Current Production Manuals
 
-**Total**: 3 manuals, 108 pages, 300 text chunks, 65 visual chunks
+| Manual Name | Dutch Title | English Translation | Pages | Text Chunks | Visual Chunks | Version | Location |
+|-------------|-------------|---------------------|-------|-------------|---------------|---------|----------|
+| `storingzoeken-koeltechniek_theorie_179` | Storingzoeken koeltechniek | Troubleshooting cooling technology | 29 | 79 | 11 | 20 maart 2018 | `production_output/` |
+| `koelinstallaties-inspectie-en-onderhoud_theorie_168` | Koelinstallaties inspectie en onderhoud | Cooling installations inspection and maintenance | 61 | 188 | 43 | 20 maart 2018 | `production_output/` |
+| `koelinstallaties-opbouw-en-werking_theorie_2016` | Koelinstallaties opbouw en werking | Cooling installations structure and operation | 163 | 422 | 179 | 7 januari 2021 | `production_output/` |
+
+**Total (Production)**: 3 manuals, 253 pages, 689 text chunks, 233 visual chunks
+
+---
+
+## Archived Manuals (Previous Versions)
+
+Previous versions of the manuals are stored in `features/extraction/archive_output/` for reference:
+
+| Manual Name | Pages | Text Chunks | Visual Chunks | Status |
+|-------------|-------|-------------|---------------|--------|
+| `storingzoeken-koeltechniek_theorie` | 29 | 74 | 9 | Archived (superseded by `_179`) |
+| `koelinstallaties-inspectie-en-onderhoud_theorie` | 61 | 188 | 41 | Archived (superseded by `_168`) |
+| `koelinstallaties-opbouw-en-werking_theorie` | 18 | 38 | 15 | Archived (superseded by `_2016`) |
+
+**Total (Archived)**: 3 manuals, 108 pages, 300 text chunks, 65 visual chunks
+
+### Changes Summary
+
+| Manual | Pages Change | Text Chunks Change | Visual Chunks Change | Notes |
+|--------|--------------|-------------------|---------------------|-------|
+| storingzoeken | 29 → 29 (no change) | 74 → 79 (+5) | 9 → 11 (+2) | Minor improvements |
+| inspectie-en-onderhoud | 61 → 61 (no change) | 188 → 188 (no change) | 41 → 43 (+2) | Minor improvements |
+| opbouw-en-werking | **18 → 163 (+145)** | **38 → 422 (+384)** | **15 → 179 (+164)** | **Significantly expanded** |
+
+**Overall**: 108 → 253 pages (+145), 300 → 689 text chunks (+389), 65 → 233 visual chunks (+168)
 
 ---
 
@@ -76,53 +102,68 @@ For each manual, the following file formats are available in `features/extractio
 
 ## Directory Structure
 
+### Production Output (Current)
+
 ```
 features/extraction/production_output/
-├── storingzoeken-koeltechniek_theorie/
-│   ├── storingzoeken-koeltechniek_theorie/        [subdirectory with assets]
-│   ├── storingzoeken-koeltechniek_theorie.meta.json
-│   ├── storingzoeken-koeltechniek_theorie.parsed.json
-│   ├── storingzoeken-koeltechniek_theorie.parsed.md
-│   ├── storingzoeken-koeltechniek_theorie.pages.jsonl
-│   ├── storingzoeken-koeltechniek_theorie.text_chunks.jsonl
-│   ├── storingzoeken-koeltechniek_theorie.visual_chunks.jsonl
-│   └── storingzoeken-koeltechniek_theorie.qa.json
-├── koelinstallaties-inspectie-en-onderhoud_theorie/
+├── storingzoeken-koeltechniek_theorie_179/
+│   ├── storingzoeken-koeltechniek_theorie_179/        [subdirectory with assets]
+│   ├── storingzoeken-koeltechniek_theorie_179.meta.json
+│   ├── storingzoeken-koeltechniek_theorie_179.parsed.json
+│   ├── storingzoeken-koeltechniek_theorie_179.parsed.md
+│   ├── storingzoeken-koeltechniek_theorie_179.pages.jsonl
+│   ├── storingzoeken-koeltechniek_theorie_179.text_chunks.jsonl
+│   ├── storingzoeken-koeltechniek_theorie_179.visual_chunks.jsonl
+│   └── storingzoeken-koeltechniek_theorie_179.qa.json
+├── koelinstallaties-inspectie-en-onderhoud_theorie_168/
 │   └── [same file structure]
-└── koelinstallaties-opbouw-en-werking_theorie/
+└── koelinstallaties-opbouw-en-werking_theorie_2016/
     └── [same file structure]
 ```
+
+### Archive Output (Previous Versions)
+
+```
+features/extraction/archive_output/
+├── storingzoeken-koeltechniek_theorie/        [old version, archived]
+├── koelinstallaties-inspectie-en-onderhoud_theorie/  [old version, archived]
+└── koelinstallaties-opbouw-en-werking_theorie/       [old version, archived]
+```
+
+**Note**: The archive folder contains the previous versions of the manuals that were replaced during reprocessing in November 2024. These are kept for reference but should not be used for new development.
 
 ---
 
 ## File Sizes
 
-### storingzoeken-koeltechniek_theorie (Troubleshooting)
-- `.parsed.json`: 118 KB
-- `.parsed.md`: 40 KB
-- `.text_chunks.jsonl`: 63 KB
-- `.visual_chunks.jsonl`: 11 KB
-- `.pages.jsonl`: 45 KB
+### storingzoeken-koeltechniek_theorie_179 (Troubleshooting)
+- `.parsed.json`: ~120 KB (estimated)
+- `.parsed.md`: ~40 KB (estimated)
+- `.text_chunks.jsonl`: ~65 KB (79 chunks)
+- `.visual_chunks.jsonl`: ~12 KB (11 chunks)
+- `.pages.jsonl`: ~45 KB (29 pages)
 
-### koelinstallaties-inspectie-en-onderhoud_theorie (Inspection & Maintenance)
-- `.parsed.json`: 315 KB (largest)
-- `.parsed.md`: 106 KB
-- `.text_chunks.jsonl`: 162 KB
-- `.visual_chunks.jsonl`: 44 KB
-- `.pages.jsonl`: 120 KB
+### koelinstallaties-inspectie-en-onderhoud_theorie_168 (Inspection & Maintenance)
+- `.parsed.json`: ~320 KB (estimated)
+- `.parsed.md`: ~110 KB (estimated)
+- `.text_chunks.jsonl`: ~165 KB (188 chunks)
+- `.visual_chunks.jsonl`: ~46 KB (43 chunks)
+- `.pages.jsonl`: ~125 KB (61 pages)
 
-### koelinstallaties-opbouw-en-werking_theorie (Structure & Operation)
-- `.parsed.json`: 91 KB
-- `.parsed.md`: 33 KB
-- `.text_chunks.jsonl`: 32 KB
-- `.visual_chunks.jsonl`: 24 KB
-- `.pages.jsonl`: 37 KB
+### koelinstallaties-opbouw-en-werking_theorie_2016 (Structure & Operation)
+- `.parsed.json`: ~500 KB (estimated, 163 pages)
+- `.parsed.md`: ~200 KB (estimated)
+- `.text_chunks.jsonl`: ~350 KB (422 chunks)
+- `.visual_chunks.jsonl`: ~150 KB (179 chunks)
+- `.pages.jsonl`: ~200 KB (163 pages)
+
+**Note**: The opbouw-en-werking manual was significantly expanded from 18 to 163 pages in the reprocessed version, resulting in a much larger number of chunks (from 53 to 601 total).
 
 ---
 
 ## Content Overview by Manual
 
-### 1. Troubleshooting Cooling Technology (`storingzoeken-koeltechniek_theorie`)
+### 1. Troubleshooting Cooling Technology (`storingzoeken-koeltechniek_theorie_179`)
 
 **Focus**: Systematic troubleshooting methodology for cooling installations
 
@@ -137,7 +178,7 @@ features/extraction/production_output/
 
 **Relevance**: **PRIMARY** manual for VSM demo - contains the SMIDO methodology
 
-### 2. Cooling Installations Inspection & Maintenance (`koelinstallaties-inspectie-en-onderhoud_theorie`)
+### 2. Cooling Installations Inspection & Maintenance (`koelinstallaties-inspectie-en-onderhoud_theorie_168`)
 
 **Focus**: Inspection, maintenance, and repair procedures
 
@@ -152,17 +193,22 @@ features/extraction/production_output/
 
 **Relevance**: **SECONDARY** - useful for component-specific maintenance knowledge
 
-### 3. Cooling Installations Structure & Operation (`koelinstallaties-opbouw-en-werking_theorie`)
+### 3. Cooling Installations Structure & Operation (`koelinstallaties-opbouw-en-werking_theorie_2016`)
 
 **Focus**: Fundamentals of cooling system design and operation
+
+**Size**: **163 pages** (significantly expanded from previous 18-page version)
 
 **Key content**:
 - Refrigeration cycle basics
 - Component descriptions (compressor, evaporator, condenser, expansion valve)
 - System configurations
 - Operating principles
+- Extensive technical diagrams and illustrations (179 visual chunks)
 
 **Relevance**: **TERTIARY** - foundational knowledge, useful for understanding system behavior
+
+**Note**: This manual was reprocessed and expanded significantly. The new version contains 422 text chunks and 179 visual chunks (compared to 38 and 15 in the previous version), making it the largest manual by chunk count.
 
 ---
 

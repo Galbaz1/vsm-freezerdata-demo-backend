@@ -49,7 +49,7 @@ The `.parsed.json` files have:
 
 ## Content Structure Analysis
 
-### 1. Troubleshooting Manual (`storingzoeken-koeltechniek_theorie`)
+### 1. Troubleshooting Manual (`storingzoeken-koeltechniek_theorie_179`)
 
 #### Document Outline (from Table of Contents)
 
@@ -101,9 +101,9 @@ The manual explicitly covers each SMIDO step:
 
 ---
 
-### 2. Inspection & Maintenance Manual (`koelinstallaties-inspectie-en-onderhoud_theorie`)
+### 2. Inspection & Maintenance Manual (`koelinstallaties-inspectie-en-onderhoud_theorie_168`)
 
-**Size**: 61 pages, 188 text chunks, 41 visual chunks
+**Size**: 61 pages, 188 text chunks, 43 visual chunks
 
 **Structure**: (Need to examine table of contents - likely includes)
 - Safety procedures
@@ -124,9 +124,11 @@ The manual explicitly covers each SMIDO step:
 
 ---
 
-### 3. Structure & Operation Manual (`koelinstallaties-opbouw-en-werking_theorie`)
+### 3. Structure & Operation Manual (`koelinstallaties-opbouw-en-werking_theorie_2016`)
 
-**Size**: 18 pages, 38 text chunks, 15 visual chunks
+**Size**: 163 pages, 422 text chunks, 179 visual chunks
+
+**Note**: This manual was significantly expanded in the reprocessed version (from 18 to 163 pages), resulting in a much larger number of chunks.
 
 **Structure**: (Likely includes)
 - Refrigeration cycle fundamentals
@@ -186,7 +188,7 @@ To create meaningful `ManualSections` for Weaviate, we should **group related ch
 **Section 1: SMIDO Melding**
 - **Chunks**: All chunks from "# Melding" heading through end of that subsection
 - **Properties**:
-  - `manual_id`: "storingzoeken-koeltechniek_theorie"
+  - `manual_id`: "storingzoeken-koeltechniek_theorie_179"
   - `section_id`: "smido_melding"
   - `title`: "Melding"
   - `body_text`: Combined text of all chunks
@@ -433,10 +435,10 @@ Based on chunk counts and structure:
 
 | Manual | Estimated Sections | Reasoning |
 |--------|-------------------|-----------|
-| Troubleshooting | **30-40 sections** | ~3 chunks per section average |
-| Inspection & Maintenance | **60-80 sections** | Larger, more detailed manual |
-| Structure & Operation | **15-25 sections** | Smaller, focused manual |
-| **Total** | **~110-140 sections** | For initial ingestion |
+| Troubleshooting | **30-40 sections** | ~3 chunks per section average (79 text chunks) |
+| Inspection & Maintenance | **60-80 sections** | Larger, more detailed manual (188 text chunks) |
+| Structure & Operation | **80-120 sections** | Expanded manual with 422 text chunks (was 15-25) |
+| **Total** | **~170-240 sections** | Increased due to expanded opbouw-en-werking manual |
 
 Each section would be a document in the `ManualSections` Weaviate collection.
 

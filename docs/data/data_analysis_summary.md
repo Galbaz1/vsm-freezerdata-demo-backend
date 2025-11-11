@@ -80,13 +80,19 @@ This document answers all key questions from [todo.md](../../todo.md) about the 
 
 **Format**: Landing AI processed JSON/JSONL/Markdown
 
-**Three manuals available**:
+**Status**: Manuals were reprocessed in November 2024. Current versions are in `production_output/`, previous versions archived in `archive_output/`.
+
+**Three manuals available (Production)**:
 
 | Manual | Pages | Text Chunks | Visual Chunks | Focus |
 |--------|-------|-------------|---------------|-------|
-| **storingzoeken-koeltechniek_theorie** | 29 | 74 | 9 | **SMIDO methodology** (PRIMARY) |
-| koelinstallaties-inspectie-en-onderhoud_theorie | 61 | 188 | 41 | Inspection & maintenance |
-| koelinstallaties-opbouw-en-werking_theorie | 18 | 38 | 15 | System fundamentals |
+| **storingzoeken-koeltechniek_theorie_179** | 29 | 79 | 11 | **SMIDO methodology** (PRIMARY) |
+| koelinstallaties-inspectie-en-onderhoud_theorie_168 | 61 | 188 | 43 | Inspection & maintenance |
+| koelinstallaties-opbouw-en-werking_theorie_2016 | 163 | 422 | 179 | System fundamentals |
+
+**Total**: 253 pages, 689 text chunks, 233 visual chunks
+
+**Note**: The `opbouw-en-werking` manual was significantly expanded from 18 to 163 pages during reprocessing, increasing from 53 to 601 total chunks.
 
 **Structure per manual**:
 - `.meta.json` - Document metadata (title, pages, version)
@@ -382,10 +388,15 @@ features/
 ├── telemetry/timeseries_freezerdata/
 │   ├── 135_1570_cleaned.parquet (785K rows, 9 cols)
 │   └── 135_1570_cleaned_with_flags.parquet (785K rows, 15 cols) ⭐
-├── extraction/production_output/
-│   ├── storingzoeken-koeltechniek_theorie/ ⭐ (SMIDO)
-│   ├── koelinstallaties-inspectie-en-onderhoud_theorie/
-│   └── koelinstallaties-opbouw-en-werking_theorie/
+├── extraction/
+│   ├── production_output/  ⭐ (Current versions)
+│   │   ├── storingzoeken-koeltechniek_theorie_179/ ⭐ (SMIDO)
+│   │   ├── koelinstallaties-inspectie-en-onderhoud_theorie_168/
+│   │   └── koelinstallaties-opbouw-en-werking_theorie_2016/
+│   └── archive_output/  (Previous versions, archived Nov 2024)
+│       ├── storingzoeken-koeltechniek_theorie/
+│       ├── koelinstallaties-inspectie-en-onderhoud_theorie/
+│       └── koelinstallaties-opbouw-en-werking_theorie/
 └── vlogs_vsm/
     ├── A1_1.mov, A1_2.mov, A1_3.mov
     ├── A2_1.mov, ..., A5_3.mov
