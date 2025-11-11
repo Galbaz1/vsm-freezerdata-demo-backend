@@ -418,22 +418,53 @@ async def query_vlog_cases(
     client_manager=None,
     **kwargs
 ):
-    """
-    Query vlog cases for similar problem→solution workflows.
-    Returns both VSM_VlogCase (aggregated) and VSM_VlogClip (detailed steps).
-    
-    Args:
-        problem_description: Natural language description of the problem
-        failure_mode: Filter by failure mode (e.g., "ingevroren_verdamper")
-        component: Filter by component name
-        smido_step: Filter by SMIDO step
-        limit: Maximum number of cases to return. Default: 3
-    
-    Returns:
-        - List of vlog case objects with related clips
-    
-    Used in: O (Onderdelen) node
-    """
+    """Query vlog cases for similar problem→solution workflows - learn from past repairs.
+
+When to use:
+- O (ONDERDELEN): After identifying failure mode, to find repair procedures
+- When you've completed P1-P4 checks and need component-specific guidance
+- To show M a similar case with step-by-step solution
+
+What it returns:
+- VSM_VlogCase objects: Complete problem→triage→solution workflows (A1-A5)
+- Each case includes: problem_summary, root_cause, solution_summary, transcript_nl
+- Cases are real troubleshooting sessions with Dutch language
+- Related components, failure modes, SMIDO steps tagged
+
+Output interpretation:
+- case_id (A1-A5): Reference to specific troubleshooting video
+- problem_summary: What was wrong initially
+- root_cause: What caused the problem (component + contributing factors)
+- solution_summary: Step-by-step fix that worked
+- transcript_nl: Full Dutch narrative of troubleshooting session
+
+How to explain to M:
+"Ik zoek nu vergelijkbare cases in de database..."
+[after tool runs]
+"Ik heb case [ID] gevonden: [problem]. Root cause was: [cause]. Oplossing: [steps]. Laten we dit ook checken."
+
+Example (A3 frozen evaporator):
+"Case A3 gevonden (frozen evaporator). Probleem: Koelcel bereikt temp niet, verdamper vol ijs.
+Root cause: Ontdooitimer op 'handmatig' + vervuilde luchtkanalen.
+Oplossing: 1) Handmatig ontdooien 2) Luchtkanalen reinigen 3) Timer reset 4) Test cyclus."
+
+Available cases:
+- A1: Condenser fan (pressostaat + electrical issue)
+- A2: Expansion valve blockage
+- A3: Frozen evaporator (defrost timer + dirty ducts) ⭐ Primary demo case
+- A4: Controller settings incorrect
+- A5: Clogged refrigerant line (filter-dryer)
+
+Args:
+    problem_description: Natural language description (e.g., "koelcel te warm verdamper bevroren")
+    failure_mode: Filter by failure mode (e.g., "ingevroren_verdamper")
+    component: Filter by component name (e.g., "verdamper", "condensor")
+    smido_step: Filter by SMIDO step
+    limit: Maximum number of cases. Default: 3.
+
+Returns:
+    List of vlog case dicts with problem_summary, root_cause, solution_summary, transcript_nl.
+"""
     if not client_manager:
         yield Error("Client manager not available. Cannot query Weaviate.")
         return
@@ -528,20 +559,41 @@ async def compute_worldstate(
     tree_data=None,
     **kwargs
 ):
-    """
-    Compute WorldState (W) features from telemetry parquet data.
-    Returns 60+ features including current state, trends, flags, and health scores.
-    
-    Args:
-        asset_id: Asset identifier (e.g., "135_1570")
-        timestamp: ISO format timestamp (e.g., "2024-01-01T12:00:00"). If None, uses current time.
-        window_minutes: Time window for computation. Default: 60 minutes.
-    
-    Returns:
-        - WorldState dictionary with current_state, trends_30m, trends_2h, flags, incidents, health_scores
-    
-    Used in: P3 (Procesparameters), P4 (Productinput) SMIDO nodes
-    """
+    """Compute WorldState (W) - 58+ sensor features from telemetry parquet.
+
+When to use:
+- P3 (PROCESPARAMETERS): When you need detailed sensor analysis
+- P4 (PRODUCTINPUT): To check environmental trends
+- After M reports symptom, to correlate with sensor data
+
+What it computes:
+- Current readings (temps, pressures, compressor status)
+- Trends (30min, 2h, 24h windows) - rising/falling?
+- Flags (_flag_main_temp_high, _flag_suction_extreme, etc.)
+- Health scores (0-100, lower = worse)
+- Anomaly detection
+
+Output interpretation:
+- If _flag_main_temp_high=True → Koelcel te warm
+- If _flag_suction_extreme=True → Mogelijk bevroren verdamper
+- If trend_2h positive → Temperatuur stijgt afgelopen 2 uur
+
+How to explain to M:
+"Ik ga nu de sensordata analyseren van de afgelopen [window_minutes] minuten..."
+[after tool runs]
+"Oké, ik zie: [key findings]. Dit betekent: [interpretation]."
+
+Example (A3 frozen evaporator):
+"Ik analyseer sensordata... Verdampertemp -40°C (te koud door ijs), zuigdruk extreem laag, koelcel temp stijgt 2.8°C/uur. Dit patroon = bevroren verdamper."
+
+Args:
+    asset_id: Asset identifier (e.g., "135_1570")
+    timestamp: ISO format timestamp (e.g., "2024-01-01T12:00:00"). If None, uses historical demo timestamp.
+    window_minutes: Time window for computation. Default: 60 minutes.
+
+Returns:
+    WorldState dict with 58+ computed features including current_state, trends, flags, health_scores.
+"""
     yield Status(f"Loading telemetry data for asset {asset_id}...")
     
     from features.telemetry_vsm.src.worldstate_engine import WorldStateEngine
@@ -598,21 +650,45 @@ async def get_asset_health(
     client_manager=None,
     **kwargs
 ):
-    """
-    Compare WorldState (W) against Context (C) - implements balance check.
-    
-    Args:
-        asset_id: Asset identifier (e.g., "135_1570")
-        timestamp: ISO format timestamp (e.g., "2024-01-01T12:00:00"). If None, uses current time.
-        window_minutes: Time window for WorldState computation. Default: 60 minutes.
-    
-    Returns:
-        - Health summary with overall_health status
-        - Out of balance factors (deviations from design parameters)
-        - Recommendations based on balance violations
-    
-    Used in: M (Melding), T (Technisch), P2 (Procesinstellingen) nodes
-    """
+    """Compare WorldState (W) against Context (C) - implements "Koelproces uit balans" check.
+
+When to use:
+- M (MELDING): Quick health check after symptom reported
+- T (TECHNISCH): Verify if system operating within design parameters
+- P2 (PROCESINSTELLINGEN): Compare actual vs design settings
+
+What it analyzes:
+- Computes current WorldState (W) from sensors
+- Loads commissioning data (Context C) - design parameters
+- Compares W vs C for: room temp, hot gas, suction, liquid temps
+- Identifies deviations from design (out of balance factors)
+
+Output interpretation:
+- overall_health="in_balance" → System operating within design
+- overall_health="uit_balans" → System outside design parameters
+- out_of_balance_factors → List of specific deviations with severity
+- recommendations → Suggested next steps based on balance issues
+
+How to explain to M:
+"Ik vergelijk nu de huidige metingen (WorldState) met de ontwerpwaarden (Context)..."
+[after tool runs]
+"Het systeem is [in_balance/uit_balans]. Ik zie: [factor] is [deviation]. Dit wijst op [interpretation]."
+
+Example (A3 frozen evaporator):
+"W vs C vergelijking toont: koelcel 0°C (design: -33°C) = 33°C afwijking. System UIT BALANS. Verdamper waarschijnlijk bevroren (blokkeert koeling)."
+
+Key concept:
+Een storing betekent NIET altijd een defect component. System kan "uit balans" zijn door:
+verkeerde instellingen, omgevingscondities, of capaciteit mismatch.
+
+Args:
+    asset_id: Asset identifier (e.g., "135_1570")
+    timestamp: ISO format timestamp. If None, uses historical demo timestamp.
+    window_minutes: Time window for WorldState computation. Default: 60.
+
+Returns:
+    Health summary dict with overall_health, out_of_balance_factors, recommendations.
+"""
     if not client_manager:
         yield Error("Client manager not available. Cannot query Weaviate.")
         return
@@ -785,23 +861,49 @@ async def analyze_sensor_pattern(
     client_manager=None,
     **kwargs
 ):
-    """
-    Match current WorldState against reference patterns (VSM_WorldStateSnapshot).
-    Detects if system is "uit balans" and identifies which failure mode.
-    
-    Args:
-        asset_id: Asset identifier (e.g., "135_1570")
-        timestamp: ISO format timestamp (e.g., "2024-01-01T12:00:00"). If None, uses current time.
-        window_minutes: Time window for WorldState computation. Default: 60 minutes.
-    
-    Returns:
-        - Current WorldState summary
-        - Matched patterns from VSM_WorldStateSnapshot
-        - Detected failure mode
-        - Balance factors violated
-    
-    Used in: P3 (Procesparameters), P4 (Productinput) nodes
-    """
+    """Match current WorldState against reference patterns - pattern recognition for failure modes.
+
+When to use:
+- P3 (PROCESPARAMETERS): After ComputeWorldState, to identify which failure mode
+- P4 (PRODUCTINPUT): To detect environmental/loading issues
+- When sensor readings are abnormal but you need to identify the specific problem
+
+What it does:
+- Computes current WorldState (W) with all sensor readings
+- Creates summary of current conditions + flags
+- Searches VSM_WorldStateSnapshot for similar patterns
+- Matches against 13 reference patterns (5 from vlogs + 8 from manual)
+- Returns best matching failure modes with similarity scores
+
+Output interpretation:
+- matched_patterns[0] → Best matching reference pattern
+- failure_mode → Detected problem (e.g., "ingevroren_verdamper", "te_weinig_koudemiddel")
+- balance_type → "factor_side", "component_defect", "settings_incorrect", or "in_balance"
+- similarity_score → How well current pattern matches reference (0-1)
+
+How to explain to M:
+"Ik vergelijk nu het huidige sensorpatroon met bekende storingen..."
+[after tool runs]
+"Dit patroon komt overeen met: [failure_mode]. Score: [similarity]. Dit is typisch wanneer [explanation]."
+
+Example (A3 frozen evaporator):
+"Patroon match: 'ingevroren_verdamper' (90% match). Typisch: room temp hoog, zuigdruk extreem laag, hot gas laag. Dit past bij bevroren verdamper die luchtcirculatie blokkeert."
+
+Reference patterns available:
+- ws_frozen_evaporator_A3: Frozen evaporator (defrost issue)
+- ws_condenser_fan_A1: Condenser fan problem
+- ws_expansion_valve_A2: Expansion valve blockage
+- ws_low_refrigerant_A5: Refrigerant leakage
+- 8 balance patterns from manual (overbelading, vuile condensor, etc.)
+
+Args:
+    asset_id: Asset identifier (e.g., "135_1570")
+    timestamp: ISO format timestamp. If None, uses historical demo timestamp.
+    window_minutes: Time window for WorldState computation. Default: 60.
+
+Returns:
+    Dict with current_worldstate_summary, matched_patterns (top 3), detected_failure_mode.
+"""
     if not client_manager:
         yield Error("Client manager not available. Cannot query Weaviate.")
         return
