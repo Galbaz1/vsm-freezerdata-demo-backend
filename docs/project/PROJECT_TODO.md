@@ -47,19 +47,26 @@
 
 ---
 
-### 2. Fix Diagram Search in SearchManualsBySMIDO
-**Problem**: Returns "0 related diagrams" despite 9 diagrams in Weaviate  
-**Impact**: Users don't see visual aids (schemas, flowcharts)
+### 2. ~~Fix Diagram Search in SearchManualsBySMIDO~~ ✅ COMPLETED
+**Problem**: ~~Returns "0 related diagrams"~~ → Now returns 3-6 diagrams per phase ✅  
+**Impact**: Users now see visual aids (schemas, flowcharts)
 
-**Tasks**:
-- [ ] Investigate `search_manuals_by_smido` lines ~160-189 (diagram fetching logic)
-- [ ] Verify VSM_Diagram objects have correct `smido_step` properties in Weaviate
-- [ ] Test Filter.by_property("diagram_id") query directly
-- [ ] Check if `related_diagram_ids` field is populated in VSM_ManualSections
-- [ ] Add debug logging to diagram fetch logic
-- [ ] Fix and re-test with SearchManuals queries
+**Completed Tasks**:
+- [x] Investigate diagram fetching logic ✅
+- [x] Discovered: VSM_Diagram doesn't exist → VSM_DiagramUserFacing + AgentInternal ✅
+- [x] Discovered: related_diagram_ids NOT populated (0%) ✅
+- [x] Implemented: SMIDO phase matching fallback ✅
+- [x] Implemented: Batch fetching with Filter.contains_any() ✅
+- [x] Fixed: Collection names (VSM_Diagram → UserFacing/AgentInternal) ✅
+- [x] Tested: 3 M-phase diagrams, 6 P3-phase diagrams ✅
 
-**File**: `elysia/api/custom_tools.py`
+**Result**: 
+- M phase: 3 diagrams
+- P3 phase: 6 diagrams
+- Performance: 731ms (acceptable)
+- Strategy: SMIDO phase matching (AgentInternal only)
+
+**Commit**: f2c7614 (Nov 12, 2025)
 
 ---
 
