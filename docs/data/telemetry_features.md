@@ -13,6 +13,41 @@ The features are organized into categories:
 
 ---
 
+## Time-Zone Aware Computation
+
+WorldStateEngine implements three time zones for demo purposes:
+
+### PAST (before today)
+Queries return real historical telemetry from parquet file.
+- Uses actual sensor readings from the rebased dataset (2024-07-21 to 2026-01-01)
+- All features computed from real parquet data
+- Use case: "What was the state on July 25, 2024?"
+
+### PRESENT (today)
+Queries return synthetic problem data resembling A3 frozen evaporator case.
+- Randomized per session for variation (cached within same engine instance)
+- Same critical flags as A3 (`flag_main_temp_high`, `flag_suction_extreme`)
+- Similar symptoms but different temperature/pressure values
+- Enables pattern matching to find A3 vlog case in troubleshooting workflows
+- Use case: "How are we doing?", "What's the current state?"
+
+**Synthetic data characteristics**:
+- Room temperature: -2.0°C to +1.5°C (critical, should be -33°C)
+- Hot gas: 18-22°C (too low, compressor struggling)
+- Suction: -42 to -38°C (extreme cold, frozen evaporator signature)
+- Same flags as A3: `flag_main_temp_high=True`, `flag_suction_extreme=True`
+- Door ratio: 0.4-0.7 (elevated but not stuck open like A3)
+
+### FUTURE (after today → 2026-01-01)
+Queries return real parquet data flagged as "predictive analytics".
+- Uses actual historical data from parquet (shifted forward)
+- Flagged with `is_future: true` and note about ML predictions
+- Use case: "What will the system look like next week?"
+
+**Implementation**: The `WorldStateEngine.compute_worldstate()` method automatically detects which time zone applies based on comparing the requested timestamp to `datetime.now()`.
+
+---
+
 ## 1. Current State Features (Instantaneous)
 
 These features represent the most recent measurement values.
@@ -314,7 +349,7 @@ This is feasible for real-time API queries from parquet files given:
 ```json
 {
   "asset_id": "135_1570",
-  "timestamp": "2024-12-31T14:30:00Z",
+  "timestamp": "2025-12-31T14:30:00Z",
   "current_state": {
     "room_temp": -28.5,
     "hot_gas_temp": 52.3,

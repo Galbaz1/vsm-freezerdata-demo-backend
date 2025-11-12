@@ -21,10 +21,10 @@ flowchart TD
   end
 
   subgraph Bootstrap[Bootstrapping & Config]
-    CFG["Config: branch_initialisation=empty<br/>feature_bootstrappers=['vsm_smido']<br/>agent_description/style/end_goal"]
-    REG["Bootstrap Registry<br/>features/vsm_tree/bootstrap.py"]
-    BS[vsm_smido bootstrap - adds branches + tools]
-    SEED["seed_default_config.py<br/>one-time config seeding"]
+    CFG[Config: branch_initialisation empty<br/>feature_bootstrappers vsm_smido<br/>agent_description style end_goal]
+    REG[Bootstrap Registry<br/>features vsm_tree bootstrap.py]
+    BS[vsm_smido bootstrap - adds branches and tools]
+    SEED[seed_default_config.py<br/>one-time config seeding]
   end
 
   subgraph Tools[Tools - Capabilities]
@@ -38,14 +38,14 @@ flowchart TD
   end
 
   subgraph Data[Data Stores]
-    WVT[("Weaviate<br/>VSM collections<br/>ELYSIA_CONFIG")]
-    PARQ[("Parquet Telemetry<br/>features/telemetry")]
-    ENR[("fd_assets_enrichment.json")]
-    LOGS[("elysia/logs<br/>sessions.jsonl")]
+    WVT[(Weaviate<br/>VSM collections<br/>ELYSIA_CONFIG)]
+    PARQ[(Parquet Telemetry<br/>features telemetry)]
+    ENR[(fd_assets_enrichment.json)]
+    LOGS[(elysia logs<br/>sessions.jsonl)]
   end
 
   %% Frontend → API → Manager → Tree
-  UI --> APIEntry --> TM -->|add_tree()| T
+  UI --> APIEntry --> TM -->|add_tree| T
   CFG --> TM
   REG --> TM
   SEED --> WVT

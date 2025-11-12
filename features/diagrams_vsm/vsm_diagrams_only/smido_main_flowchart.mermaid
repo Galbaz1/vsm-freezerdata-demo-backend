@@ -1,0 +1,50 @@
+%% ============================================================
+%% Diagram: SMIDO Methodology - High-Level Overview
+%% Purpose: Show M→T→I→D→O flow at a glance
+%% Usage: "I don't know where to start" - overview for users
+%% Created: 2024-11-11
+%% Revised: 2025-01-11 - Simplified for user clarity
+%% ============================================================
+
+flowchart LR
+    Start([Start<br/>Storing]) --> M
+    
+    M["<b>M</b><br/>Melding<br/><i>Symptoms</i>"] --> T
+    T["<b>T</b><br/>Technisch<br/><i>Visual Check</i>"] --> QuickFix{Direct<br/>Fix?}
+    
+    QuickFix -->|Ja| Fixed([Opgelost])
+    QuickFix -->|Nee| I
+    
+    I["<b>I</b><br/>Installatie<br/><i>Familiarity</i>"] --> D
+    
+    D["<b>D</b><br/>Diagnose<br/><i>4 P's</i>"] --> D_Detail
+    
+    subgraph D_Detail["Diagnose Detail"]
+        direction TB
+        P1[P1: Power] --> P2[P2: Settings]
+        P2 --> P3[P3: Parameters]
+        P3 --> P4[P4: Product Input]
+    end
+    
+    D_Detail --> CanFix{Fixed?}
+    CanFix -->|Nee| O
+    CanFix -->|Ja| Fixed
+    
+    O["<b>O</b><br/>Onderdelen<br/><i>Components</i>"] --> OCheck{Fixed?}
+    OCheck -->|Ja| Fixed
+    OCheck -->|Nee| Escalate
+    
+    Escalate[/"Escaleer<br/>Specialist"/] --> End([End])
+    
+    %% Styling
+    classDef phase fill:#e3f2fd,stroke:#1976d2,stroke-width:3px,color:#000,font-size:14px
+    classDef decision fill:#fff9c4,stroke:#f57f17,stroke-width:2px,color:#000
+    classDef action fill:#f5f5f5,stroke:#616161,stroke-width:2px,color:#000
+    classDef terminal fill:#b2dfdb,stroke:#004d40,stroke-width:3px,color:#000
+    classDef subphase fill:#c8e6c9,stroke:#2e7d32,stroke-width:2px,color:#000,font-size:12px
+    
+    class M,T,I,D,O phase
+    class QuickFix,CanFix,OCheck decision
+    class Escalate action
+    class Start,Fixed,End terminal
+    class P1,P2,P3,P4 subphase

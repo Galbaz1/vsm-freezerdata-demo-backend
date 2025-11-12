@@ -1,0 +1,64 @@
+%% ============================================================
+%% Diagram: Schematic Cooling Installation with Instrumentation
+%% Source: koelinstallaties-opbouw-en-werking_theorie_2016
+%% Chunk: 6c631446-7f65-475e-8df0-8109a44e85f9
+%% Page: 8 (page-009 in assets)
+%% Asset: features/extraction/production_output/koelinstallaties-opbouw-en-werking_theorie_2016/koelinstallaties-opbouw-en-werking_theorie_2016/assets/page-009/chunk-6c631446-7f65-475e-8df0-8109a44e85f9.png
+%% SMIDO: D (Diagnose - 3 P's Procesparameters) - Measurement points
+%% Usage: Agent uses this to identify WHERE to measure pressures/temperatures
+%%        Shows expected measurement locations
+%%        Reference for "3 P's - Procesparameters" phase
+%% Created: 2024-11-11
+%% ============================================================
+
+flowchart TD
+    Energy["Toegevoegde energie<br/>(warmte)<br/>Added Energy"]
+    
+    Energy --> Compressor
+    
+    Compressor["COMPRESSOR<br/>🔧"]
+    
+    Compressor --> P1["📊 P: hoog<br/>🌡️ T: hoog<br/>(High P&T)"]
+    P1 --> Gas1["Gas"]
+    Gas1 --> Condensor
+    
+    Condensor["CONDENSOR<br/>🌬️ ⬇️<br/>Warmteafvoer buiten<br/>de koelkast"]
+    
+    Condensor --> P2["📊 P: hoog<br/>(High P)"]
+    P2 --> Liquid1["Vloeistof"]
+    Liquid1 --> Expansion
+    
+    Expansion["EXPANSIEVENTIEL<br/>⚙️"]
+    
+    Expansion --> P3["📊 P: laag<br/>(Low P)"]
+    P3 --> Mixture["Vloeistof/Gas<br/>mixture"]
+    Mixture --> Evaporator
+    
+    Evaporator["╔═══════════╗<br/>║ VERDAMPER ║<br/>║   🌬️ ⬆️   ║<br/>╚═══════════╝<br/>Warmte toevoer<br/>in de koelkast"]
+    
+    Evaporator --> P4["📊 P: laag<br/>🌡️ T: laag<br/>(Low P&T)"]
+    P4 --> Gas2["Gas"]
+    Gas2 --> Compressor
+    
+    subgraph Measurements["MEETPUNTEN (Measurement Points)"]
+        M1["P = Druk<br/>(Pressure)"]
+        M2["T = Temperatuur<br/>(Temperature)"]
+    end
+    
+    subgraph Zones["DRUK ZONES"]
+        HP["Hoge Druk:<br/>Compressor → Expansieventiel"]
+        LP["Lage Druk:<br/>Expansieventiel → Compressor"]
+    end
+    
+    style Energy fill:#ffe0b2,stroke:#e65100,stroke-width:2px
+    style Compressor fill:#ffcdd2,stroke:#c62828,stroke-width:3px
+    style Condensor fill:#fff9c4,stroke:#f57f17,stroke-width:3px
+    style Expansion fill:#c8e6c9,stroke:#2e7d32,stroke-width:3px
+    style Evaporator fill:#bbdefb,stroke:#1565c0,stroke-width:3px
+    style P1 fill:#ffe0b2,stroke:#ef6c00,stroke-width:2px
+    style P2 fill:#ffe0b2,stroke:#ef6c00,stroke-width:2px
+    style P3 fill:#e1f5ff,stroke:#0277bd,stroke-width:2px
+    style P4 fill:#e1f5ff,stroke:#0277bd,stroke-width:2px
+    style Measurements fill:#f3e5f5,stroke:#6a1b9a,stroke-width:2px
+    style Zones fill:#e0f2f1,stroke:#00695c,stroke-width:2px
+

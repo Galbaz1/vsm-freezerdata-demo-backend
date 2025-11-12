@@ -123,6 +123,7 @@ def _register_vsm_smido_bootstrapper():
         Bootstrap VSM SMIDO tree structure.
         
         Adds all SMIDO branches (M→T→I→D[P1,P2,P3,P4]→O) and assigns tools.
+        Pre-seeds synthetic "today" WorldState for instant status queries.
         """
         logger.info("Bootstrapping VSM SMIDO tree structure...")
         
@@ -135,6 +136,36 @@ def _register_vsm_smido_bootstrapper():
         
         # Assign tools to branches
         _assign_tools_to_branches(tree)
+        
+        # Add show_diagram tool to relevant branches
+        from elysia.api.custom_tools import show_diagram
+        
+        tree.add_tool(show_diagram, branch_id="smido_melding")  # Overview
+        tree.add_tool(show_diagram, branch_id="smido_technisch")  # Visual check
+        tree.add_tool(show_diagram, branch_id="smido_installatie")  # System basics
+        tree.add_tool(show_diagram, branch_id="smido_p2_procesinstellingen")  # Settings
+        tree.add_tool(show_diagram, branch_id="smido_p3_procesparameters")  # Measurements
+        tree.add_tool(show_diagram, branch_id="smido_onderdelen")  # Cases
+        
+        # Pre-seed synthetic "today" WorldState for instant status queries
+        logger.info("Pre-seeding synthetic 'today' WorldState...")
+        try:
+            from features.telemetry_vsm.src.worldstate_engine import WorldStateEngine
+            from datetime import datetime
+            
+            engine = WorldStateEngine("features/telemetry/timeseries_freezerdata/135_1570_cleaned_with_flags.parquet")
+            now = datetime.now()
+            
+            # Generate synthetic today (cached in engine, then stored in tree)
+            synthetic_ws = engine.compute_worldstate("135_1570", now, 60)
+            
+            # Store in tree for instant access by get_current_status
+            tree._initial_worldstate_cache = synthetic_ws
+            
+            logger.info(f"Synthetic WorldState pre-seeded for {now.date()} (room_temp: {synthetic_ws['current_state']['current_room_temp']:.1f}°C)")
+        except Exception as e:
+            logger.warning(f"Failed to pre-seed synthetic WorldState: {e}")
+            # Not critical - get_current_status will generate on-demand
         
         logger.info("VSM SMIDO tree structure bootstrapped successfully")
     

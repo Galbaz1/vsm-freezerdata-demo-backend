@@ -40,11 +40,13 @@ async def seed_default_config():
     agent_description = temp_tree.tree_data.atlas.agent_description
     style = temp_tree.tree_data.atlas.style
     end_goal = temp_tree.tree_data.atlas.end_goal
+    suggestions_context = temp_tree.tree_data.atlas.suggestions_context
     branch_initialisation = "empty"  # VSM uses empty init
 
     print(f"   ✅ Agent Description: {len(agent_description)} characters")
     print(f"   ✅ Style: {len(style)} characters")
     print(f"   ✅ End Goal: {len(end_goal)} characters")
+    print(f"   ✅ Suggestions Context: {len(suggestions_context)} characters")
     print(f"   ✅ Branch Init: {branch_initialisation}")
 
     # 2. Set up config values
@@ -99,6 +101,7 @@ async def seed_default_config():
                         Property(name="style", data_type=DataType.TEXT),
                         Property(name="agent_description", data_type=DataType.TEXT),
                         Property(name="end_goal", data_type=DataType.TEXT),
+                        Property(name="suggestions_context", data_type=DataType.TEXT),
                         Property(name="branch_initialisation", data_type=DataType.TEXT),
                         Property(name="user_id", data_type=DataType.TEXT),
                         Property(name="config_id", data_type=DataType.TEXT),
@@ -111,12 +114,13 @@ async def seed_default_config():
                 )
                 print("   ✅ Collection created")
 
-            # Ensure feature_bootstrappers property exists (for existing collections)
-            print("\n🛠️  Step 5a: Ensuring schema includes feature_bootstrappers...")
+            # Ensure feature_bootstrappers and suggestions_context properties exist (for existing collections)
+            print("\n🛠️  Step 5a: Ensuring schema includes all required properties...")
             schema_config = await collection.config.get(simple=True)
             schema_props = schema_config.to_dict().get("properties", [])
             # Properties are _Property objects, not dicts - access .name attribute
             property_names = {prop.name if hasattr(prop, "name") else prop.get("name") for prop in schema_props}
+            
             if "feature_bootstrappers" not in property_names:
                 print("   ⚠️  Adding missing 'feature_bootstrappers' property...")
                 add_result = collection.config.add_property(
@@ -130,6 +134,20 @@ async def seed_default_config():
                 print("   ✅ Added 'feature_bootstrappers' property to schema")
             else:
                 print("   ✅ Schema already includes 'feature_bootstrappers'")
+            
+            if "suggestions_context" not in property_names:
+                print("   ⚠️  Adding missing 'suggestions_context' property...")
+                add_result = collection.config.add_property(
+                    Property(
+                        name="suggestions_context",
+                        data_type=DataType.TEXT,
+                    )
+                )
+                if inspect.isawaitable(add_result):
+                    await add_result
+                print("   ✅ Added 'suggestions_context' property to schema")
+            else:
+                print("   ✅ Schema already includes 'suggestions_context'")
 
             # 6. Check if a default config already exists for this user
             print("\n🔍 Step 5: Checking for existing default configs...")
@@ -163,6 +181,7 @@ async def seed_default_config():
                 "style": style,
                 "agent_description": agent_description,
                 "end_goal": end_goal,
+                "suggestions_context": suggestions_context,
                 "branch_initialisation": branch_initialisation,
                 "feature_bootstrappers": feature_bootstrappers,
                 "frontend_config": frontend_config,
@@ -206,7 +225,7 @@ async def seed_default_config():
             else:
                 print("   ❌ WARNING: Config may not have been saved correctly")
 
-            # Verify schema still contains the property (defensive double-check)
+            # Verify schema still contains the properties (defensive double-check)
             schema_after_write = await collection.config.get(simple=True)
             schema_props_after = schema_after_write.to_dict().get("properties", [])
             # Properties are _Property objects, not dicts - access .name attribute
@@ -218,6 +237,11 @@ async def seed_default_config():
                 print("   ✅ Schema includes feature_bootstrappers")
             else:
                 print("   ❌ WARNING: Schema missing feature_bootstrappers after write")
+            
+            if "suggestions_context" in schema_properties:
+                print("   ✅ Schema includes suggestions_context")
+            else:
+                print("   ❌ WARNING: Schema missing suggestions_context after write")
 
             # 10. Summary
             print("\n" + "=" * 60)
@@ -232,6 +256,7 @@ async def seed_default_config():
             print(f"   Description: {agent_description[:80]}...")
             print(f"   Style: {style[:80]}...")
             print(f"   End Goal: {end_goal[:80]}...")
+            print(f"   Suggestions Context: {suggestions_context[:80]}...")
             print(f"   Branch Init: {branch_initialisation}")
             print(f"   Feature Bootstrappers: {', '.join(feature_bootstrappers)}")
             print(f"\n⚙️  LLM Models:")

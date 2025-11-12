@@ -22,7 +22,7 @@ This document answers all key questions from [todo.md](../../todo.md) about the 
 
 **Source**: `135_1570_cleaned_with_flags.parquet` (785,398 rows × 15 columns)
 
-**Time index**: `timestamp` (datetime64, 1-minute intervals, Oct 2022 - Dec 2024)
+**Time index**: `timestamp` (datetime64, 1-minute intervals, Jul 2024 - Jan 2026)
 
 | Column | Type | Unit | Description | Range |
 |--------|------|------|-------------|-------|

@@ -24,8 +24,8 @@ def engine():
 @pytest.fixture
 def sample_timestamp():
     """Sample timestamp from the middle of the dataset"""
-    # Use a timestamp that should have data
-    return datetime(2023, 6, 15, 12, 0)
+    # Use a timestamp that should have data (new range: 2024-07-21 to 2026-01-01)
+    return datetime(2025, 4, 1, 12, 0)
 
 
 class TestWorldStateEngine:
@@ -293,6 +293,44 @@ class TestWorldStateEngine:
                     assert isinstance(value, bool)
                 else:
                     assert isinstance(value, (int, float))
+    
+    def test_synthetic_today_worldstate(self, engine):
+        """Test that today's date returns synthetic problem data."""
+        now = datetime.now()
+        
+        ws = engine.compute_worldstate("135_1570", now, 60)
+        
+        assert ws["is_synthetic_today"] == True
+        assert ws["flags"]["flag_main_temp_high"] == True
+        assert ws["flags"]["flag_suction_extreme"] == True
+        assert ws["current_state"]["current_room_temp"] > -10  # Critical temp
+    
+    def test_past_worldstate(self, engine):
+        """Test that past dates return real parquet data."""
+        past = datetime(2024, 7, 21, 14, 30, 0)
+        
+        ws = engine.compute_worldstate("135_1570", past, 60)
+        
+        assert "is_synthetic_today" not in ws or ws["is_synthetic_today"] == False
+    
+    def test_future_worldstate(self, engine):
+        """Test that future dates return predictive data."""
+        future = datetime(2025, 12, 15, 12, 0, 0)
+        
+        ws = engine.compute_worldstate("135_1570", future, 60)
+        
+        assert ws["is_future"] == True
+        assert "predictive" in ws["note"].lower()
+    
+    def test_synthetic_today_caching(self, engine):
+        """Test that synthetic data is cached per session."""
+        now = datetime.now()
+        
+        ws1 = engine.compute_worldstate("135_1570", now, 60)
+        ws2 = engine.compute_worldstate("135_1570", now, 60)
+        
+        # Should be same instance (cached)
+        assert ws1["current_state"]["current_room_temp"] == ws2["current_state"]["current_room_temp"]
 
 
 if __name__ == "__main__":

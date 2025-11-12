@@ -18,7 +18,7 @@ def get_logger():
                 level="DEBUG",
                 format=FORMAT,
                 datefmt="[%X]",
-                handlers=[RichHandler(rich_tracebacks=True, markup=True)],
+                handlers=[RichHandler(rich_tracebacks=True, markup=False)],
             )
 
         # Set log levels for specific loggers

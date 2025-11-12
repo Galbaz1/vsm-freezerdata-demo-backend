@@ -27,8 +27,8 @@ The naming pattern `135_1570_*` suggests:
 
 ## Time Range
 
-**Coverage**: October 20, 2022 to December 31, 2024
-- **Total duration**: ~799 days (approximately 2.2 years)
+**Coverage**: July 21, 2024 to January 1, 2026
+- **Total duration**: ~528 days (approximately 1.4 years)
 - **Sampling rate**: 1 minute intervals
 - **Total records**: 785,398 measurements
 

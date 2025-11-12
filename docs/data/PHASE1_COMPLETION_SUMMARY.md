@@ -9,7 +9,8 @@
 
 | Collection | Objects | Status | Purpose |
 |------------|---------|--------|---------|
-| **VSM_Diagram** | 9 | ✅ | Visual logic diagrams for SearchManualsBySMIDO tool |
+| **VSM_DiagramUserFacing** | 8 | ✅ | User-facing diagrams (PNG) for show_diagram tool |
+| **VSM_DiagramAgentInternal** | 8 | ✅ | Agent-internal diagrams (Mermaid) for agent logic |
 | **VSM_ManualSections** | 167 | ✅ | Manual sections SMIDO-tagged with 4 P's classification |
 | **VSM_TelemetryEvent** | 12 | ✅ | "Uit balans" incidents from 785K telemetry rows |
 | **VSM_VlogClip** | 15 | ✅ | Individual troubleshooting video clips |
@@ -17,7 +18,7 @@
 | **VSM_WorldStateSnapshot** | 13 | ✅ | Reference patterns for AnalyzeSensorPattern tool |
 | **FD_Assets** | enriched | ✅ | Commissioning data (Context C) for GetAssetHealth tool |
 
-**Total Objects**: 221 in Weaviate  
+**Total Objects**: 221 in Weaviate (replaced VSM_Diagram with 2 new collections: 8 user-facing + 8 agent-internal)  
 **Total Data Size**: ~3 MB (vectors + metadata)
 
 ---
@@ -26,10 +27,12 @@
 
 ### Real Data Processed
 
-**Diagrams** (9 created):
-- Extracted metadata from Mermaid files
+**Diagrams** (8 user-facing + 8 agent-internal):
+- Generated PNG files from user-facing Mermaid diagrams (1200px width)
+- Extracted metadata from both user-facing and agent-internal Mermaid files
+- Created 1:1 mapping between user-facing and agent-internal diagrams
 - Classified SMIDO phases, failure modes, components
-- Output: `features/diagrams_vsm/output/diagrams_metadata.jsonl`
+- Output: `features/diagrams_vsm/output/user_facing_diagrams.jsonl`, `agent_internal_diagrams.jsonl`
 
 **Manual Sections** (689 chunks → 167 sections):
 - Grouped 689 chunks from 3 manuals

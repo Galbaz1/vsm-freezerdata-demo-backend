@@ -1,0 +1,70 @@
+%% ============================================================
+%% Diagram: Koelproces in Balans (Cooling Process Balance)
+%% Source: storingzoeken-koeltechniek_theorie_179
+%% Chunk: 4806fb93-38a9-43bb-a3bf-33e32c837581
+%% Page: 12 (page-012 in assets)
+%% Asset: features/extraction/production_output/storingzoeken-koeltechniek_theorie_179/storingzoeken-koeltechniek_theorie_179/assets/page-012/chunk-4806fb93-38a9-43bb-a3bf-33e32c837581.png
+%% SMIDO: D (Diagnose) - Understanding system balance
+%% Usage: Agent uses this to explain cooling system equilibrium
+%%        Helps diagnose "Koelproces uit balans" conditions
+%%        Shows component-factor relationships
+%% Created: 2024-11-11
+%% ============================================================
+
+flowchart TD
+    Gauge[["BANDBREEDTE<br/>GAUGE<br/>⚖️"]]
+    
+    subgraph Balance["Balance System"]
+        Components["COMPONENTEN<br/>(Left Side)"]
+        Factors["FACTOREN<br/>(Right Side)"]
+    end
+    
+    Gauge --> Components
+    
+    Components --> C1[EXPANSIEORGAAN<br/>Expansion Device]
+    Components --> C2[VERDAMPER<br/>Evaporator]
+    Components --> C3[COMPRESSOR<br/>Compressor]
+    Components --> C4[CONDENSOR<br/>Condenser]
+    Components --> C5[Etcetera]
+    
+    Factors --> F1[Koudemiddel<br/>hoeveelheid<br/>Refrigerant amount]
+    Factors --> F2[Koellast product<br/>Cooling load]
+    Factors --> F3[Motorvermogen en<br/>verd/cond. temp<br/>Motor power & temps]
+    Factors --> F4[Hoeveelheid<br/>lucht/water<br/>Air/water flow]
+    Factors --> F5[Omgevings-<br/>temperatuur<br/>Ambient temp]
+    Factors --> F6[Etcetera]
+    
+    C1 -.Onderlinge<br/>relatie.-> F1
+    C1 -.Onderlinge<br/>relatie.-> F2
+    C2 -.Onderlinge<br/>relatie.-> F3
+    C2 -.Onderlinge<br/>relatie.-> F4
+    C3 -.Onderlinge<br/>relatie.-> F3
+    C3 -.Onderlinge<br/>relatie.-> F1
+    C4 -.Onderlinge<br/>relatie.-> F4
+    C4 -.Onderlinge<br/>relatie.-> F5
+    
+    Components --> GaugeStatus{Status?}
+    Factors --> GaugeStatus
+    
+    GaugeStatus -->|Ondergrens<br/>Below threshold| OutOfBalance1[PROBLEEM:<br/>Te weinig koeling]
+    GaugeStatus -->|Bandbreedte<br/>In range| InBalance[✓ SYSTEEM<br/>IN BALANS]
+    GaugeStatus -->|Bovengrens<br/>Above threshold| OutOfBalance2[PROBLEEM:<br/>Te veel koeling/<br/>verkeerde settings]
+    
+    style Gauge fill:#fff9c4,stroke:#f57f17,stroke-width:3px
+    style Components fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
+    style Factors fill:#e1f5ff,stroke:#01579b,stroke-width:2px
+    style C1 fill:#c8e6c9,stroke:#388e3c,stroke-width:2px
+    style C2 fill:#c8e6c9,stroke:#388e3c,stroke-width:2px
+    style C3 fill:#c8e6c9,stroke:#388e3c,stroke-width:2px
+    style C4 fill:#c8e6c9,stroke:#388e3c,stroke-width:2px
+    style C5 fill:#c8e6c9,stroke:#388e3c,stroke-width:1px
+    style F1 fill:#bbdefb,stroke:#1976d2,stroke-width:2px
+    style F2 fill:#bbdefb,stroke:#1976d2,stroke-width:2px
+    style F3 fill:#bbdefb,stroke:#1976d2,stroke-width:2px
+    style F4 fill:#bbdefb,stroke:#1976d2,stroke-width:2px
+    style F5 fill:#bbdefb,stroke:#1976d2,stroke-width:2px
+    style F6 fill:#bbdefb,stroke:#1976d2,stroke-width:1px
+    style InBalance fill:#c8e6c9,stroke:#2e7d32,stroke-width:3px
+    style OutOfBalance1 fill:#ffcdd2,stroke:#c62828,stroke-width:3px
+    style OutOfBalance2 fill:#ffcdd2,stroke:#c62828,stroke-width:3px
+

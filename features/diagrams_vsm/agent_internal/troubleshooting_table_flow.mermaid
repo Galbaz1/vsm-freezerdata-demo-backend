@@ -1,0 +1,29 @@
+%% ============================================================
+%% Diagram: Troubleshooting Table Structure (Storingstabel Opbouw)
+%% Source: storingzoeken-koeltechniek_theorie_179
+%% Chunk: 9e024d44-bc1b-4a36-b7a8-eec8614a838f
+%% Page: 22 (page-023 in assets)
+%% Asset: features/extraction/production_output/storingzoeken-koeltechniek_theorie_179/storingzoeken-koeltechniek_theorie_179/assets/page-023/chunk-9e024d44-bc1b-4a36-b7a8-eec8614a838f.png
+%% SMIDO: All phases - Template for diagnostic reasoning
+%% Usage: Agent uses this structure to format troubleshooting responses
+%%        Maps observed symptoms → possible causes → actions to check
+%%        Template for VSM conversational flow
+%% Created: 2024-11-11
+%% ============================================================
+
+flowchart LR
+    Symptoms["VERSCHIJNSELEN<br/>(Symptoms)<br/>──────────────<br/>Locatie in de installatie<br/><br/>Examples:<br/>• Te hoge temperatuur<br/>• Compressor draait niet<br/>• IJsvorming op verdamper<br/>• Lawaai/trillingen<br/>• Lekkage"]
+    
+    Causes["MOGELIJKE OORZAKEN<br/>(Possible Causes)<br/>──────────────<br/>1. Oorzaak A<br/>2. Oorzaak B<br/>3. Oorzaak C<br/><br/>Examples:<br/>1. Te weinig koudemiddel<br/>2. Defecte thermostaat<br/>3. Vervuilde condensor"]
+    
+    Solutions["OPLOSSINGEN<br/>(Solutions)<br/>──────────────<br/>Wat ga je controleren?<br/><br/>Examples:<br/>✓ Controleer koudemiddel<br/>✓ Test thermostaat<br/>✓ Reinig condensor<br/>✓ Meet drukken"]
+    
+    Symptoms -->|Analyze| Causes
+    Causes -->|Determine| Solutions
+    
+    style Symptoms fill:#ffcdd2,stroke:#c62828,stroke-width:3px
+    style Causes fill:#fff9c4,stroke:#f57f17,stroke-width:3px
+    style Solutions fill:#c8e6c9,stroke:#2e7d32,stroke-width:3px
+    
+    classDef arrowLabel fill:#e0f2f1,stroke:#00695c,stroke-width:2px
+

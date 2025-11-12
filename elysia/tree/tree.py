@@ -74,6 +74,7 @@ class Tree:
         style: str = "No style provided.",
         agent_description: str = "No description provided.",
         end_goal: str = "No end goal provided.",
+        suggestions_context: str = "",
         user_id: str | None = None,
         conversation_id: str | None = None,
         low_memory: bool = False,
@@ -88,6 +89,7 @@ class Tree:
             style (str): The writing style of the agent. Automatically set for "multi_branch" and "one_branch" initialisation, but overrided if non-empty.
             agent_description (str): The description of the agent. Automatically set for "multi_branch" and "one_branch" initialisation, but overrided if non-empty.
             end_goal (str): The end goal of the agent. Automatically set for "multi_branch" and "one_branch" initialisation, but overrided if non-empty.
+            suggestions_context (str): Context for follow-up suggestion generation. If empty, falls back to default RAG-focused suggestions.
             user_id (str): The id of the user, e.g. "123-456",
                 unneeded outside of user management/hosting Elysia app
             conversation_id (str): The id of the conversation, e.g. "123-456",
@@ -165,6 +167,7 @@ class Tree:
         self.tree_data.atlas.style = style
         self.tree_data.atlas.agent_description = agent_description
         self.tree_data.atlas.end_goal = end_goal
+        self.tree_data.atlas.suggestions_context = suggestions_context
 
         self.tools["forced_text_response"] = ForcedTextResponse()
 

@@ -1,0 +1,59 @@
+%% ============================================================
+%% Diagram: Pressostat Adjustment Logic (LP & HP Settings)
+%% Source: koelinstallaties-inspectie-en-onderhoud_theorie_168
+%% Chunk: ecf2283b-cd3c-4ba2-bdbb-8e4651285de8
+%% Page: 44 (page-045 in assets)
+%% Asset: features/extraction/production_output/koelinstallaties-inspectie-en-onderhoud_theorie_168/koelinstallaties-inspectie-en-onderhoud_theorie_168/assets/page-045/chunk-ecf2283b-cd3c-4ba2-bdbb-8e4651285de8.png
+%% SMIDO: D (Diagnose - P2: Procesinstellingen) - Settings verification
+%% Usage: Agent uses this to guide pressostat adjustment
+%%        Shows Start/Stop/Diff relationships
+%%        Critical for pressure control troubleshooting
+%% Created: 2024-11-11
+%% ============================================================
+
+flowchart TD
+    subgraph LP["LOW PRESSURE (LP) PRESSOSTAAT"]
+        LP_Start["START (CUT IN)<br/>────────────<br/>Compressor starts"]
+        LP_Diff["DIFF (Differential)<br/>────────────<br/>Pressure difference"]
+        LP_Stop["STOP (CUT OFF)<br/>────────────<br/>Compressor stops"]
+        
+        LP_Start -->|"Pressure RISES<br/>by DIFF"| LP_Stop
+        LP_Stop -->|"Pressure FALLS<br/>to START"| LP_Start
+        
+        LP_Scale["RANGES (LP)<br/>────────────<br/>CUT IN:<br/>0.7 - 7.5 bar<br/>10 - 107 psi<br/><br/>DIFF:<br/>0.35 - 7.5 bar<br/>5 - 107 psi"]
+    end
+    
+    subgraph HP["HIGH PRESSURE (HP) PRESSOSTAAT"]
+        HP_Stop["STOP (CUT OUT)<br/>────────────<br/>Compressor stops<br/>(Safety)"]
+        HP_Diff["DIFF (Differential)<br/>────────────<br/>Pressure difference"]
+        HP_Start["START (CUT IN)<br/>────────────<br/>Compressor restarts"]
+        
+        HP_Stop -->|"Pressure FALLS<br/>by DIFF"| HP_Start
+        HP_Start -->|"Pressure RISES<br/>to STOP"| HP_Stop
+        
+        HP_Scale["RANGES (HP)<br/>────────────<br/>CUT OUT:<br/>7 - 28 bar<br/>100 - 437 psi<br/><br/>DIFF:<br/>6 - 14 bar<br/>30 - 80 psi"]
+    end
+    
+    System["SYSTEEM<br/>────────────<br/>Normal Operation"]
+    
+    System -.->|"Te lage<br/>zuigdruk"| LP
+    System -.->|"Te hoge<br/>persdruk"| HP
+    
+    LP_Logic["LP LOGIC<br/>────────────<br/>Compressor ON when:<br/>P ≥ START<br/><br/>Compressor OFF when:<br/>P ≤ (START - DIFF)"]
+    
+    HP_Logic["HP LOGIC<br/>────────────<br/>Compressor OFF when:<br/>P ≥ STOP (safety!)<br/><br/>Compressor ON when:<br/>P ≤ (STOP - DIFF)"]
+    
+    style LP fill:#e1f5ff,stroke:#01579b,stroke-width:3px
+    style HP fill:#ffcdd2,stroke:#c62828,stroke-width:3px
+    style LP_Start fill:#c8e6c9,stroke:#2e7d32,stroke-width:2px
+    style LP_Stop fill:#ffcdd2,stroke:#d32f2f,stroke-width:2px
+    style LP_Diff fill:#fff9c4,stroke:#f57f17,stroke-width:2px
+    style HP_Start fill:#c8e6c9,stroke:#2e7d32,stroke-width:2px
+    style HP_Stop fill:#ffcdd2,stroke:#d32f2f,stroke-width:2px
+    style HP_Diff fill:#fff9c4,stroke:#f57f17,stroke-width:2px
+    style LP_Scale fill:#e0f2f1,stroke:#00695c,stroke-width:2px
+    style HP_Scale fill:#e0f2f1,stroke:#00695c,stroke-width:2px
+    style System fill:#f3e5f5,stroke:#6a1b9a,stroke-width:2px
+    style LP_Logic fill:#e0f2f1,stroke:#00695c,stroke-width:2px
+    style HP_Logic fill:#e0f2f1,stroke:#00695c,stroke-width:2px
+

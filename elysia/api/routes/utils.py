@@ -175,7 +175,9 @@ async def follow_up_suggestions(
         # get tree from user_id, conversation_id
         tree: Tree = await user_manager.get_tree(data.user_id, data.conversation_id)
 
-        suggestions = await tree.get_follow_up_suggestions_async()
+        # Use custom suggestions context if configured, otherwise None (falls back to default)
+        context = tree.tree_data.atlas.suggestions_context if tree.tree_data.atlas.suggestions_context else None
+        suggestions = await tree.get_follow_up_suggestions_async(context=context)
 
         event.set()
 

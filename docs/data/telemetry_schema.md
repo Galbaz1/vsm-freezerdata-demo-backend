@@ -13,8 +13,8 @@ This document provides a detailed schema analysis of the telemetry data from the
 ### `timestamp` (DatetimeIndex)
 
 - **Type**: datetime64[ns]
-- **Range**: 2022-10-20 16:02:00 to 2024-12-31 23:59:00
-- **Duration**: ~799 days (2.2 years)
+- **Range**: 2024-07-21 14:03:00 to 2026-01-01 00:00:00
+- **Duration**: ~528 days (1.4 years)
 - **Sampling interval**: 1 minute
 - **Description**: Timestamp for each measurement, serving as the DataFrame index
 

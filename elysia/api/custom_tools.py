@@ -1,6 +1,7 @@
 from elysia import Tool, tool
 from elysia.objects import Response, Status, Result, Error
 from weaviate.classes.query import Filter
+from datetime import datetime
 
 # Import a custom tool from a separate file
 from elysia.tools.visualisation.linear_regression import BasicLinearRegression
@@ -43,6 +44,138 @@ class TellAJoke(Tool):
         yield Response(inputs["joke"])
 
         # You can include more complex logic here via a custom function
+
+
+@tool(
+    status="Retrieving current sensor readings...",
+    branch_id="smido_melding"
+)
+async def get_current_status(
+    asset_id: str = "135_1570",
+    tree_data=None,
+    **kwargs
+):
+    """Get current sensor readings (cached, instant) - Ultra-fast status check.
+    
+    Returns pre-cached synthetic "today" WorldState without any I/O operations.
+    
+    When to use:
+    - User asks: "How are we doing?", "What's the current state?", "Status?", "Hoe gaat het?"
+    - When you need quick sensor overview WITHOUT deep analysis
+    - First response in M (Melding) phase for status requests
+    - User wants to know if there's a problem (screening)
+    
+    When NOT to use:
+    - User reports a specific problem → use get_alarms or get_asset_health
+    - User asks "why/how/diagnose" → proceed to deeper SMIDO phases
+    - User asks for historical data → use compute_worldstate with specific timestamp
+    
+    What it returns:
+    - 5 key sensor readings (room, hot gas, suction, liquid, ambient)
+    - Active flags (main_temp_high, suction_extreme, etc.)
+    - 30m trend (is temp rising?)
+    - Health scores summary (0-100)
+    
+    Performance: <100ms (reads from cache, no parquet/Weaviate)
+    
+    How to explain to M:
+    "Ik check even de huidige sensorstand..."
+    [instant response]
+    "Oké, huidige status: Koelcel [X]°C, Heetgas [Y]°C, Zuigdruk [Z]°C. 
+    Flags actief: [list]. Trend: [rising/stable/falling].
+    [If problem detected] Dit wijst op [issue]. Wil je dat ik een diagnose start?"
+    
+    Example response (A3-like frozen evaporator):
+    "Huidige status (12 nov 2025):
+     - Koelcel: -1.3°C ⚠️ (design: -33°C)
+     - Heetgas: 19.5°C (te laag)
+     - Zuigdruk: -40.2°C (extreem koud)
+     - Flags: main_temp_high, suction_extreme, hot_gas_low
+     - Trend 30min: +1.2°C (stijgend)
+     - Health: Koeling 22/100, Compressor 41/100
+     Dit patroon lijkt op bevroren verdamper. Wil je diagnose?"
+    
+    Args:
+        asset_id: Asset identifier (default: "135_1570")
+    
+    Returns:
+        Concise status dict with current readings, flags, trend, health scores.
+    """
+    yield Status("Reading current sensor data...")
+    
+    from features.telemetry_vsm.src.worldstate_engine import WorldStateEngine
+    
+    # Try to get from tree cache first (pre-seeded at startup)
+    worldstate = None
+    now = datetime.now()
+    
+    if tree_data and hasattr(tree_data.tree, '_initial_worldstate_cache'):
+        cached_ws = tree_data.tree._initial_worldstate_cache
+        # Check if cache is for today
+        try:
+            cached_date = datetime.fromisoformat(cached_ws["timestamp"]).date()
+            if cached_date == now.date():
+                worldstate = cached_ws
+        except (KeyError, ValueError):
+            pass
+    
+    # Fallback: generate if not cached or stale
+    if worldstate is None:
+        engine = WorldStateEngine("features/telemetry/timeseries_freezerdata/135_1570_cleaned_with_flags.parquet")
+        worldstate = engine.compute_worldstate(asset_id, now, 60)
+        # Update cache
+        if tree_data:
+            tree_data.tree._initial_worldstate_cache = worldstate
+    
+    # Extract concise status
+    current = worldstate.get("current_state", {})
+    flags = worldstate.get("flags", {})
+    trends = worldstate.get("trends_30m", {})
+    health = worldstate.get("health_scores", {})
+    
+    # Build concise summary
+    active_flags = [k.replace("flag_", "") for k, v in flags.items() if v]
+    
+    room_temp_delta = trends.get("room_temp_delta_30m", 0)
+    trend_description = "stijgend" if room_temp_delta > 0.5 else "dalend" if room_temp_delta < -0.5 else "stabiel"
+    
+    status_summary = {
+        "asset_id": asset_id,
+        "timestamp": worldstate["timestamp"],
+        "readings": {
+            "room_temp": current.get("current_room_temp"),
+            "hot_gas_temp": current.get("current_hot_gas_temp"),
+            "suction_temp": current.get("current_suction_temp"),
+            "liquid_temp": current.get("current_liquid_temp"),
+            "ambient_temp": current.get("current_ambient_temp")
+        },
+        "active_flags": active_flags,
+        "trend_30m": {
+            "room_temp_change_C": room_temp_delta,
+            "trend_description": trend_description
+        },
+        "health_summary": {
+            "cooling_performance": health.get("cooling_performance_score"),
+            "compressor_health": health.get("compressor_health_score"),
+            "system_stability": health.get("system_stability_score")
+        },
+        "is_synthetic_today": worldstate.get("is_synthetic_today", False),
+        "cache_hit": worldstate is not None
+    }
+    
+    # Store full worldstate in environment for potential follow-up diagnostics
+    if tree_data and hasattr(tree_data.environment, 'hidden_environment'):
+        tree_data.environment.hidden_environment["worldstate"] = worldstate
+        tree_data.environment.hidden_environment["worldstate_timestamp"] = worldstate["timestamp"]
+    
+    yield Result(
+        objects=[status_summary],
+        metadata={
+            "source": "cached_worldstate",
+            "response_type": "quick_status",
+            "response_time_ms": "<100"
+        }
+    )
 
 
 @tool(
@@ -588,7 +721,7 @@ Example (A3 frozen evaporator):
 
 Args:
     asset_id: Asset identifier (e.g., "135_1570")
-    timestamp: ISO format timestamp (e.g., "2024-01-01T12:00:00"). If None, uses historical demo timestamp.
+    timestamp: ISO format timestamp (e.g., "2025-01-01T12:00:00"). If None, uses current date (clamped to data max).
     window_minutes: Time window for computation. Default: 60 minutes.
 
 Returns:
@@ -599,17 +732,16 @@ Returns:
     from features.telemetry_vsm.src.worldstate_engine import WorldStateEngine
     from datetime import datetime
     
-    # Parse timestamp - use historical demo timestamp within data range
-    # Telemetry data range: 2022-10-20 to 2024-04-01
+    # Parse timestamp - remove clamping to data_max, let engine handle time zones
+    now = datetime.now()
+    
     if timestamp and timestamp != 'None' and timestamp.strip():
         try:
             ts = datetime.fromisoformat(timestamp)
         except (ValueError, AttributeError):
-            # Default to historical timestamp within data range
-            ts = datetime(2024, 1, 15, 12, 0, 0)
+            ts = now  # Default to current if parse fails
     else:
-        # Use default historical timestamp for demo (data ends 2024-04-01)
-        ts = datetime(2024, 1, 15, 12, 0, 0)
+        ts = now  # No timestamp = current state (will use synthetic today)
     
     # Initialize engine
     engine = WorldStateEngine("features/telemetry/timeseries_freezerdata/135_1570_cleaned_with_flags.parquet")
@@ -617,7 +749,7 @@ Returns:
     yield Status(f"Computing WorldState for {window_minutes}-minute window...")
     
     try:
-        # Compute features
+        # Compute features (engine handles time zones: past/present/future)
         worldstate = engine.compute_worldstate(asset_id, ts, window_minutes)
         
         # Store in hidden environment if available (for cross-tool access)
@@ -625,12 +757,17 @@ Returns:
             tree_data.environment.hidden_environment["worldstate"] = worldstate
             tree_data.environment.hidden_environment["worldstate_timestamp"] = ts.isoformat()
         
+        # Extract is_future flag if present (set by engine for future zone)
+        is_future = worldstate.get("is_future", False)
+        
         yield Result(
             objects=[worldstate],
             metadata={
                 "source": "worldstate_engine",
                 "window_minutes": window_minutes,
-                "features_computed": len(worldstate.keys()) if isinstance(worldstate, dict) else 0
+                "features_computed": len(worldstate.keys()) if isinstance(worldstate, dict) else 0,
+                "is_future": is_future,
+                "is_synthetic_today": worldstate.get("is_synthetic_today", False)
             }
         )
     except Exception as e:
@@ -722,21 +859,21 @@ Returns:
     # 2. Compute WorldState (W) - use WorldStateEngine
     from features.telemetry_vsm.src.worldstate_engine import WorldStateEngine
     
-    # Handle timestamp: check for None, empty string, or string 'None'
-    # Use historical timestamp from data range (2022-10-20 to 2024-04-01)
-    # Default to 2024-01-15 12:00 (known good timestamp with data)
+    # Handle timestamp - remove clamping to data_max, let engine handle time zones
+    now = datetime.now()
+    
     if timestamp and timestamp != 'None' and timestamp.strip():
         try:
             ts = datetime.fromisoformat(timestamp)
         except (ValueError, AttributeError):
-            # Default to historical timestamp within data range
-            ts = datetime(2024, 1, 15, 12, 0, 0)
+            ts = now  # Default to current if parse fails
     else:
-        # Use default historical timestamp for demo (data ends 2024-04-01)
-        ts = datetime(2024, 1, 15, 12, 0, 0)
+        ts = now  # No timestamp = current state (will use synthetic today)
+    
     engine = WorldStateEngine("features/telemetry/timeseries_freezerdata/135_1570_cleaned_with_flags.parquet")
     
     try:
+        # Engine handles time zones: past/present/future
         worldstate = engine.compute_worldstate(asset_id, ts, window_minutes)
     except Exception as e:
         yield Error(f"Error computing WorldState: {str(e)}")
@@ -918,21 +1055,21 @@ Returns:
     from features.telemetry_vsm.src.worldstate_engine import WorldStateEngine
     from datetime import datetime
     
-    # Parse timestamp - use historical demo timestamp within data range
-    # Telemetry data range: 2022-10-20 to 2024-04-01
+    # Parse timestamp - remove clamping to data_max, let engine handle time zones
+    now = datetime.now()
+    
     if timestamp and timestamp != 'None' and timestamp.strip():
         try:
             ts = datetime.fromisoformat(timestamp)
         except (ValueError, AttributeError):
-            # Default to historical timestamp within data range
-            ts = datetime(2024, 1, 15, 12, 0, 0)
+            ts = now  # Default to current if parse fails
     else:
-        # Use default historical timestamp for demo (data ends 2024-04-01)
-        ts = datetime(2024, 1, 15, 12, 0, 0)
+        ts = now  # No timestamp = current state (will use synthetic today)
     
     engine = WorldStateEngine("features/telemetry/timeseries_freezerdata/135_1570_cleaned_with_flags.parquet")
     
     try:
+        # Engine handles time zones: past/present/future
         worldstate = engine.compute_worldstate(asset_id, ts, window_minutes)
     except Exception as e:
         yield Error(f"Error computing WorldState: {str(e)}")
@@ -1033,4 +1170,146 @@ Returns:
             
     except Exception as e:
         yield Error(f"Error querying patterns: {str(e)}")
+        return
+
+
+@tool(
+    status="Loading diagram...",
+    branch_id=None  # Available in all branches
+)
+async def show_diagram(
+    diagram_id: str,
+    tree_data=None,
+    client_manager=None,
+    **kwargs
+):
+    """
+    Display a user-facing diagram (PNG) while loading the corresponding complex diagram internally for agent understanding.
+    
+    Args:
+        diagram_id: ID of the diagram to show (e.g., "smido_overview", "basic_cycle").
+    
+    Use this tool when:
+    - User asks "What is SMIDO?" → show_diagram("smido_overview")
+    - User asks "How does it work?" → show_diagram("basic_cycle")
+    - User needs visual explanation during any SMIDO phase
+    
+    Available diagrams:
+    - smido_overview: 5-phase SMIDO workflow
+    - diagnose_4ps: 4 P's checklist
+    - basic_cycle: Refrigeration cycle basics
+    - measurement_points: Where to measure P/T
+    - system_balance: "Uit balans" concept
+    - pressostat_settings: Pressostat adjustment
+    - troubleshooting_template: Response format
+    - frozen_evaporator: A3 case example
+    
+    Returns:
+        - PNG URL for frontend display
+        - Diagram metadata (title, description)
+        - Complex Mermaid code loaded in tree environment for agent context
+    """
+    if not client_manager:
+        yield Error("Client manager not available. Cannot query Weaviate.")
+        return
+    
+    if not client_manager.is_client:
+        yield Error("Weaviate client not configured. Please set WCD_URL and WCD_API_KEY.")
+        return
+    
+    try:
+        yield Status(f"Loading diagram '{diagram_id}'...")
+        
+        async with client_manager.connect_to_async_client() as client:
+            # 1. Fetch user-facing diagram from VSM_DiagramUserFacing
+            if not await client.collections.exists("VSM_DiagramUserFacing"):
+                yield Error("VSM_DiagramUserFacing collection not found. Please upload diagrams first.")
+                return
+            
+            user_facing_coll = client.collections.get("VSM_DiagramUserFacing")
+            user_result = await user_facing_coll.query.fetch_objects(
+                filters=Filter.by_property("diagram_id").equal(diagram_id),
+                limit=1
+            )
+            
+            if not user_result.objects:
+                yield Error(f"Diagram '{diagram_id}' not found in VSM_DiagramUserFacing collection.")
+                return
+            
+            user_diagram = user_result.objects[0]
+            user_props = user_diagram.properties
+            
+            # Get agent diagram ID from user-facing diagram
+            agent_diagram_id = user_props.get("agent_diagram_id")
+            
+            if not agent_diagram_id:
+                yield Error(f"User-facing diagram '{diagram_id}' has no linked agent diagram.")
+                return
+            
+            # 2. Fetch agent-internal diagram from VSM_DiagramAgentInternal
+            if not await client.collections.exists("VSM_DiagramAgentInternal"):
+                yield Error("VSM_DiagramAgentInternal collection not found. Please upload diagrams first.")
+                return
+            
+            agent_coll = client.collections.get("VSM_DiagramAgentInternal")
+            agent_result = await agent_coll.query.fetch_objects(
+                filters=Filter.by_property("diagram_id").equal(agent_diagram_id),
+                limit=1
+            )
+            
+            agent_mermaid_code = None
+            agent_title = None
+            
+            if agent_result.objects:
+                agent_diagram = agent_result.objects[0]
+                agent_props = agent_diagram.properties
+                agent_mermaid_code = agent_props.get("mermaid_code", "")
+                agent_title = agent_props.get("title", "")
+            
+            # 3. Store complex Mermaid in tree environment for agent context
+            if tree_data and agent_mermaid_code:
+                if not hasattr(tree_data.environment, 'hidden_environment'):
+                    tree_data.environment.hidden_environment = {}
+                
+                tree_data.environment.hidden_environment[f"diagram_{diagram_id}_mermaid"] = agent_mermaid_code
+                tree_data.environment.hidden_environment[f"diagram_{diagram_id}_agent_title"] = agent_title
+            
+            # 4. Return Result with PNG URL for frontend display
+            thumb_url = ""
+            try:
+                png_url_val = user_props.get("png_url", "")
+                if isinstance(png_url_val, str) and png_url_val:
+                    thumb_url = png_url_val.replace("/static/diagrams/", "/static/diagrams/thumbs/")
+            except Exception:
+                thumb_url = user_props.get("png_url", "")
+            yield Result(
+                objects=[{
+                    "diagram_id": diagram_id,
+                    "png_url": user_props.get("png_url", ""),
+                    "thumb_url": thumb_url,
+                    "title": user_props.get("title", ""),
+                    "description": user_props.get("description", ""),
+                    "when_to_show": user_props.get("when_to_show", ""),
+                    "png_width": user_props.get("png_width", 1200),
+                    "png_height": user_props.get("png_height", 800),
+                }],
+                payload_type="product",  # Use built-in type with image support
+                name="diagram",
+                mapping={
+                    "name": "title",
+                    "description": "description",
+                    "image": "thumb_url",
+                    "url": "png_url",
+                },
+                unmapped_keys=["diagram_id", "when_to_show", "png_width", "png_height", "thumb_url", "_REF_ID"],
+                metadata={
+                    "agent_mermaid_loaded": agent_mermaid_code is not None,
+                    "agent_diagram_id": agent_diagram_id,
+                    "agent_title": agent_title,
+                },
+                llm_message=f"Displayed diagram '{user_props.get('title', diagram_id)}' to technician. Complex version loaded internally for your understanding."
+            )
+            
+    except Exception as e:
+        yield Error(f"Error loading diagram: {str(e)}")
         return

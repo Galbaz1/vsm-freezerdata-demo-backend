@@ -1,0 +1,24 @@
+%% ============================================================
+%% USER-FACING DIAGRAM: Measurement Points
+%% Purpose: Show WHERE to measure pressure and temperature
+%% Layout: Square - system schematic
+%% Complexity: Simple (8 nodes)
+%% When to show: "Where do I measure?" (P3 phase)
+%% ============================================================
+
+flowchart LR
+    Comp["<b>Compressor</b>"]
+    Cond["<b>Condensor</b>"]
+    Exp["<b>Expansie</b>"]
+    Evap["<b>Verdamper</b>"]
+    
+    Comp -->|"<b>P1/T1</b><br/>Hoog"| Cond
+    Cond -->|"<b>P2</b><br/>Hoog"| Exp
+    Exp -->|"<b>P3</b><br/>Laag"| Evap
+    Evap -->|"<b>P4/T4</b><br/>Laag"| Comp
+    
+    %% Consistent styling
+    classDef component fill:#e3f2fd,stroke:#1976d2,stroke-width:3px,color:#000,font-size:14px
+    
+    class Comp,Cond,Exp,Evap component
+

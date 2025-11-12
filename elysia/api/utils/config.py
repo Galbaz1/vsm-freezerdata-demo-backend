@@ -20,6 +20,7 @@ class Config:
         style: str | None = None,
         agent_description: str | None = None,
         end_goal: str | None = None,
+        suggestions_context: str | None = None,
         branch_initialisation: BranchInitType = "one_branch",
         use_elysia_collections: bool = True,
         feature_bootstrappers: list[str] | None = None,
@@ -58,6 +59,11 @@ class Config:
         else:
             self.end_goal = end_goal
 
+        if suggestions_context is None:
+            self.suggestions_context = ""
+        else:
+            self.suggestions_context = suggestions_context
+
         self.branch_initialisation: BranchInitType = branch_initialisation
         self.use_elysia_collections: bool = use_elysia_collections
         self.feature_bootstrappers: list[str] = feature_bootstrappers if feature_bootstrappers is not None else []
@@ -70,6 +76,7 @@ class Config:
             "style": self.style,
             "agent_description": self.agent_description,
             "end_goal": self.end_goal,
+            "suggestions_context": self.suggestions_context,
             "branch_initialisation": (
                 self.branch_initialisation
                 if self.branch_initialisation is not None
@@ -91,6 +98,11 @@ class Config:
             style=json["style"],
             agent_description=json["agent_description"],
             end_goal=json["end_goal"],
+            suggestions_context=(
+                json["suggestions_context"]
+                if "suggestions_context" in json
+                else ""
+            ),
             branch_initialisation=json["branch_initialisation"],
             use_elysia_collections=(
                 json["use_elysia_collections"]

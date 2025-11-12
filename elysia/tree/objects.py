@@ -369,6 +369,12 @@ class Atlas(BaseModel):
         "However, you can still choose to end actions early, "
         "if you believe the task is not possible to be completed with what you have available.",
     )
+    suggestions_context: str = Field(
+        default="",
+        description="Context for follow-up suggestion generation. "
+        "Describes the type of follow-up questions that should be suggested to the user. "
+        "If empty, falls back to default RAG-focused suggestions.",
+    )
     datetime_reference: dict = Field(
         default=datetime_reference(),
         description="Current context information (e.g., date, time) for decision-making",

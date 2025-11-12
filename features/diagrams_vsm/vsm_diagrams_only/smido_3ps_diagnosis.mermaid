@@ -1,0 +1,41 @@
+flowchart TD
+    D[D - DIAGNOSE<br/>De 3 P's + Product Input] --> P1
+    
+    P1[P1: POWER<br/>Voeding/Spanning]
+    P1 --> P1a[Spanning aanwezig?]
+    P1 --> P1b[Zekeringen intact?]
+    P1 --> P1c[Vermogensschakelaars OK?]
+    P1 --> P1d[Motor/compressor<br/>stroomopname?]
+    
+    P1 --> P2
+    
+    P2[P2: PROCESINSTELLINGEN<br/>Parameters/Setpoints]
+    P2 --> P2a[Thermostaat<br/>instellingen]
+    P2 --> P2b[Pressostaat<br/>waarden]
+    P2 --> P2c[Tijdschakelaars]
+    P2 --> P2d[Regelaar<br/>configuratie]
+    
+    P2 --> P3
+    
+    P3[P3: PROCESPARAMETERS<br/>Metingen]
+    P3 --> P3a[Zuigdruk]
+    P3 --> P3b[Persdruk]
+    P3 --> P3c[Verdamptemperatuur]
+    P3 --> P3d[Condenstemperatuur]
+    P3 --> P3e[Oververhitting]
+    P3 --> P3f[Onderkoeling]
+    
+    P3 --> P4
+    
+    P4[P4: PRODUCTINPUT<br/>Omgevingscondities]
+    P4 --> P4a[Productbelading]
+    P4 --> P4b[Omgevingstemperatuur]
+    P4 --> P4c[Luchtstroom]
+    P4 --> P4d[Deur frequentie]
+    
+    style D fill:#e8f5e9,stroke:#1b5e20,stroke-width:3px
+    style P1 fill:#c8e6c9,stroke:#2e7d32,stroke-width:2px
+    style P2 fill:#c8e6c9,stroke:#2e7d32,stroke-width:2px
+    style P3 fill:#c8e6c9,stroke:#2e7d32,stroke-width:2px
+    style P4 fill:#c8e6c9,stroke:#2e7d32,stroke-width:2px
+

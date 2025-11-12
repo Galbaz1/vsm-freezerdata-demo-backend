@@ -72,6 +72,7 @@ class TreeManager:
         style: str | None = None,
         agent_description: str | None = None,
         end_goal: str | None = None,
+        suggestions_context: str | None = None,
         branch_initialisation: BranchInitType | None = None,
         feature_bootstrappers: list[str] | None = None,
     ):
@@ -92,6 +93,9 @@ class TreeManager:
 
         if end_goal is not None:
             self.change_end_goal(end_goal, conversation_id)
+
+        if suggestions_context is not None:
+            self.change_suggestions_context(suggestions_context, conversation_id)
 
         if branch_initialisation is not None:
             self.change_branch_initialisation(branch_initialisation, conversation_id)
@@ -124,6 +128,7 @@ class TreeManager:
                 style=self.config.style,
                 agent_description=self.config.agent_description,
                 end_goal=self.config.end_goal,
+                suggestions_context=self.config.suggestions_context,
                 branch_initialisation=self.config.branch_initialisation,
                 low_memory=low_memory,
                 use_elysia_collections=self.config.use_elysia_collections,
@@ -396,6 +401,29 @@ class TreeManager:
                 raise ValueError(f"Tree {conversation_id} not found")
 
             self.trees[conversation_id]["tree"].change_end_goal(end_goal)
+
+    def change_suggestions_context(self, suggestions_context: str, conversation_id: str | None = None):
+        """
+        Change the suggestions context for a tree in the TreeManager.
+        Or change the global suggestions context for all trees (if conversation_id is not supplied).
+        And applies these changes to current trees with default settings.
+
+        Args:
+            suggestions_context (str): The new suggestions context for the tree.
+            conversation_id (str | None): Optional. The conversation ID which contains the tree.
+                If not supplied, the suggestions context will be changed on all trees.
+        """
+        if conversation_id is None:
+            self.config.suggestions_context = suggestions_context
+            for conversation_id in self.trees:
+                if not self.trees[conversation_id]["tree"]._config_modified:
+                    self.trees[conversation_id]["tree"].tree_data.atlas.suggestions_context = suggestions_context
+                    self.trees[conversation_id]["tree"]._config_modified = False
+        else:
+            if conversation_id not in self.trees:
+                raise ValueError(f"Tree {conversation_id} not found")
+
+            self.trees[conversation_id]["tree"].tree_data.atlas.suggestions_context = suggestions_context
 
     def change_branch_initialisation(
         self, branch_initialisation: BranchInitType, conversation_id: str | None = None

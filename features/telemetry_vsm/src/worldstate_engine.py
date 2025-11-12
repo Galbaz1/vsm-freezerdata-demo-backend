@@ -5,9 +5,19 @@ Implements on-demand computation for flexible time windows.
 
 import pandas as pd
 import numpy as np
+import random
 from datetime import datetime, timedelta
 from typing import Dict, Any, Optional
 from pathlib import Path
+
+# Telemetry data range (after rebase)
+DATA_RANGE_START = datetime(2024, 7, 21, 14, 3, 0)
+DATA_RANGE_END = datetime(2026, 1, 1, 0, 0, 0)
+
+# Time zone behavior:
+# - PAST (< today): Real historical data from parquet
+# - PRESENT (= today): Synthetic problem data (A3-like frozen evaporator)
+# - FUTURE (> today): Real parquet data flagged as predictive
 
 
 class WorldStateEngine:
@@ -27,6 +37,9 @@ class WorldStateEngine:
         if not self.parquet_path.exists():
             raise FileNotFoundError(f"Parquet file not found: {parquet_path}")
         self._df = None  # Lazy load
+        # Session cache for synthetic "today" data
+        self._synthetic_today_cache = None
+        self._synthetic_today_date = None
     
     def _load_data(self) -> pd.DataFrame:
         """Lazy load parquet file"""
@@ -46,6 +59,11 @@ class WorldStateEngine:
         """
         Compute WorldState features for given time window.
         
+        Implements three time zones:
+        - PAST (< today): Real historical data from parquet
+        - PRESENT (= today): Synthetic problem data (A3-like frozen evaporator)
+        - FUTURE (> today): Real parquet data flagged as predictive
+        
         Args:
             asset_id: Asset identifier (e.g., "135_1570")
             timestamp: Point in time for state computation
@@ -61,6 +79,138 @@ class WorldStateEngine:
             - incidents: Derived incident features
             - health_scores: Composite health metrics
         """
+        now = datetime.now()
+        requested_date = timestamp.date()
+        today = now.date()
+        
+        # THREE TIME ZONES
+        if requested_date == today:
+            # PRESENT: Synthetic problem (cached per session)
+            return self._get_synthetic_today_worldstate(asset_id, timestamp, window_minutes)
+        elif timestamp < now:
+            # PAST: Real historical data
+            return self._compute_from_parquet(asset_id, timestamp, window_minutes)
+        else:
+            # FUTURE: Real data flagged as predictive
+            ws = self._compute_from_parquet(asset_id, timestamp, window_minutes)
+            ws["is_future"] = True
+            ws["note"] = "Predictive maintenance forecast based on ML models"
+            return ws
+    
+    def _get_synthetic_today_worldstate(self, asset_id: str, timestamp: datetime, window_minutes: int) -> Dict[str, Any]:
+        """Generate synthetic problem WorldState for 'today' queries.
+        
+        Mimics A3 frozen evaporator case with randomized variations:
+        - Same failure mode (frozen evaporator)
+        - Same critical flags
+        - Different temperature/pressure values
+        - Different door usage patterns
+        
+        Cached per session (engine instance) for consistency.
+        """
+        # Check cache (regenerate if date changed or first call)
+        if (self._synthetic_today_cache is None or 
+            self._synthetic_today_date != timestamp.date()):
+            
+            self._synthetic_today_cache = self._generate_synthetic_worldstate(
+                asset_id, timestamp, window_minutes
+            )
+            self._synthetic_today_date = timestamp.date()
+        
+        return self._synthetic_today_cache
+    
+    def _generate_synthetic_worldstate(self, asset_id: str, timestamp: datetime, window_minutes: int) -> Dict[str, Any]:
+        """Generate randomized A3-like problem data."""
+        # Base A3 characteristics with randomness
+        room_temp = random.uniform(-2.0, 1.5)  # Critical (should be -33°C)
+        hot_gas = random.uniform(18.0, 22.0)   # Too low (should be 50+°C)
+        suction = random.uniform(-42.0, -38.0) # Extreme cold (frozen evaporator)
+        liquid = random.uniform(19.0, 21.0)    # Near ambient
+        ambient = random.uniform(16.0, 22.0)   # Normal
+        door_ratio = random.uniform(0.4, 0.7)  # Elevated but not stuck
+        
+        return {
+            "asset_id": asset_id,
+            "timestamp": timestamp.isoformat(),
+            "is_synthetic_today": True,  # Flag for debugging
+            "current_state": {
+                "current_room_temp": room_temp,
+                "current_room_temp_secondary": None,
+                "current_hot_gas_temp": hot_gas,
+                "current_liquid_temp": liquid,
+                "current_suction_temp": suction,
+                "current_ambient_temp": ambient,
+                "current_door_open": False,
+                "current_rssi": -65.0,
+                "current_battery": 85.0
+            },
+            "trends_30m": {
+                "room_temp_min_30m": room_temp - 0.5,
+                "room_temp_max_30m": room_temp + 0.3,
+                "room_temp_mean_30m": room_temp - 0.2,
+                "room_temp_std_30m": 0.4,
+                "room_temp_delta_30m": random.uniform(0.5, 1.5),  # Rising
+                "door_open_ratio_30m": door_ratio,
+                "door_open_count_30m": int(random.uniform(8, 15))
+            },
+            "trends_2h": {
+                "room_temp_min_2h": room_temp - 2.0,
+                "room_temp_max_2h": room_temp + 0.5,
+                "room_temp_mean_2h": room_temp - 1.0,
+                "room_temp_trend_2h": random.uniform(1.5, 3.0),  # Rising trend
+                "hot_gas_mean_2h": hot_gas,
+                "hot_gas_std_2h": 2.0,
+                "ambient_mean_2h": ambient,
+                "door_open_ratio_2h": door_ratio
+            },
+            "trends_24h": {
+                "room_temp_min_24h": -34.0,  # Was normal earlier
+                "room_temp_max_24h": room_temp,
+                "room_temp_mean_24h": -15.0,
+                "temp_violations_24h": random.uniform(2.0, 4.0),
+                "compressor_runtime_24h": random.uniform(18.0, 22.0),
+                "compressor_cycle_count_24h": int(random.uniform(25, 35)),
+                "door_open_ratio_24h": door_ratio * 0.8,
+                "door_open_total_24h": int(random.uniform(80, 120))
+            },
+            "flags": {
+                "flag_secondary_error": False,
+                "flag_main_temp_high": True,      # CRITICAL: Temp too high
+                "flag_hot_gas_low": True,         # Compressor struggling
+                "flag_liquid_extreme": False,
+                "flag_suction_extreme": True,     # CRITICAL: Frozen evaporator
+                "flag_ambient_extreme": False
+            },
+            "incidents": {
+                "is_temp_critical": True,
+                "is_temp_warning": True,
+                "is_temp_rising": True,
+                "is_compressor_inactive": True,
+                "is_door_stuck_open": False,
+                "has_recent_errors": True,
+                "error_duration_current": random.uniform(120.0, 300.0),
+                "is_ambient_high": False,
+                "is_sensor_communication_poor": False
+            },
+            "health_scores": {
+                "cooling_performance_score": int(random.uniform(15, 30)),
+                "compressor_health_score": int(random.uniform(35, 50)),
+                "system_stability_score": int(random.uniform(20, 40)),
+                "data_quality_score": 95
+            },
+            "context": {
+                "timestamp_current": timestamp.isoformat(),
+                "time_since_last_measurement": 1.0,
+                "hour_of_day": timestamp.hour,
+                "day_of_week": timestamp.weekday(),
+                "is_business_hours": (timestamp.weekday() < 5 and 8 <= timestamp.hour < 18),
+                "time_since_last_door_event": random.uniform(5.0, 15.0),
+                "sensor_data_age_max": None
+            }
+        }
+    
+    def _compute_from_parquet(self, asset_id: str, timestamp: datetime, window_minutes: int) -> Dict[str, Any]:
+        """Compute WorldState from actual parquet data (PAST/FUTURE zones)."""
         df = self._load_data()
         
         # Filter time window

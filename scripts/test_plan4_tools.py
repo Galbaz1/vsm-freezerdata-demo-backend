@@ -37,7 +37,7 @@ async def test_get_asset_health(client_manager=None):
             tree_data=tree.tree_data,
             inputs={
                 "asset_id": "135_1570",
-                "timestamp": "2024-01-01T12:00:00",
+                "timestamp": "2025-04-01T12:00:00",
                 "window_minutes": 60
             },
             base_lm=None,  # Not needed for low_memory
@@ -98,7 +98,7 @@ async def test_analyze_sensor_pattern(client_manager=None):
             tree_data=tree.tree_data,
             inputs={
                 "asset_id": "135_1570",
-                "timestamp": "2024-01-01T12:00:00",
+                "timestamp": "2025-04-01T12:00:00",
                 "window_minutes": 60
             },
             base_lm=None,  # Not needed for low_memory
