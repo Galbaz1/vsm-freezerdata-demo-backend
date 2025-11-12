@@ -21,7 +21,7 @@ source .venv/bin/activate  # BEFORE any Python commands
 
 ```bash
 source .venv/bin/activate
-python3 scripts/seed_default_config.py  # First time only
+python3 scripts/seed_default_config.py  # First time only or after relevant updats
 elysia start  # Opens on http://localhost:8000
 ```
 
@@ -30,10 +30,10 @@ elysia start  # Opens on http://localhost:8000
 ## Weaviate Collections (Verified Counts)
 
 - **VSM_ManualSections**: 167 (4 P's classified, 9 opgave test content)
-- **VSM_DiagramUserFacing**: 8 (simple diagrams for technicians)
-- **VSM_DiagramAgentInternal**: 8 (complex logic for agent)
-- **VSM_TelemetryEvent**: 12 ("uit balans" incidents)
-- **VSM_VlogCase**: 5 (A1-A5 problem→solution workflows)
+- **VSM_DiagramUserFacing**: 8 (simple diagrams for technicians (M))
+- **VSM_DiagramAgentInternal**: 8 (complex logic for agent (A))
+- **VSM_TelemetryEvent**: 12 ("uit balans" incidents, historical events that point to telemtry data in the codebase that serve as reference when the agent (A) identified a problem and wants to find a solution)
+- **VSM_VlogCase**: 5 (A1-A5 problem→solution workflows. Video vlogs of historical problem solutions that point to video clips that A can show to M)
 - **VSM_VlogClip**: 15 (individual clips)
 - **VSM_WorldStateSnapshot**: 13 (reference patterns)
 - **FD_Assets**: 1 (commissioning data, Context C)
@@ -121,14 +121,23 @@ async with ClientManager().connect_to_async_client() as client:
 
 ## WorldState (W) vs Context (C)
 
-- **W** (Dynamic): Current sensors, flags, trends, health scores (from parquet)
+- **W** (Dynamic): Current sensors, flags, trends, health scores (from parquet) given a certain time range
 - **C** (Static): Commissioning data, design parameters, target values (from FD_Assets)
 - **Balance Check**: Compare W vs C → detect "uit balans"
 
 ---
 
-## 7 Custom Tools
+## Tools
 
+### Native Elysia Tools (6)
+1. `query` - Hybrid/semantic search in Weaviate collections
+2. `aggregate` - Count, sum, average, statistics on collections
+3. `visualise` - Create charts (bar, histogram, scatter, line)
+4. `text_response` - Direct answer without data retrieval
+5. `cited_summarize` - Summarize with citations from environment
+6. `summarise_items` - Post-process retrieved objects
+
+### Custom VSM Tools (7)
 1. `search_manuals_by_smido` - SMIDO-filtered manual + diagram search
 2. `get_alarms` - Query VSM_TelemetryEvent by severity
 3. `query_telemetry_events` - Historical "uit balans" incidents
