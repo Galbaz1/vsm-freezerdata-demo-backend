@@ -26,9 +26,9 @@ All required API keys and configuration are stored in the `.env` file at root of
 
 **Critical Model Configuration**:
 ```bash
-BASE_MODEL=gpt-4.1
+BASE_MODEL=gemini-2.5-flash
 COMPLEX_MODEL=gemini-2.5-pro  # Note: NO prefix in model name!
-BASE_PROVIDER=openai
+BASE_PROVIDER=gemini
 COMPLEX_PROVIDER=gemini  # Use "gemini" not "google"
 ```
 

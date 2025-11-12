@@ -1,18 +1,15 @@
 #!/bin/bash
-# Activate vsm-hva conda environment
+# Activate .venv virtual environment
 # Usage: source scripts/activate_env.sh
 
-# Initialize conda if needed
-if [ -z "$CONDA_EXE" ]; then
-    if [ -f "/opt/homebrew/anaconda3/etc/profile.d/conda.sh" ]; then
-        source /opt/homebrew/anaconda3/etc/profile.d/conda.sh
-    elif [ -f "$HOME/anaconda3/etc/profile.d/conda.sh" ]; then
-        source "$HOME/anaconda3/etc/profile.d/conda.sh"
-    fi
+# Check if .venv exists
+if [ ! -d ".venv" ]; then
+    echo "Error: .venv directory not found. Please create it first:"
+    echo "  python3 -m venv .venv"
+    exit 1
 fi
 
-# Activate environment
-conda activate vsm-hva
+# Activate virtual environment
+source .venv/bin/activate
 
-# Ensure conda Python is first in PATH
-export PATH="/opt/homebrew/anaconda3/envs/vsm-hva/bin:$PATH"
+echo "Virtual environment activated: $(which python)"

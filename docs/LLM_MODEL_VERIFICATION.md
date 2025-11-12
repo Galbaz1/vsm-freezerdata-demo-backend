@@ -9,9 +9,9 @@
 
 ### Environment Variables (.env)
 ```bash
-BASE_MODEL=gpt-4.1
+BASE_MODEL=gemini-2.5-flash
 COMPLEX_MODEL=gemini-2.5-pro
-BASE_PROVIDER=openai
+BASE_PROVIDER=gemini
 COMPLEX_PROVIDER=gemini
 
 OPENAI_API_KEY=sk-proj-*** (present)
@@ -25,11 +25,11 @@ WCD_API_KEY=*** (present)
 
 ## Test Results
 
-### ✅ Base Model (GPT-4.1 via OpenAI)
+### ✅ Base Model (Gemini 2.5 Flash via Gemini)
 - **Status**: WORKING
-- **Provider**: openai
-- **Model**: gpt-4.1
-- **API Key**: OPENAI_API_KEY
+- **Provider**: gemini
+- **Model**: gemini-2.5-flash
+- **API Key**: GOOGLE_API_KEY
 - **Usage**: Decision agent in Elysia Tree
 - **Test**: Successfully responded to queries via Tree interface
 
@@ -153,7 +153,7 @@ python3 scripts/test_models_via_tree.py
 
 ## Model Usage in VSM
 
-### Base Model (gpt-4.1) Usage
+### Base Model (gemini-2.5-flash) Usage
 - **Decision Agent**: Chooses which tools to call in SMIDO tree
 - **Branch Navigation**: Decides M→T→I→D→O flow
 - **Tool Selection**: Picks appropriate diagnostic tools
@@ -177,9 +177,9 @@ python3 scripts/test_models_via_tree.py
 
 ### Issue: Base model not responding
 **Check**:
-1. OPENAI_API_KEY is set in .env
-2. BASE_PROVIDER=openai
-3. BASE_MODEL=gpt-4.1 (or another valid OpenAI model)
+1. GOOGLE_API_KEY is set in .env
+2. BASE_PROVIDER=gemini
+3. BASE_MODEL=gemini-2.5-flash (or another valid Gemini model)
 
 ### Issue: Complex model errors in query tool
 **Check**:
@@ -219,7 +219,7 @@ Current configuration is production-ready:
 ## Conclusion
 
 ✅ **Both LLM models are working correctly** with the VSM project configuration:
-- Base model (GPT-4.1) handles decision-making
+- Base model (Gemini 2.5 Flash) handles decision-making
 - Complex model (Gemini 2.5 Pro) handles semantic search and complex reasoning
 - Configuration follows Elysia/DSPy/LiteLLM conventions
 - Ready for Phase 2 full tree execution (Plan 7)

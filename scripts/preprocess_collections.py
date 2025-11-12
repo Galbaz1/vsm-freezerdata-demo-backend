@@ -7,7 +7,7 @@ try:
     from elysia.preprocessing.collection import preprocess
 except Exception as e:
     raise SystemExit(
-        "Failed to import Elysia. Make sure you've activated your conda env and installed the repo:\n"
+        "Failed to import Elysia. Make sure you've activated your virtual environment (.venv) and installed the repo:\n"
         "  pip install -e .\n"
         f"Import error: {e}"
     )

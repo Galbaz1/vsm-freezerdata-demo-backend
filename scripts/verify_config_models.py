@@ -76,7 +76,7 @@ async def verify_models():
         print("VERIFICATION")
         print("="*80)
 
-        correct_base = (base_provider == "openai" and base_model == "gpt-4.1")
+        correct_base = (base_provider == "gemini" and base_model == "gemini-2.5-flash")
         correct_complex = (complex_provider == "gemini" and complex_model == "gemini-2.5-pro")
 
         if correct_base:
@@ -84,7 +84,7 @@ async def verify_models():
             print(f"   → {base_provider}/{base_model}")
         else:
             print(f"\n❌ Base model configuration is WRONG")
-            print(f"   Expected: openai/gpt-4.1")
+            print(f"   Expected: gemini/gemini-2.5-flash")
             print(f"   Got: {base_provider}/{base_model}")
 
         if correct_complex:

@@ -62,7 +62,7 @@ Following `docs/creating_tools.md`:
 
 Following `docs/setting_up.md`:
 - ✅ BASE_MODEL and COMPLEX_MODEL configured in `.env`
-- ✅ Using `gpt-4.1` (base) and `gemini-2.5-pro` (complex)
+- ✅ Using `gemini-2.5-flash` (base) and `gemini-2.5-pro` (complex)
 - ✅ API keys present (OPENAI_API_KEY, GOOGLE_API_KEY)
 
 ---

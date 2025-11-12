@@ -646,7 +646,7 @@ Decision Tree Nodes:
 2. **Resolve Python Version Confusion**
    - Clarify: Is Python 3.12.12 required, or is 3.11-3.12 acceptable?
    - Update `pyproject.toml` or `CLAUDE.md` to match reality
-   - Document conda environment setup clearly
+   - Document virtual environment setup clearly
 
 3. **Create Missing Import Scripts**
    - Vlog import script (JSONL → ServiceVlogs collection)
@@ -762,7 +762,7 @@ The `docs/vsm_freezer_demo.md` file reads like implementation documentation, but
 
 ### 10.4 Python Version Confusion
 
-**CLAUDE.md says**: "Python 3.12.12 from the `vsm-hva` conda environment"
+**CLAUDE.md says**: "Python 3.12.12 from the `.venv` virtual environment"
 
 **pyproject.toml says**: "requires-python = '>=3.11.0,<3.13.0'"
 
@@ -1115,7 +1115,7 @@ The `docs/vsm_freezer_demo.md` file reads like implementation documentation, but
 **Evidence**:
 - `CLAUDE.md` says 3.12.12 required
 - `pyproject.toml` says 3.11-3.12 acceptable
-- Conda environment uses 3.12.12
+- Virtual environment (.venv) uses 3.12.12
 
 **Conclusion**: ⚠️ **UNCLEAR** - Needs clarification and testing.
 
@@ -1424,7 +1424,7 @@ The `docs/vsm_freezer_demo.md` file reads like implementation documentation, but
 
 **Inferred Requirements**:
 - Python 3.12.12 (or 3.11-3.12)
-- Conda environment `vsm-hva`
+- Virtual environment `.venv`
 - Weaviate cluster (cloud or local)
 - LLM API keys (Gemini/OpenAI/etc.)
 - Environment variables configured
