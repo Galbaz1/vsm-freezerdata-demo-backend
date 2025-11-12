@@ -64,6 +64,9 @@ async def search_manuals_by_smido(
     """
     Search manual sections filtered by SMIDO step, with optional diagram inclusion.
     
+    Source: VSM_ManualSections collection (167 sections from 3 manuals)
+    Diagrams: VSM_DiagramUserFacing (8) + VSM_DiagramAgentInternal (8)
+    
     Args:
         query: Natural language query to search for in manual sections. If empty, uses filter-only search.
         smido_step: SMIDO methodology step to filter by. Options: melding, technisch, installatie_vertrouwd, 
@@ -271,14 +274,15 @@ async def get_alarms(
     """
     Get active alarms for asset from VSM_TelemetryEvent collection.
     
+    Source: VSM_TelemetryEvent collection (12 tagged incidents)
+    Used in: M (Melding), P1 (Power) SMIDO phases
+    
     Args:
         asset_id: Asset identifier (e.g., "135_1570"). Optional - if not provided, returns alarms for all assets.
         severity: Filter by severity level. Options: "critical", "warning", "info", "all". Default: "all"
     
     Returns:
-        - List of alarm objects from VSM_TelemetryEvent
-    
-    Used in: M (Melding), P1 (Power) nodes
+        - List of alarm objects with timestamp, severity, message, alarm_code
     """
     if not client_manager:
         yield Error("Client manager not available. Cannot query Weaviate.")
@@ -356,8 +360,18 @@ async def query_telemetry_events(
     **kwargs
 ):
     """
-    Query historical telemetry events (similar incidents).
-    Uses hybrid search if query provided, filter-only for structured search.
+    Query historical "uit balans" incidents to find patterns.
+    
+    Use when:
+    - You've identified a failure mode and want to see when it happened before
+    - Looking for temporal patterns (does this happen every night? weekend?)
+    - Comparing current incident to past similar events
+    
+    Different from get_alarms:
+    - get_alarms: Current active alarms (what's wrong RIGHT NOW)
+    - query_telemetry_events: Historical incidents (when did this happen BEFORE)
+    
+    Source: VSM_TelemetryEvent collection (12 tagged incidents)
     
     Args:
         failure_mode: Filter by failure mode (e.g., "ingevroren_verdamper")
@@ -366,9 +380,9 @@ async def query_telemetry_events(
         limit: Maximum number of events to return. Default: 5
     
     Returns:
-        - List of telemetry event objects with WorldState summaries
+        - List of telemetry event objects with timestamp, severity, failure mode
     
-    Used in: P4 (Productinput), O (Onderdelen) nodes
+    Used in: M (Melding), D (Diagnose) nodes for pattern analysis
     """
     if not client_manager:
         yield Error("Client manager not available. Cannot query Weaviate.")
@@ -455,6 +469,9 @@ async def query_vlog_cases(
     **kwargs
 ):
     """Query vlog cases for similar problem→solution workflows - learn from past repairs.
+
+Source: VSM_VlogCase collection (5 cases: A1-A5)
+Related: VSM_VlogClip collection (15 individual video segments)
 
 When to use:
 - O (ONDERDELEN): After identifying failure mode, to find repair procedures

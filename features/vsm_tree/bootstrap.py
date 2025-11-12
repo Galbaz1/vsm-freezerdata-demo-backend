@@ -221,18 +221,19 @@ def _set_root_instruction(tree: Tree) -> None:
     Key principle: NO keyword detection. Trust LLM to read tool descriptions.
     """
     tree.decision_nodes["base"].instruction = """
-Choose tool based on user's immediate need.
+Choose tool based on user's immediate need and conversation context.
 Decide based on tools available and their descriptions.
 Read them thoroughly and match actions to user prompt.
 
-**Quick checks**: get_current_status, get_alarms
-**Deep analysis**: compute_worldstate, get_asset_health, analyze_sensor_pattern
-**Search knowledge**: search_manuals_by_smido, query_vlog_cases, query
-**Statistics**: aggregate
-**Visualization**: visualise (after data tools)
-**Communicate**: cited_summarize, text_response
+Tool categories for reference:
+- Quick status checks: get_current_status, get_alarms, get_asset_health
+- Deep analysis: compute_worldstate, analyze_sensor_pattern
+- Knowledge search: search_manuals_by_smido, query_vlog_cases, query
+- Statistics: aggregate
+- Visualization: visualise (after data tools)
+- Communication: cited_summarize, text_response
 
-After a tool completes, more tools may become available.
+After a tool completes, more tools may become available based on context.
 """
     logger.debug("Set root instruction (one_branch style)")
 
