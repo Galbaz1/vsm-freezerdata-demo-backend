@@ -4,7 +4,7 @@ Comprehensive test runner for all Phase 2 implementation plans.
 Runs tests with proper output, timeout protection, and detailed reporting.
 
 Usage:
-    source .venv/bin/activate
+    conda activate vsm-hva
     python3 scripts/run_all_plan_tests.py
 """
 

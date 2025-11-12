@@ -6,7 +6,7 @@ This guide shows you the quickest way to access your session data after starting
 
 ### 1. Start Elysia
 ```bash
-source .venv/bin/activate
+conda activate vsm-hva
 elysia start
 ```
 
@@ -38,7 +38,7 @@ When you interact with the frontend, you'll see colored panels printed to the te
 In another terminal:
 
 ```bash
-source .venv/bin/activate
+conda activate vsm-hva
 python3 scripts/get_tree_session_data.py 550e8400-e29b-41d4-a716-446655440000 123e4567-e89b-12d3-a456-426614174000
 ```
 

@@ -160,10 +160,13 @@ async def _evaluate_field_statistics(
                 Metrics(property).integer(mean=True, maximum=True, minimum=True),
             ]
         )
-        out["range"] = [
-            response.properties[property].minimum,
-            response.properties[property].maximum,
-        ]
+        # Check for valid values - Weaviate doesn't accept empty arrays for NUMBER_ARRAY
+        min_val = response.properties[property].minimum
+        max_val = response.properties[property].maximum
+        if min_val is not None and max_val is not None:
+            out["range"] = [min_val, max_val]
+        else:
+            out["range"] = None
         out["mean"] = response.properties[property].mean
         out["date_range"] = None
         out["date_median"] = None
@@ -174,10 +177,13 @@ async def _evaluate_field_statistics(
                 Metrics(property).number(mean=True, maximum=True, minimum=True),
             ]
         )
-        out["range"] = [
-            response.properties[property].minimum,
-            response.properties[property].maximum,
-        ]
+        # Check for valid values - Weaviate doesn't accept empty arrays for NUMBER_ARRAY
+        min_val = response.properties[property].minimum
+        max_val = response.properties[property].maximum
+        if min_val is not None and max_val is not None:
+            out["range"] = [min_val, max_val]
+        else:
+            out["range"] = None
         out["mean"] = response.properties[property].mean
         out["date_range"] = None
         out["date_median"] = None
@@ -212,19 +218,39 @@ async def _evaluate_field_statistics(
 
     # Date (summary statistics)
     elif properties[property] == "date":
-        response = await collection.aggregate.over_all(
-            return_metrics=[
-                Metrics(property).date_(median=True, minimum=True, maximum=True)
-            ]
-        )
-        out["date_range"] = [
-            response.properties[property].minimum,
-            response.properties[property].maximum,
-        ]
+        try:
+            response = await collection.aggregate.over_all(
+                return_metrics=[
+                    Metrics(property).date_(median=True, minimum=True, maximum=True)
+                ]
+            )
+            # Check if we have valid date values - Weaviate doesn't accept empty arrays or None values in DATE_ARRAY
+            if hasattr(response, 'properties') and property in response.properties:
+                prop_metrics = response.properties[property]
+                min_date = getattr(prop_metrics, 'minimum', None)
+                max_date = getattr(prop_metrics, 'maximum', None)
+                median_date = getattr(prop_metrics, 'median', None)
+                
+                # Check for valid, non-empty dates (Weaviate returns empty strings '' for null dates)
+                if (min_date is not None and max_date is not None and 
+                    min_date != '' and max_date != ''):
+                    out["date_range"] = [min_date, max_date]
+                else:
+                    # Set to None if no valid dates (Weaviate DATE_ARRAY doesn't accept empty arrays, empty strings, or [None, None])
+                    out["date_range"] = None
+                # Set median to None if it's an empty string
+                out["date_median"] = median_date if median_date and median_date != '' else None
+            else:
+                # No date values found in collection
+                out["date_range"] = None
+                out["date_median"] = None
+        except Exception as e:
+            # If aggregation fails, set to None to avoid invalid array values
+            # Note: logger is accessed via settings.logger in the calling function
+            out["date_range"] = None
+            out["date_median"] = None
         out["mean"] = None
-        out["date_median"] = response.properties[property].median
         out["range"] = None
-        out["mean"] = None
 
     # List (lengths)
     elif properties[property].endswith("[]"):

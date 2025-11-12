@@ -206,7 +206,7 @@ async def export_session_data(user_id: str, conversation_id: str, output_file: s
 A ready-to-use script is available:
 
 ```bash
-source .venv/bin/activate
+conda activate vsm-hva
 python3 scripts/get_tree_session_data.py <user_id> <conversation_id>
 ```
 

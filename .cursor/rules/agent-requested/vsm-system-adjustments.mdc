@@ -1,0 +1,88 @@
+---
+description: "VSM agent/system adjustment guide: prompts, branches, tools, config, and info-flow diagram"
+alwaysApply: false
+---
+
+### VSM System Adjustments (Agent, Branches, Tools) – Quick Guide
+
+- **Agent vs Tools**
+  - **Agent (Tree)**: The conversational brain with persona, style, end goal, and SMIDO branches.
+  - **Tools**: Callable capabilities the agent invokes at specific branches (e.g., compute worldstate, query manuals).
+
+### Where prompts live
+- **Agent persona/style/end goal**: `features/vsm_tree/smido_tree.py` (Tree constructor arguments)
+- **SMIDO branch prompts (M, T, I, D[P1–P4], O)**: `features/vsm_tree/smido_tree.py` in `_add_*_branch(...)`
+- **Tool-level guidance (when-to-use, status text)**: `elysia/api/custom_tools.py` (docstrings and `@tool(...)` decorators)
+
+### Change the agent persona/style/end goal
+- Edit in `features/vsm_tree/smido_tree.py` (Tree initialization).
+- Or update dynamically via `TreeManager.update_config(...)` and `Config` fields in `elysia/api/utils/config.py`.
+
+### Edit SMIDO branch prompts
+- Update `instruction=` strings in:
+  - `_add_m_branch`, `_add_t_branch`, `_add_i_branch`, `_add_d_branch` (includes P1–P4), `_add_o_branch`
+- File: `features/vsm_tree/smido_tree.py`
+
+### Add or move tools across branches
+- Implement/modify tools in `elysia/api/custom_tools.py` using `@tool(...)`.
+- Bind tools to branches in `features/vsm_tree/smido_tree.py` within `_assign_tools_to_branches(...)`:
+  - Add: `tree.add_tool(my_tool, branch_id="smido_p3_procesparameters")`
+  - Move: change the `branch_id` in the mapping above.
+
+### Create a new tool (pattern)
+- In `elysia/api/custom_tools.py`:
+  - Define `@tool(status="...", branch_id="...") async def my_tool(...):` with a clear docstring:
+    - When to use
+    - What it returns
+    - How to explain results to the technician (Dutch)
+  - Use `yield Status(...)`, `yield Result(...)`, and handle missing `client_manager` gracefully.
+- Bind it in `_assign_tools_to_branches(...)` as above.
+
+### Bootstrapping (auto-load SMIDO)
+- Use config: `branch_initialisation="empty"` and `feature_bootstrappers=["vsm_smido"]`.
+- The VSM bootstrapper adds all SMIDO branches and assigns tools:
+  - Registry and bootstrap: `features/vsm_tree/bootstrap.py`
+  - Auto-application when creating a tree: `elysia/api/services/tree.py` (`TreeManager.add_tree`)
+- Seed default config once (optional but recommended):
+  - `conda activate vsm-hva && python3 scripts/seed_default_config.py`
+
+### Data & queries (sources and paths)
+- Telemetry parquet for WorldState (W):
+  - `features/telemetry/timeseries_freezerdata/135_1570_cleaned_with_flags.parquet`
+  - Used by `compute_worldstate` and `get_asset_health`
+- Commissioning/context (C):
+  - `features/integration_vsm/output/fd_assets_enrichment.json`
+  - Used by `get_asset_health`
+- Weaviate collections (semantic data):
+  - `VSM_ManualSections`, `VSM_Diagram`, `VSM_TelemetryEvent`, `VSM_WorldStateSnapshot`, `VSM_VlogCase`
+  - Queried by search/query tools in `elysia/api/custom_tools.py`
+
+### Models & environment
+- `.env` keys (critical): `BASE_MODEL`, `COMPLEX_MODEL`, `BASE_PROVIDER`, `COMPLEX_PROVIDER`
+  - Important: `COMPLEX_PROVIDER=gemini` and model name without `gemini/` prefix.
+- Activate env before running: `conda activate vsm-hva`
+
+### Run & test
+- Start API/UI: `elysia start` (optional: `--port 8080`)
+- Quick tests:
+  - `pytest` or plan-specific scripts under `scripts/` (e.g., `test_plan3_tools.py`, `test_plan7_full_tree.py`)
+
+### Quick recipes
+- **Adjust P3 diagnostic sequence**: Reorder tool calls in `_assign_tools_to_branches(...)` (P3 branch), and/or clarify tool docstrings/status texts.
+- **Add a SMIDO-specific manual search filter**: Extend filters in `search_manuals_by_smido` (in `elysia/api/custom_tools.py`).
+- **Tune WorldState behavior**: Update `WorldStateEngine` usage or parquet path in `compute_worldstate`/`get_asset_health`.
+- **Switch models**: Update `.env` and re-seed config if needed (`scripts/seed_default_config.py`).
+
+### Architecture diagram (info-flow)
+- File: `docs/diagrams/system_info_flow.mermaid`
+- Overview: Frontend → API/TreeManager → Tree (Agent) → SMIDO branches → Tools → Data stores (Weaviate/Parquet/Enrichment) → Results + logging → Frontend.
+
+### Key files at a glance
+- `features/vsm_tree/smido_tree.py` – Agent persona/style/end goal, SMIDO branches, tool binding
+- `features/vsm_tree/bootstrap.py` – `vsm_smido` bootstrapper and registry
+- `elysia/api/custom_tools.py` – Tool definitions and Weaviate/telemetry access
+- `elysia/api/services/tree.py` – `TreeManager` (creation, bootstrapping, processing)
+- `elysia/api/utils/config.py` – `Config` surface (branch_initialisation, feature_bootstrappers, etc.)
+- `features/integration_vsm/output/fd_assets_enrichment.json` – Context (C)
+- `features/telemetry/...parquet` – Telemetry (W)
+

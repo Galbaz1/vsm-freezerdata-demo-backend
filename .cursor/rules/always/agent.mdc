@@ -12,10 +12,15 @@ This file provides guidance to the agent when working with code in this reposito
 
 ## ⚠️ CRITICAL: Environment Setup
 
-**BEFORE RUNNING ANY PYTHON COMMANDS**, you MUST activate the virtual environment:
+**BEFORE RUNNING ANY PYTHON COMMANDS**, you MUST activate the Conda environment:
 
 ```bash
-source .venv/bin/activate
+conda activate vsm-hva
+```
+
+Alternatively, you can use the provided script:
+```bash
+source scripts/activate_env.sh
 ```
 
 
@@ -58,7 +63,7 @@ For frontend customization, you would need to clone that repository separately a
 Before starting Elysia for the first time, seed the VSM default config to skip manual configuration:
 
 ```bash
-source .venv/bin/activate
+conda activate vsm-hva
 python3 scripts/seed_default_config.py
 elysia start
 ```
@@ -105,7 +110,7 @@ elysia start
 
 **⚠️ Always activate environment first:**
 ```bash
-source .venv/bin/activate
+conda activate vsm-hva
 ```
 
 Then run scripts:
@@ -131,7 +136,7 @@ python3 scripts/seed_assets_alarms.py
 
 **⚠️ Always activate environment first:**
 ```bash
-source .venv/bin/activate
+conda activate vsm-hva
 ```
 
 Then run tests:
@@ -175,6 +180,24 @@ mkdocs serve
 # Build docs
 mkdocs build
 ```
+
+### Session Logging
+
+**Session IDs & Timestamps**: All sessions are automatically logged with official IDs and ISO timestamps.
+
+- **User ID**: Created when user initializes (`/init/user/{user_id}`)
+- **Conversation ID**: Created when conversation starts (`/init/tree/{user_id}/{conversation_id}`)
+- **Logs location**: `elysia/logs/`
+  - `sessions.jsonl` - All sessions (JSONL format)
+  - `sessions/{user_id}/{conversation_id}_{timestamp}.json` - Individual session logs
+  - `users/{user_id}_{timestamp}.json` - User session logs
+
+**Access session data**:
+```bash
+python3 scripts/get_tree_session_data.py {user_id} {conversation_id}
+```
+
+**Implementation**: `elysia/api/utils/session_logger.py` - SessionLogger class tracks all sessions with timestamps, user_id, and conversation_id.
 
 ---
 
@@ -802,7 +825,7 @@ asyncio.run(check())
 **Re-seeding config**:
 ```bash
 # Safe to run multiple times - updates existing config, doesn't create duplicates
-source .venv/bin/activate
+conda activate vsm-hva
 python3 scripts/seed_default_config.py
 ```
 

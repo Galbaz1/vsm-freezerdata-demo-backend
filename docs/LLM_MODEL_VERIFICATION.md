@@ -126,7 +126,7 @@ Failed to load vertex credentials...
 
 ### Quick Model Test (Recommended)
 ```bash
-source .venv/bin/activate
+conda activate vsm-hva
 python3 scripts/quick_model_test.py
 ```
 **Time**: ~10-15 seconds
@@ -134,7 +134,7 @@ python3 scripts/quick_model_test.py
 
 ### Comprehensive LLM Test
 ```bash
-source .venv/bin/activate
+conda activate vsm-hva
 python3 scripts/test_llm_models.py
 ```
 **Time**: ~30-60 seconds
@@ -143,7 +143,7 @@ python3 scripts/test_llm_models.py
 
 ### Full Tree Test via Tree Interface
 ```bash
-source .venv/bin/activate
+conda activate vsm-hva
 python3 scripts/test_models_via_tree.py
 ```
 **Time**: ~15-20 seconds

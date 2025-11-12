@@ -1,0 +1,126 @@
+╔════════════════════════════════════════════════════════════════════════════╗
+║           CONDA ENVIRONMENT QUICK REFERENCE - VSM PROJECT                   ║
+╚════════════════════════════════════════════════════════════════════════════╝
+
+🔧 ENVIRONMENT ACTIVATION
+─────────────────────────────────────────────────────────────────────────────
+
+Primary method:
+  $ conda activate vsm-hva
+
+Alternative method (script):
+  $ source scripts/activate_env.sh
+
+
+📊 VERIFY ENVIRONMENT
+─────────────────────────────────────────────────────────────────────────────
+
+Check Python version:
+  $ python --version  # Should show 3.12.12
+
+Check active environment:
+  $ conda info | grep "active environment"
+
+List all environments:
+  $ conda env list
+
+
+🚀 COMMON COMMANDS
+─────────────────────────────────────────────────────────────────────────────
+
+BEFORE EACH SESSION: conda activate vsm-hva
+
+Data Analysis:
+  $ python3 scripts/analyze_telemetry.py
+  $ python3 scripts/analyze_manuals.py
+
+Run Tests:
+  $ pytest
+  $ pytest tests/test_specific.py
+  $ python3 scripts/run_all_plan_tests.py
+
+Start API Server:
+  $ elysia start
+  $ elysia start --port 8080  # Custom port
+
+Access Session Data:
+  $ python3 scripts/get_tree_session_data.py <user_id> <conversation_id>
+
+
+📦 KEY PACKAGES INSTALLED
+─────────────────────────────────────────────────────────────────────────────
+
+✓ dspy-ai (3.0.3)              - Language model framework
+✓ elysia-ai (0.3.dev1)         - Decision tree agent framework
+✓ fastapi                      - Web API framework
+✓ uvicorn                      - ASGI server
+✓ weaviate-client              - Vector database client
+✓ pandas                       - Data analysis
+✓ pytest (8.4.2)               - Testing framework
+✓ litellm (1.75.9)             - Multi-model LLM support
+✓ spacy                        - NLP processing
+✓ matplotlib                   - Data visualization
+... and 234 more packages
+
+
+🔍 ENVIRONMENT DETAILS
+─────────────────────────────────────────────────────────────────────────────
+
+Name:        vsm-hva
+Location:    /opt/homebrew/anaconda3/envs/vsm-hva
+Python:      3.12.12 (Anaconda)
+Packages:    244 total
+Status:      ✅ All dependencies installed
+
+
+❓ TROUBLESHOOTING
+─────────────────────────────────────────────────────────────────────────────
+
+Q: "conda: command not found"
+A: Initialize conda:
+   $ /opt/homebrew/anaconda3/bin/conda init
+   Then restart your terminal
+
+Q: Python version shows 3.13 instead of 3.12
+A: Use the full path to conda's Python:
+   $ /opt/homebrew/anaconda3/envs/vsm-hva/bin/python --version
+
+Q: "ModuleNotFoundError: No module named X"
+A: Ensure you've activated the environment:
+   $ conda activate vsm-hva
+   $ python -m pip install package_name
+
+Q: How to check if environment is active?
+A: Look for "(vsm-hva)" prefix in your terminal prompt
+   Or run: $ conda info | grep "active environment"
+
+
+📚 DOCUMENTATION FILES
+─────────────────────────────────────────────────────────────────────────────
+
+CONDA_ENVIRONMENT_SETUP.md       - Comprehensive setup guide
+CONDA_UPDATE_COMPLETE.md         - Completion summary
+CONDA_QUICK_REFERENCE.txt        - This file
+.cursor/rules/always/agent.mdc   - Updated agent rules
+
+
+🎯 TYPICAL WORKFLOW
+─────────────────────────────────────────────────────────────────────────────
+
+1. Start new terminal
+2. Activate: conda activate vsm-hva
+3. Run commands (tests, analysis, server, etc.)
+4. When done, deactivate: conda deactivate (optional)
+
+
+📝 CHANGED FROM VEX (November 12, 2025)
+─────────────────────────────────────────────────────────────────────────────
+
+OLD: source .venv/bin/activate
+NEW: conda activate vsm-hva
+
+All agent rules and key documentation have been updated.
+Environment is fully configured and ready to use.
+
+═══════════════════════════════════════════════════════════════════════════════
+
