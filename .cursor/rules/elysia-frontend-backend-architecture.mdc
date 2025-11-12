@@ -1,0 +1,57 @@
+---
+alwaysApply: false
+description: "Elysia frontend/backend separation and static HTML serving"
+---
+
+# Elysia Frontend/Backend Architecture
+
+## Key Pattern: Static HTML Serving
+
+**Separate repos, unified deployment**:
+1. Frontend (Next.js) built as static export → `elysia/api/static/`
+2. Backend (FastAPI) serves static files + API
+3. Single server: `elysia start` serves both
+
+---
+
+## Frontend Build
+
+```bash
+cd elysia-frontend-main  # Separate repo
+npm run assemble  # Builds to ../elysia/api/static/
+```
+
+---
+
+## Backend Serving
+
+```python
+# elysia/api/app.py
+app.mount("/_next", StaticFiles(directory=BASE_DIR / "static/_next"))
+app.mount("/static", StaticFiles(directory=BASE_DIR / "static"))
+
+@app.get("/")
+async def serve_frontend():
+    return FileResponse(os.path.join(BASE_DIR, "static/index.html"))
+```
+
+---
+
+## Benefits
+
+- Single deployment (`elysia start`)
+- No separate frontend hosting
+- Pre-built optimization
+- Simple for end users
+
+---
+
+## VSM Customization
+
+**For serious frontend changes**:
+1. Clone frontend repo separately
+2. Customize for VSM features
+3. Build: `npm run assemble`
+4. Backend serves updated static files
+
+**Frontend Repo**: [github.com/weaviate/elysia-frontend](https://github.com/weaviate/elysia-frontend)

@@ -1,0 +1,158 @@
+---
+alwaysApply: false
+description: "Mermaid flowchart syntax - essential patterns and pitfalls"
+---
+
+# Mermaid Flowchart Guide
+
+**Based on**: Mermaid.js v11.3.0+  
+**Reference**: [mermaid.js.org/syntax/flowchart.html](https://mermaid.js.org/syntax/flowchart.html)
+
+---
+
+## Basic Structure
+
+```mermaid
+flowchart TD
+    A[Process] --> B{Decision?}
+    B -->|Yes| C[Action 1]
+    B -->|No| D[Action 2]
+```
+
+**Always start with**: `flowchart TD` (or `LR`, `BT`, `RL`)  
+**Use**: `flowchart` not `graph` (modern syntax)
+
+---
+
+## Node Shapes
+
+| Shape | Syntax | Use |
+|-------|--------|-----|
+| Rectangle | `A[Text]` | Process |
+| Rounded | `A(Text)` | Event/Start/End |
+| Stadium | `A([Text])` | Terminal |
+| Diamond | `A{Text}` | Decision |
+| Circle | `A((Text))` | Start |
+| Double Circle | `A(((Text)))` | Stop |
+| Cylinder | `A[(Text)]` | Database |
+| Hexagon | `A{{Text}}` | Prepare |
+
+---
+
+## Arrows
+
+| Type | Syntax | Use |
+|------|--------|-----|
+| Solid | `-->` | Normal flow |
+| Thick | `==>` | Strong connection |
+| Dotted | `-.->` | Optional/weak |
+| With label | `-->|Text|` | Labeled transition |
+
+**Multi-rank**: Add dashes (`---->` spans 2 ranks)
+
+---
+
+## Subgraphs
+
+```mermaid
+flowchart TD
+    A --> B
+    subgraph SubID["Display Name"]
+        B --> C
+        C --> D
+    end
+    D --> E
+```
+
+**Rules**:
+- Always close with `end`
+- Connect to nodes INSIDE subgraph, not subgraph ID
+- At least one node inside each subgraph
+
+---
+
+## Styling
+
+### Classes
+```mermaid
+classDef success fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
+class NodeA,NodeB success
+```
+
+### Inline
+```mermaid
+style NodeA fill:#e1f5ff,stroke:#01579b,stroke-width:3px
+```
+
+### Color Schemes
+- **Blue** (Process): Fill `#e1f5ff`, Stroke `#01579b`
+- **Green** (Success): Fill `#e8f5e9`, Stroke `#2e7d32`
+- **Orange** (Warning): Fill `#fff3e0`, Stroke `#e65100`
+- **Red** (Error): Fill `#ffebee`, Stroke `#c62828`
+
+---
+
+## Common Pitfalls
+
+### ❌ Reserved word "end"
+```mermaid
+A --> end  // BREAKS!
+```
+**Fix**: `A --> End` or `A --> "end"`
+
+### ❌ Connecting to subgraph
+```mermaid
+A --> SubID  // May not render
+subgraph SubID
+    B --> C
+end
+```
+**Fix**: `A --> B` (connect to node inside)
+
+### ❌ Node ID starting with "o" or "x"
+```mermaid
+A --> oB  // Creates circle edge!
+```
+**Fix**: `A --> OB` or `A --> "oB"`
+
+### ❌ Empty subgraph label
+```mermaid
+subgraph Group[" "]  // Breaks rendering
+```
+**Fix**: `subgraph Group["Group Name"]`
+
+### ❌ Unquoted special characters
+```mermaid
+A[Process <step>]  // BREAKS!
+```
+**Fix**: `A["Process &lt;step&gt;"]`
+
+---
+
+## Best Practices
+
+- ✅ One connection per line (readable)
+- ✅ Max 20-30 nodes per diagram
+- ✅ Alphanumeric IDs (no spaces)
+- ✅ Quote labels with spaces/special chars
+- ✅ Consistent arrow types (solid main, dotted optional)
+- ✅ Meaningful colors (3-5 max)
+- ✅ Comments on separate lines: `%% Comment`
+- ❌ Don't chain too many: `A --> B --> C --> D --> E`
+- ❌ Don't use HTML tags (use markdown)
+
+---
+
+## Quick Checklist
+
+- [ ] Starts with `flowchart TD`
+- [ ] No reserved words (`end`, lowercase `o`, `x`)
+- [ ] Labels quoted if spaces/special chars
+- [ ] Connections to nodes, not subgraph IDs
+- [ ] Subgraphs have `end`
+- [ ] Max 20-30 nodes
+- [ ] Meaningful color scheme
+
+---
+
+**Live Editor**: [mermaid.live](https://mermaid.live)

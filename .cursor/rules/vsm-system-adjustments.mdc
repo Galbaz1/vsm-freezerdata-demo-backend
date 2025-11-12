@@ -1,0 +1,115 @@
+---
+alwaysApply: false
+description: "Quick guide for modifying VSM agent prompts, branches, and tools"
+---
+
+# VSM System Adjustments - Quick Reference
+
+## Agent vs Tools
+
+- **Agent (Tree)**: Conversational brain with persona, style, SMIDO branches
+- **Tools**: Callable functions agent uses at specific branches
+
+---
+
+## Where to Edit
+
+### Agent Persona/Style/End Goal
+**File**: `features/vsm_tree/smido_tree.py` (Tree constructor)  
+**Or**: Update via `Config` in `elysia/api/utils/config.py`
+
+### SMIDO Branch Prompts (M, T, I, D[P1-P4], O)
+**File**: `features/vsm_tree/smido_tree.py`  
+**Functions**: `_add_m_branch()`, `_add_t_branch()`, `_add_i_branch()`, `_add_d_branch()`, `_add_o_branch()`  
+**Edit**: `instruction=` parameter in each function
+
+### Tool Docstrings & Guidance
+**File**: `elysia/api/custom_tools.py`  
+**Edit**: Docstrings (when to use, what it returns, how to explain to technician)
+
+### Tool-to-Branch Assignments
+**File**: `features/vsm_tree/smido_tree.py`  
+**Function**: `_assign_tools_to_branches()`  
+**Pattern**: `tree.add_tool(tool_name, branch_id="smido_p3_procesparameters")`
+
+---
+
+## Create New Tool
+
+**File**: `elysia/api/custom_tools.py`
+
+```python
+from elysia import tool, Result, Status
+
+@tool(status="Processing...", branch_id="smido_melding")
+async def my_tool(param: str, tree_data=None, client_manager=None, **kwargs):
+    """
+    One-line summary.
+    
+    When to use: Specific SMIDO phase/situation
+    What it returns: Data structure details
+    How to explain to M: "Dutch template..."
+    """
+    yield Status("Working...")
+    result = do_work(param)
+    yield Result(objects=[result])
+```
+
+Then add to `_assign_tools_to_branches()` in `smido_tree.py`.
+
+---
+
+## Data Sources
+
+| Tool | Weaviate | Parquet | JSON | Node |
+|------|----------|---------|------|------|
+| compute_worldstate | - | ✓ | - | P3 |
+| get_asset_health | - | ✓ | ✓ (C) | M,T,P2 |
+| search_manuals_by_smido | ✓ | - | - | I,P2,O |
+| query_vlog_cases | ✓ | - | - | O |
+| get_alarms | ✓ | - | - | M,P1 |
+| query_telemetry_events | ✓ | - | - | P4,O |
+| analyze_sensor_pattern | ✓ | ✓ | - | P3,P4 |
+
+**Paths**:
+- Parquet: `features/telemetry/timeseries_freezerdata/135_1570_cleaned_with_flags.parquet`
+- Context C: `features/integration_vsm/output/fd_assets_enrichment.json`
+
+---
+
+## Bootstrap System
+
+Auto-loads SMIDO tree when:
+```python
+Config(
+    branch_initialisation="empty",
+    feature_bootstrappers=["vsm_smido"]
+)
+```
+
+**Registry**: `features/vsm_tree/bootstrap.py`  
+**Function**: `vsm_smido_bootstrap()` adds all 9 branches + 7 tools  
+**Triggered**: Automatically in `TreeManager.add_tree()`
+
+---
+
+## Quick Recipes
+
+**Adjust P3 sequence**: Reorder tool calls in `_assign_tools_to_branches()` for P3 branch
+
+**Add SMIDO filter**: Extend filters in `search_manuals_by_smido` tool
+
+**Switch models**: Update `.env`, re-run `scripts/seed_default_config.py`
+
+**Change WorldState window**: Edit default `window_minutes` param in `compute_worldstate`
+
+---
+
+## Key Files Quick Reference
+
+- `features/vsm_tree/smido_tree.py` - Agent persona, SMIDO branches, tool binding
+- `features/vsm_tree/bootstrap.py` - Bootstrap registry
+- `elysia/api/custom_tools.py` - Tool definitions (1036 lines)
+- `elysia/api/services/tree.py` - TreeManager (applies bootstrappers)
+- `elysia/api/utils/config.py` - Config class
+- `features/telemetry_vsm/src/worldstate_engine.py` - 58-feature computation

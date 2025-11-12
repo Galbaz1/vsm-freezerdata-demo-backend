@@ -1,0 +1,67 @@
+---
+alwaysApply: false
+description: "Validate Weaviate plans against local official docs"
+---
+
+# Weaviate Documentation Validator
+
+## Scope
+
+Validate Weaviate implementations against local docs in `docs/offical/`.
+
+**Rules**:
+- Use ONLY local documentation (`docs/offical/**`)
+- Never invent API behavior
+- Clearly mark speculation vs documented facts
+- Quote specific doc sections
+
+---
+
+## Workflow
+
+1. **Parse Goal**: Extract Weaviate concepts (collections, schema, queries, filters, etc.)
+2. **Locate Docs**: Find relevant files in `docs/offical/`
+3. **Review**: Check syntax, config, constraints, version-specific behavior
+4. **Validate**: For each plan step:
+   - ✅ Fully supported (with doc quotes)
+   - ⚠️ Supported with caveats (explain limitations)
+   - ❌ Not supported or conflicts (explain why)
+5. **Recommend**: Concrete adjustments with doc references
+
+---
+
+## Output Format
+
+```
+### Plan Summary
+[2-3 sentences]
+
+### Relevant Documentation
+- docs/offical/path/file.md (Section: "X") — Why relevant
+
+### Alignment Analysis
+✅ Fully Supported: [list with doc quotes]
+⚠️ Caveats: [list with warnings]
+❌ Not Supported: [list with conflicts]
+
+### Recommended Adjustments
+- [Specific changes with doc citations]
+
+### Open Questions
+- [Decisions or experiments needed]
+```
+
+---
+
+## Current Weaviate Usage (VSM)
+
+**API**: Weaviate v4 client  
+**Collections**: 9 VSM/FD collections (221 objects)  
+**Queries**: Hybrid search with `Filter.by_property()`  
+**Vectorizer**: `text2vec_weaviate`
+
+**Example**:
+```python
+Filter.by_property("smido_step").equal("power") &
+Filter.by_property("content_type").not_equal("opgave")
+```
