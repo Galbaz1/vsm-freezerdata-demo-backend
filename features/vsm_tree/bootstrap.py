@@ -231,10 +231,12 @@ Tool categories for reference:
 - Knowledge search: search_manuals_by_smido, query_vlog_cases, query
 - Statistics & Data:
   * compute_worldstate: Sensor analysis (785K parquet rows, 1-min intervals)
+    Use for: trends, monthly data, historical snapshots, any time-based analysis
   * aggregate: Collection statistics (use on VSM_ManualSections, VSM_VlogCase, etc.)
     NOTE: VSM_TelemetryEvent has only 12 reference events, not suitable for monthly stats
   * query: Flexible search across all collections
-- Visualization: visualise (after data tools)
+- Visualization: visualise (appears AFTER compute_worldstate, get_asset_health, query, or aggregate)
+  For viz requests: FIRST run a data tool (e.g. compute_worldstate), THEN visualise becomes available
 - Communication: cited_summarize, text_response
 
 After a tool completes, more tools may become available based on context.

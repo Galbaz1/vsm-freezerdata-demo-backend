@@ -696,12 +696,14 @@ async def compute_worldstate(
     tree_data=None,
     **kwargs
 ):
-    """Compute WorldState (W) - 58+ sensor features from telemetry parquet.
+    """Compute WorldState (W) - 58+ sensor features from telemetry parquet (785K rows).
 
 When to use:
 - P3 (PROCESPARAMETERS): When you need detailed sensor analysis
 - P4 (PRODUCTINPUT): To check environmental trends
 - After M reports symptom, to correlate with sensor data
+- User asks for trends, monthly data, historical analysis, or visualization
+- BEFORE visualize: This tool makes 'visualise' available after it completes
 
 What it computes:
 - Current readings (temps, pressures, compressor status)
@@ -709,6 +711,11 @@ What it computes:
 - Flags (_flag_main_temp_high, _flag_suction_extreme, etc.)
 - Health scores (0-100, lower = worse)
 - Anomaly detection
+
+Timestamp flexibility:
+- Can query ANY timestamp from Jul 2024 - Jan 2026 (785K rows, 1-min intervals)
+- For "last month": pick a timestamp from last month (e.g., 15 Oct 2025)
+- For "trends": can compute multiple snapshots at different times
 
 Output interpretation:
 - If _flag_main_temp_high=True → Koelcel te warm
@@ -725,7 +732,8 @@ Example (A3 frozen evaporator):
 
 Args:
     asset_id: Asset identifier (e.g., "135_1570")
-    timestamp: ISO format timestamp (e.g., "2024-01-01T12:00:00"). If None, uses historical demo timestamp.
+    timestamp: ISO format timestamp (e.g., "2024-10-15T12:00:00"). If None, uses historical demo timestamp.
+              Can be ANY timestamp from Jul 2024 - Jan 2026 for historical analysis.
     window_minutes: Time window for computation. Default: 60 minutes.
 
 Returns:
