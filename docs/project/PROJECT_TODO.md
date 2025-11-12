@@ -1,8 +1,8 @@
 # VSM Project - TODO List
 
-**Last Updated**: November 12, 2025  
+**Last Updated**: November 13, 2025  
 **Project Phase**: 3 of 5 (UX & Performance)  
-**Completion**: 85%
+**Completion**: 90%
 
 ---
 
@@ -70,9 +70,49 @@
 
 ---
 
+### 3. ~~Improve Agent Context & Tool Descriptions~~ ✅ COMPLETED
+**Problem**: Agent context lacked clarity on SMIDO flow, data sources, tool distinctions  
+**Impact**: Agent now has explicit SMIDO methodology, clear tool purposes, transparent data sources
+
+**Completed Tasks** (All 8 from AGENT_CONTEXT_AUDIT.md):
+- [x] HIGH: Root Instruction (bootstrap.py) ✅
+  - Revised to follow Weaviate philosophy (tool choice, not sequence)
+  - Tool-agnostic approach per Elysia best practice
+  - Tool categories for reference, LLM chooses based on descriptions
+- [x] HIGH: Clarify query_telemetry_events vs get_alarms ✅
+  - Clear distinction: "RIGHT NOW" vs "BEFORE"
+  - Use cases: pattern finding, temporal analysis
+  - Collection source: VSM_TelemetryEvent (12 incidents)
+- [x] MEDIUM: Agent Description - SMIDO Flow (smido_tree.py) ✅
+  - Explicit M→T→I→D→O breakdown with descriptions
+  - "Uit balans" definition (outside design params, not broken)
+  - 4 P's with clear definitions
+- [x] MEDIUM: End Goal Specificity ✅
+  - References SMIDO completion
+  - Mentions 4 P's systematic check
+- [x] LOW: Collection Sources - 4 Tools (custom_tools.py) ✅
+  - get_alarms: VSM_TelemetryEvent (12)
+  - query_vlog_cases: VSM_VlogCase (5) + VSM_VlogClip (15)
+  - search_manuals_by_smido: VSM_ManualSections (167) + Diagrams (16)
+  - query_telemetry_events: Source clarified
+- [x] Re-seeded ELYSIA_CONFIG__ ✅
+
+**Result**:
+- Agent description: 2748 chars (explicit SMIDO + data sources)
+- Root instruction: Weaviate-aligned (tool choice, not sequence)
+- All tools: Collection source transparency
+- Data clarity: Agent knows what to query vs what to ask user
+
+**Key Insight**: Root instruction revised based on Weaviate's `one_branch` philosophy - SMIDO flow belongs in agent persona, not decision logic
+
+**Reference**: `docs/project/AGENT_CONTEXT_AUDIT.md`, `docs/project/DATA_ACCESS_CLARITY_ANALYSIS.md`  
+**Commit**: 9593bc3 (Nov 13, 2025)
+
+---
+
 ## 🟡 HIGH PRIORITY (Performance & UX)
 
-### 3. Optimize get_asset_health Performance
+### 4. Optimize get_asset_health Performance
 **Current**: 20-30 seconds  
 **Target**: <10 seconds
 
@@ -91,7 +131,7 @@
 
 ---
 
-### 4. Optimize compute_worldstate Performance
+### 5. Optimize compute_worldstate Performance
 **Current**: 30+ seconds for 785K rows  
 **Target**: <15 seconds
 
@@ -111,7 +151,7 @@
 
 ---
 
-### 5. Fix I Phase Repetitive Looping
+### 6. Fix I Phase Repetitive Looping
 **Problem**: Agent asks 3-4 times "Ben je bekend met dit systeem?"  
 **Impact**: Poor UX, frustrating for users
 

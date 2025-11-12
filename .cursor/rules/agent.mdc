@@ -68,12 +68,12 @@ elysia start  # Opens on http://localhost:8000
 ## Key Files
 
 ### Agent & Tree
-- `features/vsm_tree/smido_tree.py` - SMIDO tree (9 branches), agent persona, prompts
-- `features/vsm_tree/bootstrap.py` - Auto-load registry
-- `elysia/api/custom_tools.py` - 7 VSM tools
+- `features/vsm_tree/smido_tree.py` - Agent persona with explicit SMIDO flow, "uit balans" definition
+- `features/vsm_tree/bootstrap.py` - Flat root architecture, tool registration, Weaviate-aligned instruction
+- `elysia/api/custom_tools.py` - 8 VSM tools (all with collection source transparency)
 
 ### Data
-- `features/telemetry/timeseries_freezerdata/135_1570_cleaned_with_flags.parquet` - 785K rows
+- `features/telemetry/timeseries_freezerdata/135_1570_cleaned_with_flags.parquet` - 785K rows (July 2024 - Jan 2026)
 - `features/integration_vsm/output/fd_assets_enrichment.json` - Context C
 - `features/manuals_vsm/output/manual_sections_classified.jsonl` - 167 sections
 
