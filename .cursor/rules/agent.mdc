@@ -127,17 +127,11 @@ async with ClientManager().connect_to_async_client() as client:
 
 ---
 
-## Tools
+## Tools Available in VSM
 
-### Native Elysia Tools (6)
-1. `query` - Hybrid/semantic search in Weaviate collections
-2. `aggregate` - Count, sum, average, statistics on collections
-3. `visualise` - Create charts (bar, histogram, scatter, line)
-4. `text_response` - Direct answer without data retrieval
-5. `cited_summarize` - Summarize with citations from environment
-6. `summarise_items` - Post-process retrieved objects
+**VSM uses `branch_initialisation="empty"`** — native Elysia tools (query, aggregate, visualise) are **NOT loaded**.
 
-### Custom VSM Tools (7)
+### VSM Custom Tools (7 loaded via bootstrap)
 1. `search_manuals_by_smido` - SMIDO-filtered manual + diagram search
 2. `get_alarms` - Query VSM_TelemetryEvent by severity
 3. `query_telemetry_events` - Historical "uit balans" incidents
@@ -145,6 +139,14 @@ async with ClientManager().connect_to_async_client() as client:
 5. `compute_worldstate` - Calculate 58 features from parquet (<500ms)
 6. `get_asset_health` - W vs C comparison, balance check
 7. `analyze_sensor_pattern` - Match against 13 reference snapshots
+
+### Always Available
+- `forced_text_response` - Fallback text generation (automatic)
+
+### Native Elysia Tools (NOT in VSM, available in other tree modes)
+- `query`, `aggregate`, `visualise`, `cited_summarize`, `summarise_items`
+- Loaded in `one_branch` or `multi_branch` init modes
+- VSM uses `empty` init → only custom tools loaded
 
 ---
 
