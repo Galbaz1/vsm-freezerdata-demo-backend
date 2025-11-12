@@ -868,17 +868,17 @@ Returns:
     from features.telemetry_vsm.src.worldstate_engine import WorldStateEngine
     
     # Handle timestamp: check for None, empty string, or string 'None'
-    # Use historical timestamp from data range (2022-10-20 to 2024-04-01)
-    # Default to 2024-01-15 12:00 (known good timestamp with data)
+    # Use current time (will auto-detect "today" and inject A3 if needed)
+    # Data range after rebase: Jul 2024 - Jan 2026
     if timestamp and timestamp != 'None' and timestamp.strip():
         try:
             ts = datetime.fromisoformat(timestamp)
         except (ValueError, AttributeError):
-            # Default to historical timestamp within data range
-            ts = datetime(2024, 1, 15, 12, 0, 0)
+            # Default to current time (datetime.now() triggers A3 demo)
+            ts = datetime.now()
     else:
-        # Use default historical timestamp for demo (data ends 2024-04-01)
-        ts = datetime(2024, 1, 15, 12, 0, 0)
+        # Use current time by default (triggers A3 demo if today)
+        ts = datetime.now()
     engine = WorldStateEngine("features/telemetry/timeseries_freezerdata/135_1570_cleaned_with_flags.parquet")
     
     try:

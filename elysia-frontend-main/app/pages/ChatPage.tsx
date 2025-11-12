@@ -155,7 +155,7 @@ export default function ChatPage() {
     if (messagesEndRef.current) {
       messagesEndRef.current.scrollIntoView({
         behavior: "smooth",
-        block: "nearest",
+        block: "end",
       });
     }
   }, [currentQuery, currentStatus]);
