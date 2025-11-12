@@ -1,0 +1,837 @@
+---
+alwaysApply: true
+---
+
+
+This file provides guidance to the agent when working with code in this repository.
+
+## Project Overview
+
+**Virtual Service Mechanic (VSM) Demo** - An AI agent built on the Elysia framework that helps junior cooling technicians troubleshoot freezer/cooling cell installations using the SMIDO methodology.
+
+**Tech Stack**: Python 3.12.12, FastAPI, DSPy, Weaviate (vector DB), pandas (telemetry analysis)
+---
+
+## ⚠️ CRITICAL: Environment Setup
+
+**BEFORE RUNNING ANY PYTHON COMMANDS**, you MUST activate the virtual environment:
+
+```bash
+source .venv/bin/activate
+```
+
+
+---
+
+### Configuration
+
+All required API keys and configuration are stored in the `.env` file at root of the repository (which may not be visible to the agent due to security reasons).
+
+**Critical Model Configuration**:
+```bash
+BASE_MODEL=gpt-4.1
+COMPLEX_MODEL=gemini-2.5-pro  # Note: NO prefix in model name!
+BASE_PROVIDER=openai
+COMPLEX_PROVIDER=gemini  # Use "gemini" not "google"
+```
+
+**Important**: Use `COMPLEX_PROVIDER=gemini` (not `google`). Elysia's `load_lm()` function automatically combines the provider and model name into `gemini/gemini-2.5-pro`, which routes to Google AI Studio using your `GOOGLE_API_KEY`. Do NOT include the `gemini/` prefix in the model name itself, as this would result in `google/gemini/gemini-2.5-pro` which is invalid.
+
+### Running Elysia
+
+```bash
+# Start the API server (includes frontend)
+elysia start
+
+# With custom port
+elysia start --port 8080
+
+# Access at http://localhost:8000
+```
+
+**Frontend:**
+
+The Elysia frontend is served from `elysia/api/static/` and is included with the Elysia framework. The frontend source code is maintained in a separate repository: [github.com/weaviate/elysia-frontend](https://github.com/weaviate/elysia-frontend).
+
+For frontend customization, you would need to clone that repository separately and build it into the static directory.
+
+### First-Time Frontend Setup
+
+Before starting Elysia for the first time, seed the VSM default config to skip manual configuration:
+
+```bash
+source .venv/bin/activate
+python3 scripts/seed_default_config.py
+elysia start
+```
+
+**What this does**:
+- Pre-populates frontend with models from `.env` (gpt-4.1, gemini-2.5-pro)
+- Auto-configures Weaviate connection
+- Loads VSM agent prompts from `smido_tree.py` (Dutch, senior-guiding-junior tone)
+- Sets `branch_initialisation="empty"` and `feature_bootstrappers=["vsm_smido"]` for automatic SMIDO tree loading
+
+**Result**: Users opening the frontend skip the "Welcome to Elysia" configuration screen and go straight to a VSM-ready chat interface with all SMIDO branches and tools automatically loaded.
+
+**One-time only**: Run once per Weaviate cluster. Config is stored in `ELYSIA_CONFIG__` collection.
+
+### Feature Bootstrap System
+
+**Purpose**: Dynamically load custom branches and tools into Elysia trees without hardcoding into the core framework.
+
+**How it works**:
+1. **Config setting**: `feature_bootstrappers: list[str]` in `Config` class specifies which bootstrappers to apply
+2. **Bootstrap registry**: `features/vsm_tree/bootstrap.py` maintains a registry of available bootstrappers
+3. **Automatic application**: When `TreeManager.add_tree()` creates a tree with `branch_initialisation="empty"` and `feature_bootstrappers` is set, it automatically applies registered bootstrappers
+4. **VSM bootstrap**: `vsm_smido_bootstrap()` adds all SMIDO branches (M→T→I→D[P1-P4]→O) and 7 custom tools
+
+**Key Files**:
+- `features/vsm_tree/bootstrap.py` - Bootstrap registry and VSM-specific bootstrap function
+- `elysia/api/utils/config.py` - `Config` class with `feature_bootstrappers` field
+- `elysia/api/services/tree.py` - `TreeManager.add_tree()` applies bootstrappers
+- `scripts/seed_default_config.py` - Seeds default config with `feature_bootstrappers: ["vsm_smido"]`
+
+**Adding new features**:
+1. Create bootstrap function in your feature module
+2. Register it in `features/vsm_tree/bootstrap.py` using `register_bootstrapper()`
+3. Add feature name to `feature_bootstrappers` list in config
+4. Bootstrap runs automatically when tree is created
+
+**Weaviate Schema**: `ELYSIA_CONFIG__` collection includes `feature_bootstrappers` property (TEXT_ARRAY) to store bootstrapper names.
+
+---
+
+## Key Commands
+
+### Data Analysis Scripts
+
+**⚠️ Always activate environment first:**
+```bash
+source .venv/bin/activate
+```
+
+Then run scripts:
+```bash
+# Analyze telemetry parquet files
+python3 scripts/analyze_telemetry.py
+
+# Analyze parsed manuals
+python3 scripts/analyze_manuals.py
+
+# Process vlogs with Gemini 2.5 Pro
+python3 features/vlogs_vsm/src/process_vlogs.py
+# Interactive: choose 1 video (test) or all 15 videos
+
+# Preprocess Weaviate collections
+python3 scripts/preprocess_collections.py
+
+# Seed test data
+python3 scripts/seed_assets_alarms.py
+```
+
+### Testing
+
+**⚠️ Always activate environment first:**
+```bash
+source .venv/bin/activate
+```
+
+Then run tests:
+```bash
+# Run all tests
+pytest
+
+# Run with coverage
+pytest --cov=elysia
+
+# Run specific test file
+pytest tests/test_specific.py
+
+# Run async tests
+pytest tests/test_async.py --asyncio-mode=auto
+```
+
+**Phase 2 Plan-Specific Tests:**
+```bash
+# Run all Phase 2 tests in sequence (recommended)
+python3 scripts/run_all_plan_tests.py    # Runs all 7 plans with real-time output
+
+# Or run individual plan tests
+python3 scripts/test_plan2_tools.py      # Simple query tools (~8s)
+python3 scripts/test_plan3_tools.py      # SearchManualsBySMIDO tool (~8s)
+python3 scripts/test_plan4_tools.py      # Advanced diagnostic tools (~6s)
+python3 scripts/test_plan7_full_tree.py  # Complete A3 scenario (~4 minutes, LLM-driven)
+
+# Quick model verification
+python3 scripts/quick_model_test.py      # Test LLM models via Elysia Tree (~10s)
+```
+
+**Note**: Plan 7 (full tree execution) takes 3-5 minutes due to LLM decision-making at each SMIDO phase. This is expected for full agent execution.
+
+### Documentation
+
+```bash
+# Serve docs locally
+mkdocs serve
+
+# Build docs
+mkdocs build
+```
+
+---
+
+## Data Status - Phase 1 Complete ✅
+
+**All data processed and uploaded to Weaviate**:
+- Telemetry: 785K rows → 12 events (VSM_TelemetryEvent)
+- Manuals: 689 chunks → 167 sections (VSM_ManualSections), 9 diagrams (VSM_Diagram)
+- Vlogs: 15 videos → 15 clips + 5 cases (VSM_VlogClip, VSM_VlogCase)
+- Synthetic: 13 snapshots (VSM_WorldStateSnapshot), commissioning data (FD_Assets)
+
+**Processed outputs** in `features/*/output/`:
+- `diagrams_metadata.jsonl` (9)
+- `manual_sections_classified.jsonl` (167)
+- `telemetry_events.jsonl` (12)
+- `vlog_clips_enriched.jsonl` (15)
+- `vlog_cases_enriched.jsonl` (5)
+- `worldstate_snapshots.jsonl` (13)
+- `fd_assets_enrichment.json` (Context C)
+
+**See**: [docs/data/PHASE1_COMPLETION_SUMMARY.md](docs/data/PHASE1_COMPLETION_SUMMARY.md)
+
+---
+
+## Architecture
+
+### Elysia Framework Structure
+
+```
+elysia/
+├── api/                 # FastAPI application
+│   ├── app.py          # Main app
+│   ├── cli.py          # Command-line interface
+│   └── custom_tools.py # Custom tool definitions
+├── core/               # Core agent logic
+│   ├── tree.py         # Decision tree implementation
+│   └── nodes.py        # Node definitions
+├── preprocessing/      # Weaviate collection preprocessing
+├── tools/              # Built-in and custom tools
+└── util/               # Utilities (client, logging, etc.)
+```
+
+### Elysia Architecture Documentation
+
+**Comprehensive low-level diagrams and documentation available:**
+- **Start here**: [docs/diagrams/elysia/INDEX.md](docs/diagrams/elysia/INDEX.md) - Complete navigation guide
+- **Overview**: [docs/diagrams/elysia/README.md](docs/diagrams/elysia/README.md) - Documentation structure
+- **Summary**: [docs/diagrams/elysia/COMPREHENSIVE_SUMMARY.md](docs/diagrams/elysia/COMPREHENSIVE_SUMMARY.md) - 47-page technical deep-dive
+
+**Key diagram topics covered** (16 Mermaid diagrams):
+- System architecture and three pillars (decision trees, dynamic display, data awareness)
+- Decision tree structure, lifecycle, and recursion control
+- Core components: Tree, TreeData, Environment, DecisionNode
+- Tool system and Query tool internals
+- DSPy integration and multi-model strategy
+- Feedback system and few-shot learning
+- Collection preprocessing pipeline
+- Chunk-on-demand implementation
+- FastAPI backend structure
+
+**When to use**: Reference these diagrams when you need to understand Elysia's internals for building VSM-specific tools, designing the SMIDO decision tree, or integrating with telemetry/manuals/vlogs data.
+
+### VSM Domain Diagrams
+
+**Machine-readable SMIDO and troubleshooting logic diagrams:**
+- **Start here**: [docs/diagrams/INDEX.md](docs/diagrams/INDEX.md) - Complete catalog of all diagrams
+- **Implementation guide**: [docs/diagrams/DIAGRAMS_FOR_AGENT.md](docs/diagrams/DIAGRAMS_FOR_AGENT.md) - Agent integration patterns
+- **Detailed catalog**: [docs/diagrams/DIAGRAM_CATALOG.md](docs/diagrams/DIAGRAM_CATALOG.md) - Full metadata for each diagram
+
+**VSM-specific Mermaid diagrams** (9 created, traced to source chunks):
+- **SMIDO Methodology** (4): Main flowchart, 3 P's diagnosis, frozen evaporator example, data integration
+- **System Fundamentals** (3): Basic refrigeration cycle, instrumentation schema, balance diagram  
+- **Troubleshooting Tools** (2): Response template, pressostat adjustment logic
+
+**Key features**:
+- Every diagram links to original manual chunk ID (full traceability)
+- Indexed by SMIDO phase, failure mode, and components
+- Includes agent usage guidance and code examples
+- Converted from 233 visual chunks (3.9% selectivity - logic diagrams only)
+
+**When to use**: Reference when implementing SMIDO decision tree, formatting troubleshooting responses, explaining system fundamentals, or guiding technician through diagnosis. Use INDEX.md to find relevant diagrams by SMIDO phase or failure mode.
+
+### VSM-Specific Additions
+
+```
+features/
+├── telemetry/          # Parquet files with sensor data
+├── extraction/         # Parsed manuals (Landing AI output)
+├── vlogs_vsm/         # Video annotations (Gemini output)
+└── vsm_tree/          # SMIDO decision tree and bootstrap
+    ├── smido_tree.py  # SMIDO tree structure (9 branches)
+    └── bootstrap.py   # Bootstrap registry and VSM bootstrap function
+
+scripts/
+├── analyze_telemetry.py   # Schema analysis
+├── analyze_manuals.py     # Manual structure analysis
+├── preprocess_collections.py  # Weaviate preprocessing
+├── seed_assets_alarms.py  # Test data seeding
+└── seed_default_config.py # Seed VSM default config with bootstrappers
+
+docs/data/              # Complete data analysis documentation
+├── README.md           # Data overview
+├── data_analysis_summary.md  # Executive summary
+├── telemetry_*.md      # Telemetry docs
+├── manuals_*.md        # Manual docs
+└── vlogs_*.md          # Vlog docs
+```
+
+---
+
+## SMIDO Methodology
+
+The troubleshooting decision tree follows **SMIDO** (M→T→I→D→O):
+
+1. **M**elding - Symptom collection, urgency assessment
+2. **T**echnisch - Visual/audio inspection, quick checks
+3. **I**nstallatie vertrouwd - Familiarity check, schemas, design parameters
+4. **D**iagnose - **4 P's** (manual says "3-P's" but lists 4):
+   - **P1** Power - Electrical supply checks
+   - **P2** Procesinstellingen - Settings vs design (pressostaat, defrost, thermostat)
+   - **P3** Procesparameters - Measurements vs design (temps, pressures)
+   - **P4** Productinput - External conditions vs design (ambient, product load, door usage)
+5. **O**nderdelen uitsluiten - Component isolation (chains, wiring)
+
+**Key Concept**: **"Uit balans"** (out of balance) - faults aren't always broken components, system can operate outside design parameters.
+
+**Each DecisionNode maps to SMIDO step** with specific tools and W/C data access.
+
+---
+
+## Implementation Status
+
+### ✅ Phase 1: COMPLETE (Data Upload)
+- **221 objects** in Weaviate (6 VSM collections)
+- **13 WorldState snapshots** (reference patterns for AnalyzeSensorPattern)
+- **Commissioning data** (Context C for GetAssetHealth)
+- **Elysia preprocessing** complete (ELYSIA_METADATA__ has 6 entries)
+- **Validation** passed (4 P's, A3 coverage, opgave filtering)
+- **Documentation**: [docs/data/PHASE1_COMPLETION_SUMMARY.md](docs/data/PHASE1_COMPLETION_SUMMARY.md)
+
+### ✅ Phase 2: COMPLETE & VALIDATED (Agent Tools & Tree)
+**All 7 implementation plans completed and tested**:
+1. ✅ WorldState Engine (18/18 tests pass, 58 features, <500ms)
+2. ✅ Simple query tools (GetAlarms, QueryTelemetryEvents, QueryVlogCases)
+3. ✅ SearchManualsBySMIDO (SMIDO filtering, opgave exclusion working)
+4. ✅ Advanced diagnostic tools (W vs C comparison, pattern matching functional)
+5. ✅ SMIDO tree (9 branches: M→T→I→D[P1,P2,P3,P4]→O)
+6. ✅ Orchestrator + Context Manager (imports successfully)
+7. ✅ A3 scenario (full tree execution working, identifies frozen evaporator)
+
+**Test Results**: [docs/plans/TEST_RESULTS_SUMMARY.md](docs/plans/TEST_RESULTS_SUMMARY.md)
+**LLM Models**: [docs/LLM_MODEL_VERIFICATION.md](docs/LLM_MODEL_VERIFICATION.md)
+**Status**: Production-ready for SMIDO troubleshooting workflows
+
+---
+
+## Data Storage Strategy
+
+### Weaviate vs Local Files Split
+
+**Weaviate** (221 objects uploaded):
+- VSM_ManualSections: 167 (9 opgave flagged)
+- VSM_Diagram: 9
+- VSM_TelemetryEvent: 12
+- VSM_VlogCase: 5
+- VSM_VlogClip: 15
+- VSM_WorldStateSnapshot: 13 (SYNTHETIC)
+- FD_Assets: enriched with Context C (SYNTHETIC)
+
+**Local Files**:
+- Telemetry parquet: 785K rows (ComputeWorldState reads directly)
+- Manual JSONL: 689 chunks (source data)
+- Vlog .mov: 15 videos (playback)
+
+### Hybrid Query Pattern
+
+1. **Agent queries Weaviate** for semantic discovery (incidents, manuals, vlogs, patterns)
+2. **Tool reads parquet** for WorldState (W) computation on-demand
+3. **Agent compares W vs C** (commissioning data from FD_Assets) - balance check
+4. **Agent presents insights**: "System uit balans" or "Component defect"
+
+**Benefits**: Semantic search (Weaviate) + time-series efficiency (parquet) + balance analysis (W vs C)
+
+### Data Strategy by Tool Need
+
+**ComputeWorldState** (P3 node):
+- Reads parquet directly (785K rows) → computes W on-demand
+- Not in Weaviate (too large, inefficient for time-series)
+
+**SearchManualsBySMIDO** (I, P2, O nodes):
+- Queries VSM_ManualSections + VSM_Diagram
+- Returns text sections + visual diagrams filtered by SMIDO step
+- Test content flagged `content_type="opgave"` (filterable)
+
+**QueryVlogCases** (O node):
+- Queries VSM_VlogCase/Clip for similar problem→solution workflows
+- .mov files local (playback reference)
+
+**GetAssetHealth** (M, T, P2 nodes):
+- Needs C (commissioning data) from enriched FD_Assets
+- Compares W vs C → balance check ("uit balans" detection)
+
+**AnalyzeSensorPattern** (P3, P4 nodes):
+- Queries VSM_WorldStateSnapshot (synthetic reference patterns)
+- Compares current W against typical "uit balans" patterns
+
+---
+
+## Weaviate Collections - UPLOADED ✅
+
+| Collection | Objects | Status | Purpose |
+|------------|---------|--------|---------|
+| VSM_ManualSections | 167 | ✅ | SMIDO-filtered search (9 opgave flagged) |
+| VSM_Diagram | 9 | ✅ | Visual diagrams for SearchManualsBySMIDO |
+| VSM_TelemetryEvent | 12 | ✅ | "Uit balans" incidents |
+| VSM_VlogCase | 5 | ✅ | A1-A5 problem→solution workflows |
+| VSM_VlogClip | 15 | ✅ | Individual troubleshooting clips |
+| VSM_WorldStateSnapshot | 13 | ✅ | Reference patterns (SYNTHETIC) |
+| FD_Assets | enriched | ✅ | Context C: commissioning data (SYNTHETIC) |
+
+**All preprocessed**: ELYSIA_METADATA__ has 6 entries
+
+---
+
+## WorldState (W) vs Context (C)
+
+**WorldState (W)** - Dynamic state (changes during troubleshooting):
+- Current sensor readings (ComputeWorldState tool → parquet)
+- Technician observations (visual, audio, tactile)
+- Customer symptoms, urgency (goods at risk)
+- 60+ computed features (trends, flags, health scores)
+
+**Context (C)** - Static design/historical data:
+- Commissioning data ("gegevens bij inbedrijfstelling") - stored in FD_Assets
+- Design parameters (target temps, pressures, superheat, subcooling)
+- Component capacities (compressor, evaporator, condenser matched)
+- Control settings (pressostat cutouts, defrost intervals)
+- Schemas, service history
+
+**Balance Check**: GetAssetHealth compares W vs C to detect "uit balans" (operating outside design parameters).
+
+**Full spec**: [docs/data/telemetry_features.md](docs/data/telemetry_features.md), [docs/data/DATA_UPLOAD_STRATEGY.md](docs/data/DATA_UPLOAD_STRATEGY.md)
+
+---
+
+## Demo Scenarios
+
+**⭐ PRIMARY RECOMMENDED SCENARIO: A3 "Ingevroren Verdamper" (Frozen Evaporator)**
+
+This is the **best case scenario** with perfect alignment across ALL data sources (manual + vlog + telemetry). All development and demo efforts should prioritize this scenario.
+
+### Recommended: A3 "Ingevroren Verdamper" (Frozen Evaporator) ⭐ PRIMARY
+- **Manual**: Explicit case on page ~7 with photo + "Koelproces uit balans" section
+- **Vlog**: Perfect match with A3_1, A3_2, A3_3 (complete problem-triage-solution workflow)
+- **Telemetry**: Flags: `_flag_main_temp_high`, `_flag_suction_extreme`
+- **SMIDO**: Complete M→T→I→D→O flow (full methodology coverage)
+- **Why**: Perfect alignment across all data sources - the star case for demo
+- **Problem**: Koelcel bereikt temperatuur niet, verdamper volledig bevroren
+- **Root cause**: Defrost cycle malfunction + vervuilde luchtkanalen
+- **Solution**: Manual defrost + clean air ducts + calibrate thermostat
+
+### Alternative: A1 "Condensor Ventilator" (Condenser Fan)
+- **Problem**: Pressostaat + electrical connection issue
+- **Good for**: Demonstrating P2-Procesinstellingen (settings check) and P4-Productinput (condenser conditions)
+
+---
+
+## Implementation Roadmap
+
+### ✅ Phase 1: Data Upload - COMPLETE
+All collections uploaded, synthetic data generated, preprocessing done.
+
+### ✅ Phase 2: Tools & Tree - COMPLETE & VALIDATED
+
+**All 7 implementation plans completed**:
+- ✅ Plan 1: WorldState Engine (`features/telemetry_vsm/src/worldstate_engine.py`) - 58 features, <500ms
+- ✅ Plan 2: Simple tools (GetAlarms, QueryTelemetryEvents, QueryVlogCases) - Weaviate queries working
+- ✅ Plan 3: SearchManualsBySMIDO - SMIDO filtering, opgave exclusion, diagram integration
+- ✅ Plan 4: Advanced tools (GetAssetHealth, AnalyzeSensorPattern) - W vs C comparison functional
+- ✅ Plan 5: SMIDO tree structure (`features/vsm_tree/smido_tree.py`) - 9 branches with 4 P's
+- ✅ Plan 6: Orchestrator + Context Manager - Integration complete
+- ✅ Plan 7: A3 end-to-end test - Full tree execution working (3-5 min, identifies frozen evaporator)
+
+**Test Documentation**:
+- [docs/plans/TEST_RESULTS_SUMMARY.md](docs/plans/TEST_RESULTS_SUMMARY.md) - Detailed test results
+- [docs/LLM_MODEL_VERIFICATION.md](docs/LLM_MODEL_VERIFICATION.md) - Model configuration verification
+- [docs/plans/00_MERGE_STRATEGY_AND_TESTING.md](docs/plans/00_MERGE_STRATEGY_AND_TESTING.md) - Original merge strategy
+
+### 📝 Phase 3: Demo & Polish (Next Steps)
+- UI enhancements
+- Additional scenarios beyond A3
+- Performance optimization for tree execution
+- Additional WorldState patterns
+
+---
+
+## Agent Prompting Strategy
+
+### Collaborative Troubleshooting Approach
+
+The VSM agent uses a **senior-guiding-junior** conversational model based on the role definition in [docs/AGENT_USER_ROLES.md](docs/AGENT_USER_ROLES.md):
+
+- **Agent (A)**: Experienced senior technician with remote data access (sensors, manuals, cases)
+- **User (M)**: Junior technician on-site with physical observation and action capabilities
+
+### Prompt Architecture
+
+**Three-level hierarchy** ensures clear guidance at each decision point:
+
+1. **Agent-level** ([smido_tree.py:35-64](features/vsm_tree/smido_tree.py#L35-L64)):
+   - Core identity: "Ervaren VSM die junior monteur begeleidt"
+   - Communication style: Educational, patient, safety-first
+   - Escalation criteria: When to stop and call specialist
+
+2. **Branch-level** ([smido_tree.py:105-465](features/vsm_tree/smido_tree.py#L105-L465)):
+   - Phase-specific instructions for M→T→I→D→O
+   - Strategy guidance (not just tactics)
+   - Conversational examples from A3 vlog case
+   - Tool selection logic (which tools, when, why)
+
+3. **Tool-level** ([custom_tools.py](elysia/api/custom_tools.py)):
+   - "When to use" context
+   - "What it tells you" interpretation
+   - "How to explain to M" conversational templates
+   - Examples with Dutch language
+
+### Key Prompting Principles
+
+1. **Educational**: Always explain "why" behind each step
+   - ✅ "We checken P2 omdat regelaar actief is maar verkeerd gedrag vertoont"
+   - ❌ "Check P2 settings"
+
+2. **Safety-first**: Explicit escalation criteria at multiple levels
+   - Agent description: General safety rules
+   - Branch instructions: Phase-specific safety checks
+   - Example: "Als monteur rapporteert lekkage → STOP en escaleer"
+
+3. **Context-aware**: Reference sensor data, manual sections, similar cases
+   - "Ik zie in sensor data: [finding]" (data-driven)
+   - "Dit patroon komt overeen met case A3" (experience-based)
+   - "In de manual staat: [section]" (knowledge-based)
+
+4. **One-step-at-a-time**: M must walk around, don't overload
+   - "Ga naar regelaar. Wat zie je?" (single action)
+   - Not: "Check regelaar, meet druk, test ventilator" (too many steps)
+
+5. **Praise observations**: Build confidence with "Uitstekend gevonden!"
+   - Reinforces good diagnostic behavior
+   - Makes junior technician feel supported
+
+### Few-Shot Learning
+
+**Conversational examples embedded in branch instructions** from A3 vlog transcript:
+
+- **M phase**: "Ik zie actief alarm. Koelcel 0°C, zou -33°C moeten zijn. Welke producten?"
+- **T phase**: "Bevroren verdamper. Dit is symptoom - we moeten oorzaak vinden."
+- **P2 phase**: "Uitstekend gevonden! Timer staat op 'handmatig' - dát is het probleem."
+- **O phase**: "Case A3: Timer handmatig + vuile luchtkanalen. Oplossing: ontdooien, reinigen, reset."
+
+These examples teach the agent:
+- Natural Dutch troubleshooting language
+- How to acknowledge observations
+- When to distinguish symptom from cause
+- How to reference similar cases
+
+### "Koelproces uit Balans" Concept
+
+**Critical for VSM**: Not all failures = broken components. System can be "uit balans":
+
+Prompted in multiple locations:
+- Agent description: "Diepgaande kennis van 'Koelproces uit balans' concept"
+- D branch: Dedicated section explaining balance vs defect
+- get_asset_health tool: "Een storing betekent NIET altijd een defect component"
+
+### Tool Selection Guidance
+
+Tools have context about **when** and **how** to use them:
+
+**Example - compute_worldstate**:
+```
+When to use:
+- P3 (PROCESPARAMETERS): When you need detailed sensor analysis
+- P4 (PRODUCTINPUT): To check environmental trends
+
+How to explain to M:
+"Ik ga nu de sensordata analyseren van de afgelopen 60 minuten..."
+[after tool runs]
+"Oké, ik zie: verdampertemp -40°C (te koud), zuigdruk extreem laag."
+```
+
+This guides the LLM on:
+1. Which SMIDO phase to use the tool
+2. How to frame the action to the user
+3. How to interpret results for the user
+
+### Performance Expectations
+
+- **Agent responses**: Concise explanations (2-4 sentences)
+- **Tool selection**: Strategic sequencing (e.g., P3: ComputeWorldState → AnalyzeSensorPattern → SearchManuals)
+- **Full tree execution**: 3-5 minutes for complete SMIDO workflow (M→T→I→D→O)
+- **A3 scenario success**: Agent identifies frozen evaporator, references A3 case, provides step-by-step repair
+
+### Testing Strategy
+
+**Validation checks** (see [docs/plans/TEST_RESULTS_SUMMARY.md](docs/plans/TEST_RESULTS_SUMMARY.md)):
+- ✅ Agent uses Dutch language consistently
+- ✅ Agent identifies A3 frozen evaporator correctly
+- ✅ Agent references vlog cases appropriately
+- ✅ Agent explains reasoning (not just commands)
+- ✅ Safety warnings appear when needed
+
+---
+
+## Important File Locations
+
+### Configuration
+- `.env` - Environment variables (API keys, Weaviate connection)
+- `pyproject.toml` - Python package config
+- `mkdocs.yml` - Documentation config
+
+### Data
+- `features/telemetry/timeseries_freezerdata/135_1570_cleaned_with_flags.parquet`
+- `features/extraction/production_output/storingzoeken-koeltechniek_theorie_179/*.jsonl`
+- `features/vlogs_vsm/output/vlogs_vsm_annotations.jsonl`
+
+### Documentation
+- `docs/data/` - Complete data analysis (telemetry, manuals, vlogs)
+- `docs/data/README.md` - Start here for data overview
+- `docs/data/data_analysis_summary.md` - Answers all analysis questions
+
+### Scripts
+- `scripts/analyze_*.py` - Data analysis utilities
+- `features/vlogs_vsm/src/process_vlogs.py` - Vlog processing with Gemini
+
+---
+
+## Elysia Patterns (Critical for Phase 2)
+
+### Tree + Branch Creation
+
+**Manual approach** (for testing/debugging):
+```python
+from elysia import Tree
+
+tree = Tree(
+    branch_initialisation="empty",  # Manual control
+    agent_description="Virtual Service Mechanic...",
+    style="Professional, clear Dutch",
+    end_goal="Root cause identified and solution provided"
+)
+
+# Add branches with from_branch_id hierarchy
+tree.add_branch(
+    branch_id="smido_melding",
+    instruction="Collect symptoms, assess urgency...",
+    description="Symptom collection phase",
+    root=True,  # First branch
+    status="Collecting symptoms..."
+)
+
+tree.add_branch(
+    branch_id="smido_technisch",
+    instruction="Visual inspection...",
+    description="Quick technical check",
+    from_branch_id="smido_melding",  # Comes after M
+    status="Performing technical check..."
+)
+```
+
+**Production approach** (using bootstrap system):
+```python
+# In Config:
+config = Config(
+    branch_initialisation="empty",
+    feature_bootstrappers=["vsm_smido"],  # Automatically loads SMIDO tree
+    agent_description="Virtual Service Mechanic...",
+    style="Professional, clear Dutch",
+    end_goal="Root cause identified and solution provided"
+)
+
+# TreeManager automatically applies bootstrappers when creating tree:
+tree_manager = TreeManager(user_id="user_123", config=config)
+tree_manager.add_tree("conversation_1")  # Bootstrap runs automatically
+# Tree now has all SMIDO branches and tools loaded
+```
+
+### Add Tools to Branches
+```python
+from elysia.api.custom_tools import compute_worldstate, search_manuals_by_smido
+
+# Add to specific branch
+tree.add_tool(compute_worldstate, branch_id="smido_p3_procesparameters")
+tree.add_tool(search_manuals_by_smido, branch_id="smido_installatie")
+```
+
+## Coding Conventions
+
+### VSM Tool Pattern (Elysia v4)
+```python
+from elysia import tool, Result, Status
+
+@tool(branch_id="smido_p3_procesparameters")
+async def compute_worldstate(
+    asset_id: str,
+    timestamp: str = None,
+    window_minutes: int = 60,
+    tree_data=None,  # Auto-injected by Elysia
+    **kwargs
+):
+    """Compute WorldState (W) - 60+ features from parquet."""
+    yield Status("Computing WorldState features...")
+    
+    from features.telemetry_vsm.src.worldstate_engine import WorldStateEngine
+    engine = WorldStateEngine("features/telemetry/timeseries_freezerdata/135_1570_cleaned_with_flags.parquet")
+    worldstate = engine.compute_worldstate(asset_id, timestamp, window_minutes)
+    
+    # Store in tree environment
+    if tree_data:
+        tree_data.environment["worldstate"] = worldstate
+    
+    yield Result(objects=[worldstate], metadata={"source": "worldstate_engine"})
+
+@tool(branch_id="smido_p2_procesinstellingen")
+async def get_asset_health(
+    asset_id: str,
+    tree_data=None,
+    client_manager=None,
+    **kwargs
+):
+    """Compare W vs C - balance check."""
+    yield Status("Comparing WorldState vs Context...")
+    
+    # Get C from FD_Assets, compute W, compare
+    # Identify out-of-balance factors
+    
+    yield Result(objects=[health_summary])
+
+### Weaviate Queries (v4 API)
+```python
+from elysia.util.client import ClientManager
+from weaviate.classes.query import Filter
+
+async def search_manual_by_smido(smido_step: str, query: str):
+    """Search manuals filtered by SMIDO step."""
+    async with ClientManager().connect_to_async_client() as client:
+        collection = client.collections.get("VSM_ManualSections")
+        result = await collection.query.hybrid(
+            query=query,
+            filters=Filter.by_property("smido_step").equal(smido_step) &
+                    Filter.by_property("content_type").not_equal("opgave")  # Exclude test content
+        )
+        return result
+```
+
+### VSM Tool → Data Mapping
+
+| Tool | Weaviate | Parquet | Synthetic | SMIDO Node |
+|------|----------|---------|-----------|------------|
+| ComputeWorldState | - | ✓ | - | P3 |
+| QueryTelemetryEvents | VSM_TelemetryEvent | - | - | P4, O |
+| SearchManualsBySMIDO | VSM_ManualSections, VSM_Diagram | - | - | I, P2, O |
+| QueryVlogCases | VSM_VlogCase, VSM_VlogClip | - | - | O |
+| GetAlarms | VSM_TelemetryEvent | - | - | M, P1 |
+| GetAssetHealth | VSM_TelemetryEvent | ✓ | FD_Assets (C) | M, T, P2 |
+| AnalyzeSensorPattern | VSM_WorldStateSnapshot | ✓ | Snapshots | P3, P4 |
+
+**W = WorldState** (dynamic), **C = Context** (static design data)
+
+### Async/Await
+- All tools should be `async def`
+- Use `await` for I/O operations (Weaviate, file reads)
+- FastAPI endpoints are `async`
+
+---
+
+## Troubleshooting
+
+### Vlog Processing Issues
+```bash
+# If Gemini fails: check API key in .env
+export GOOGLE_API_KEY="your-key"
+
+# Run with limit for testing
+python features/vlogs_vsm/src/process_vlogs.py --limit 1
+```
+
+### Weaviate Connection
+```bash
+# Check .env has correct credentials
+# WCD_URL should be full URL (https://...)
+# Test connection:
+python -c "from elysia.util.client import ClientManager; ClientManager().connect_to_client()"
+```
+
+### Bootstrap System Issues
+
+**Problem**: "No tools available to use!" error in frontend, SMIDO tree missing.
+
+**Cause**: Tree initialized with `branch_initialisation="empty"` but bootstrappers not applied.
+
+**Solution**: Ensure `feature_bootstrappers: ["vsm_smido"]` is set in config and `TreeManager.add_tree()` applies bootstrappers (automatic if config is correct).
+
+**Verification**:
+```bash
+# Check config in Weaviate
+python3 -c "
+import asyncio
+from elysia.util.client import ClientManager
+from weaviate.classes.query import Filter
+
+async def check():
+    async with ClientManager().connect_to_async_client() as client:
+        collection = client.collections.get('ELYSIA_CONFIG__')
+        result = await collection.query.fetch_objects(
+            filters=Filter.by_property('default').equal(True),
+            limit=1
+        )
+        if result.objects:
+            print('feature_bootstrappers:', result.objects[0].properties.get('feature_bootstrappers'))
+
+asyncio.run(check())
+"
+```
+
+**Re-seeding config**:
+```bash
+# Safe to run multiple times - updates existing config, doesn't create duplicates
+source .venv/bin/activate
+python3 scripts/seed_default_config.py
+```
+
+### Telemetry Analysis
+```python
+# Quick parquet inspection
+import pandas as pd
+df = pd.read_parquet("features/telemetry/timeseries_freezerdata/135_1570_cleaned_with_flags.parquet")
+print(df.dtypes)
+print(df.describe())
+```
+
+---
+
+## Key Documentation
+
+### Phase 2 Implementation (START HERE)
+- **Plans Index**: [docs/plans/README.md](docs/plans/README.md) - 7 parallelizable plans
+- **Merge Strategy**: [docs/plans/00_MERGE_STRATEGY_AND_TESTING.md](docs/plans/00_MERGE_STRATEGY_AND_TESTING.md)
+- **Session Summary**: [docs/plans/SESSION_SUMMARY.md](docs/plans/SESSION_SUMMARY.md)
+
+### Architecture & Data
+- **Agent Architecture**: [docs/diagrams/vsm_agent_architecture.mermaid](docs/diagrams/vsm_agent_architecture.mermaid)
+- **Phase 1 Complete**: [docs/data/PHASE1_COMPLETION_SUMMARY.md](docs/data/PHASE1_COMPLETION_SUMMARY.md)
+- **Weaviate API**: [docs/data/WEAVIATE_API_NOTES.md](docs/data/WEAVIATE_API_NOTES.md) (Filter.by_property patterns)
+
+### Elysia Framework
+- **Tool Creation**: [docs/creating_tools.md](docs/creating_tools.md) (@tool decorator, async generators)
+- **Basic Usage**: [docs/basic.md](docs/basic.md) (Tree, branches, preprocessing)
+- **Elysia Diagrams**: [docs/diagrams/elysia/INDEX.md](docs/diagrams/elysia/INDEX.md) (16 architecture diagrams)

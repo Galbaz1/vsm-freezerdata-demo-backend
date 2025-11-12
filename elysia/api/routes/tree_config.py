@@ -34,6 +34,8 @@ def rename_keys(config_item: dict):
 
     renamed_config = {key.lower(): config_item[key] for key in config_item}
     renamed_config["settings"] = renamed_settings
+    if "feature_bootstrappers" not in renamed_config:
+        renamed_config["feature_bootstrappers"] = []
 
     return renamed_config
 
@@ -57,7 +59,9 @@ async def get_tree_config(
     headers = {"Cache-Control": "no-cache"}
 
     try:
-        tree: Tree = await user_manager.get_tree(user_id, conversation_id)
+        user = await user_manager.get_user_local(user_id)
+        tree_manager: TreeManager = user["tree_manager"]
+        tree: Tree = tree_manager.get_tree(conversation_id)
         config = Config(
             id="tree_config",
             name="Tree Config",
@@ -66,6 +70,7 @@ async def get_tree_config(
             agent_description=tree.tree_data.atlas.agent_description,
             end_goal=tree.tree_data.atlas.end_goal,
             branch_initialisation=tree.branch_initialisation,
+            feature_bootstrappers=tree_manager.config.feature_bootstrappers,
         )
 
     except Exception as e:
@@ -102,7 +107,9 @@ async def new_tree_config(
     logger.debug(f"Conversation ID: {conversation_id}")
 
     try:
-        tree: Tree = await user_manager.get_tree(user_id, conversation_id)
+        user = await user_manager.get_user_local(user_id)
+        tree_manager: TreeManager = user["tree_manager"]
+        tree: Tree = tree_manager.get_tree(conversation_id)
 
         settings = Settings()
         settings.smart_setup()
@@ -122,6 +129,9 @@ async def new_tree_config(
         )
         tree.set_branch_initialisation("one_branch")
 
+        # Reset bootstrappers to empty for default configuration
+        tree_manager.config.feature_bootstrappers = []
+
         config = Config(
             id="tree_config",
             name="Tree Config",
@@ -130,6 +140,7 @@ async def new_tree_config(
             agent_description=tree.tree_data.atlas.agent_description,
             end_goal=tree.tree_data.atlas.end_goal,
             branch_initialisation=tree.branch_initialisation,
+            feature_bootstrappers=tree_manager.config.feature_bootstrappers,
         )
 
     except Exception as e:
@@ -180,9 +191,12 @@ async def change_config_tree(
     logger.debug(f"Agent description: {data.agent_description}")
     logger.debug(f"End goal: {data.end_goal}")
     logger.debug(f"Branch initialisation: {data.branch_initialisation}")
+    logger.debug(f"Feature bootstrappers: {data.feature_bootstrappers}")
 
     try:
-        tree: Tree = await user_manager.get_tree(user_id, conversation_id)
+        user = await user_manager.get_user_local(user_id)
+        tree_manager: TreeManager = user["tree_manager"]
+        tree: Tree = tree_manager.get_tree(conversation_id)
 
         if data.settings is not None:
 
@@ -208,6 +222,9 @@ async def change_config_tree(
         if data.branch_initialisation is not None:
             tree.set_branch_initialisation(data.branch_initialisation)
 
+        if data.feature_bootstrappers is not None:
+            tree_manager.config.feature_bootstrappers = data.feature_bootstrappers
+
         config = Config(
             id="tree_config",
             name="Tree Config",
@@ -216,6 +233,7 @@ async def change_config_tree(
             agent_description=tree.tree_data.atlas.agent_description,
             end_goal=tree.tree_data.atlas.end_goal,
             branch_initialisation=tree.branch_initialisation,
+            feature_bootstrappers=tree_manager.config.feature_bootstrappers,
         )
 
     except Exception as e:
@@ -257,7 +275,8 @@ async def load_config_tree(
     try:
         # Retrieve the user info
         user = await user_manager.get_user_local(user_id)
-        tree: Tree = await user_manager.get_tree(user_id, conversation_id)
+        tree_manager: TreeManager = user["tree_manager"]
+        tree: Tree = tree_manager.get_tree(conversation_id)
 
         if (
             "frontend_config" not in user
@@ -291,6 +310,9 @@ async def load_config_tree(
         tree.change_end_goal(renamed_config["end_goal"])
 
         tree.set_branch_initialisation(renamed_config["branch_initialisation"])
+        tree_manager.config.feature_bootstrappers = renamed_config.get(
+            "feature_bootstrappers", []
+        )
 
     except Exception as e:
         logger.exception(f"Error in /load_config API")

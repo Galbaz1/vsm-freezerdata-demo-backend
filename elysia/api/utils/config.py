@@ -22,6 +22,7 @@ class Config:
         end_goal: str | None = None,
         branch_initialisation: BranchInitType = "one_branch",
         use_elysia_collections: bool = True,
+        feature_bootstrappers: list[str] | None = None,
     ):
 
         if id is None:
@@ -59,6 +60,7 @@ class Config:
 
         self.branch_initialisation: BranchInitType = branch_initialisation
         self.use_elysia_collections: bool = use_elysia_collections
+        self.feature_bootstrappers: list[str] = feature_bootstrappers if feature_bootstrappers is not None else []
 
     def to_json(self):
         return {
@@ -74,6 +76,7 @@ class Config:
                 else "one_branch"
             ),
             "use_elysia_collections": self.use_elysia_collections,
+            "feature_bootstrappers": self.feature_bootstrappers,
         }
 
     @classmethod
@@ -93,6 +96,11 @@ class Config:
                 json["use_elysia_collections"]
                 if "use_elysia_collections" in json
                 else True
+            ),
+            feature_bootstrappers=(
+                json["feature_bootstrappers"]
+                if "feature_bootstrappers" in json
+                else []
             ),
         )
 

@@ -236,6 +236,101 @@ def check_tree_execution():
         return False
 
 
+def check_bootstrap_system():
+    """Check bootstrap system integration"""
+    print("\n" + "=" * 60)
+    print("7. Bootstrap System (API Integration)")
+    print("=" * 60)
+    
+    try:
+        from elysia.api.services.tree import TreeManager
+        from elysia.api.utils.config import Config
+        from elysia.tree.tree import Tree
+        
+        # Test 1: Bootstrap enabled - should have SMIDO branches and tools
+        print("\nTest 1: Bootstrap enabled (empty + vsm_smido)")
+        config_with_bootstrap = Config(
+            branch_initialisation="empty",
+            feature_bootstrappers=["vsm_smido"]
+        )
+        tree_manager = TreeManager(user_id="test_user", config=config_with_bootstrap)
+        tree_manager.add_tree("test_conv_1")
+        tree = tree_manager.get_tree("test_conv_1")
+        
+        config_payload = tree_manager.config.to_json()
+        assert config_payload.get("feature_bootstrappers") == ["vsm_smido"]
+        print("   ✅ Config to_json exposes feature_bootstrappers")
+
+        # Check that SMIDO root branch exists
+        assert tree.root == "smido_melding", f"Expected root='smido_melding', got '{tree.root}'"
+        print("   ✅ Root branch is 'smido_melding' (SMIDO M phase)")
+        
+        # Check that tools are registered
+        expected_tools = [
+            "get_alarms", "get_asset_health", "compute_worldstate",
+            "query_telemetry_events", "search_manuals_by_smido",
+            "query_vlog_cases", "analyze_sensor_pattern"
+        ]
+        registered_tools = list(tree.tools.keys())
+        for tool_name in expected_tools:
+            assert tool_name in registered_tools, f"Tool '{tool_name}' not found in tree"
+        print(f"   ✅ All {len(expected_tools)} VSM tools registered")
+        
+        # Check that SMIDO branches exist
+        smido_branches = [
+            "smido_melding", "smido_technisch", "smido_installatie",
+            "smido_diagnose", "smido_p1_power", "smido_p2_procesinstellingen",
+            "smido_p3_procesparameters", "smido_p4_productinput", "smido_onderdelen"
+        ]
+        for branch_id in smido_branches:
+            assert branch_id in tree.decision_nodes, f"Branch '{branch_id}' not found"
+        print(f"   ✅ All {len(smido_branches)} SMIDO branches created")
+        
+        # Test 2: Bootstrap disabled (empty but no bootstrappers) - should have empty base branch
+        print("\nTest 2: Bootstrap disabled (empty, no bootstrappers)")
+        config_no_bootstrap = Config(
+            branch_initialisation="empty",
+            feature_bootstrappers=[]
+        )
+        tree_manager2 = TreeManager(user_id="test_user_2", config=config_no_bootstrap)
+        tree_manager2.add_tree("test_conv_2")
+        tree2 = tree_manager2.get_tree("test_conv_2")
+        
+        assert tree2.root == "base", f"Expected root='base', got '{tree2.root}'"
+        print("   ✅ Root branch is 'base' (empty initialization)")
+        
+        # Should only have forced_text_response tool (default)
+        assert len(tree2.tools) == 1, f"Expected 1 tool (forced_text_response), got {len(tree2.tools)}"
+        assert "forced_text_response" in tree2.tools, "Expected forced_text_response tool"
+        print("   ✅ Only default tool present (no VSM tools)")
+        
+        # Test 3: Bootstrap skipped when branch_initialisation != "empty"
+        print("\nTest 3: Bootstrap skipped (one_branch, bootstrappers set)")
+        config_skip_bootstrap = Config(
+            branch_initialisation="one_branch",
+            feature_bootstrappers=["vsm_smido"]  # Set but should be ignored
+        )
+        tree_manager3 = TreeManager(user_id="test_user_3", config=config_skip_bootstrap)
+        tree_manager3.add_tree("test_conv_3")
+        tree3 = tree_manager3.get_tree("test_conv_3")
+        
+        # Should have default one_branch structure, not SMIDO
+        assert tree3.root != "smido_melding", "Bootstrap should be skipped for one_branch"
+        print("   ✅ Bootstrap correctly skipped (branch_initialisation != 'empty')")
+        
+        print("\n✅ Bootstrap system working correctly:")
+        print("   - Bootstrap applies when branch_initialisation='empty' and bootstrappers set")
+        print("   - Bootstrap skipped when branch_initialisation != 'empty'")
+        print("   - Empty tree without bootstrappers has only base branch")
+        
+        return True
+    except Exception as e:
+        print(f"❌ Error: {e}")
+        import traceback
+        traceback.print_exc()
+        return False
+
+
 async def main():
     """Run all verification checks"""
     print("=" * 60)
@@ -249,7 +344,8 @@ async def main():
         ("Tools", check_tools),
         ("Branches", check_branches),
         ("Preprocessing", check_preprocessing),
-        ("Tree Execution", check_tree_execution)
+        ("Tree Execution", check_tree_execution),
+        ("Bootstrap System", check_bootstrap_system)
     ]
     
     results = []

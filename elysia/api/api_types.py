@@ -119,6 +119,7 @@ class SaveConfigTreeData(BaseModel):
     agent_description: Optional[str] = None
     end_goal: Optional[str] = None
     branch_initialisation: Optional[str] = None
+    feature_bootstrappers: Optional[list[str]] = None
 
 
 class UpdateFrontendConfigData(BaseModel):

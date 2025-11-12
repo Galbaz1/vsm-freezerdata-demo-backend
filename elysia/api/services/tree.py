@@ -73,6 +73,7 @@ class TreeManager:
         agent_description: str | None = None,
         end_goal: str | None = None,
         branch_initialisation: BranchInitType | None = None,
+        feature_bootstrappers: list[str] | None = None,
     ):
         if config_id is not None:
             self.config.id = config_id
@@ -95,6 +96,9 @@ class TreeManager:
         if branch_initialisation is not None:
             self.change_branch_initialisation(branch_initialisation, conversation_id)
 
+        if feature_bootstrappers is not None:
+            self.config.feature_bootstrappers = feature_bootstrappers
+
     def add_tree(
         self,
         conversation_id: str,
@@ -113,18 +117,51 @@ class TreeManager:
         """
 
         if not self.tree_exists(conversation_id):
+            tree = Tree(
+                conversation_id=conversation_id,
+                user_id=self.user_id,
+                settings=self.settings,
+                style=self.config.style,
+                agent_description=self.config.agent_description,
+                end_goal=self.config.end_goal,
+                branch_initialisation=self.config.branch_initialisation,
+                low_memory=low_memory,
+                use_elysia_collections=self.config.use_elysia_collections,
+            )
+            
+            # Apply feature bootstrappers if configured
+            # Only bootstrap when branch_initialisation is "empty" and bootstrappers are specified
+            if (
+                self.config.branch_initialisation == "empty"
+                and self.config.feature_bootstrappers
+            ):
+                try:
+                    from features.vsm_tree.bootstrap import bootstrap_tree
+                    
+                    context = {
+                        "user_id": self.user_id,
+                        "conversation_id": conversation_id,
+                        "config": self.config,
+                    }
+                    
+                    bootstrap_tree(
+                        tree,
+                        self.config.feature_bootstrappers,
+                        context
+                    )
+                except ImportError as e:
+                    self.settings.logger.warning(
+                        f"Could not import bootstrap module: {e}. "
+                        "Tree will be created without feature bootstrappers."
+                    )
+                except Exception as e:
+                    self.settings.logger.error(
+                        f"Error applying feature bootstrappers: {e}",
+                        exc_info=True
+                    )
+            
             self.trees[conversation_id] = {
-                "tree": Tree(
-                    conversation_id=conversation_id,
-                    user_id=self.user_id,
-                    settings=self.settings,
-                    style=self.config.style,
-                    agent_description=self.config.agent_description,
-                    end_goal=self.config.end_goal,
-                    branch_initialisation=self.config.branch_initialisation,
-                    low_memory=low_memory,
-                    use_elysia_collections=self.config.use_elysia_collections,
-                ),
+                "tree": tree,
                 "last_request": datetime.datetime.now(),
                 "event": asyncio.Event(),
             }

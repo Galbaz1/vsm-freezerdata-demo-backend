@@ -362,6 +362,7 @@ async def save_config_user(
                 agent_description=data.config.get("agent_description"),
                 end_goal=data.config.get("end_goal"),
                 branch_initialisation=data.config.get("branch_initialisation"),
+                feature_bootstrappers=data.config.get("feature_bootstrappers"),
             )
 
         except Exception as e:
@@ -666,6 +667,7 @@ async def load_config_user(
             agent_description=renamed_config["agent_description"],
             end_goal=renamed_config["end_goal"],
             branch_initialisation=renamed_config["branch_initialisation"],
+            feature_bootstrappers=renamed_config.get("feature_bootstrappers"),
         )
 
         # Update the frontend config
