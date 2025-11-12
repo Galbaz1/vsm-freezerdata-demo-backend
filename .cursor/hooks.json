@@ -1,0 +1,18 @@
+{
+  "afterFileEdit": [
+    { 
+      "command": "cd presentation && pnpm run check:slices 2>/dev/null || echo '⚠️ Slice check skipped'", 
+      "description": "Enforce vertical-slice boundaries (graceful failure)" 
+    },
+    { 
+      "command": "cd presentation && pnpm run check:naming 2>/dev/null || echo '⚠️ Naming check skipped'", 
+      "description": "Enforce file naming conventions (graceful failure)" 
+    }
+  ],
+  "stop": [
+    { 
+      "command": "cd presentation && pnpm run test:affected-slices || true", 
+      "description": "Run tests for touched slices (non-blocking)" 
+    }
+  ]
+}

@@ -6,8 +6,7 @@ This file provides guidance to the agent when working with code in this reposito
 
 **Virtual Service Mechanic (VSM) Demo** - An AI agent built on the Elysia framework that helps junior cooling technicians troubleshoot freezer/cooling cell installations using the SMIDO methodology.
 
-**Tech Stack**: Python 3.12.12, FastAPI, DSPy, Weaviate (vector DB), pandas (telemetry analysis), Next.js 14 (frontend)
-
+**Tech Stack**: Python 3.12.12, FastAPI, DSPy, Weaviate (vector DB), pandas (telemetry analysis)
 ---
 
 ## ⚠️ CRITICAL: Environment Setup
@@ -18,37 +17,6 @@ This file provides guidance to the agent when working with code in this reposito
 source .venv/bin/activate
 ```
 
-**Why:** This repository requires Python 3.12 from the `.venv` virtual environment. The system may have Python 3.13 or other versions, but this codebase specifically needs 3.12.
-
-**Verification:**
-```bash
-source .venv/bin/activate
-python3 --version  # Should show: Python 3.12.x
-which python3      # Should point to: /Users/.../vsm-freezerdata-demo-backend/.venv/bin/python3
-```
-
-**Always activate the environment before:**
-- Running Python scripts (`python3 scripts/*.py`)
-- Running tests (`pytest`)
-- Installing packages (`pip install`)
-- Running Elysia commands (`elysia start`)
-
-**First-time setup:**
-```bash
-# Create virtual environment with Python 3.12
-python3.12 -m venv .venv
-
-# Activate it
-source .venv/bin/activate
-
-# Install dependencies
-pip install -e .
-
-# Install additional VSM-specific dependencies (telemetry analysis)
-pip install pandas pyarrow
-```
-
-**Note**: The VSM project requires `pandas` and `pyarrow` for telemetry data analysis (parquet files). These should be added to `pyproject.toml` dependencies in the future.
 
 ---
 

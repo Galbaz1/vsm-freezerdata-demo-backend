@@ -1,0 +1,1 @@
+@browser Compare current UI against this design screenshot and adjust spacing, colors, and typography to match

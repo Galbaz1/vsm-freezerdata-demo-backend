@@ -1,0 +1,88 @@
+---
+alwaysApply: false
+---
+# Documentation Navigation Guide
+
+Quick reference for RAG and Context Engineering documentation in `docs/`.
+
+## Context Engineering Series (`docs/context_engineering/`)
+
+**Purpose:** Design tool responses and interaction patterns for agentic systems.
+
+| File | Topic | When to Use |
+|------|-------|-------------|
+| `context-engineering-index.md` | Series overview & fundamentals | Start here for context engineering concepts |
+| `context-engineering-tool-response.md` | Faceted search & structured responses | Building tool outputs, designing agent peripheral vision |
+| `context-engineering-agent-frameworks.md` | Framework selection (chatbot vs workflow vs artifact) | Choosing architecture, autonomy spectrum decisions |
+| `context-engineering-slash-commands.md` | Prompt injection patterns | Designing custom commands, IDE integrations |
+| `context-engineering-compaction.md` | Token optimization techniques | Managing context windows, compressing information |
+| `context-engineering-rapid-prototyping.md` | Fast iteration strategies | Accelerating development, testing patterns |
+
+**Core Concepts:** Tool response design, faceted search, agent peripheral vision, structured metadata, context windows.
+
+---
+
+## RAG Master Series (`docs/rag/`)
+
+**Purpose:** Building, improving, and scaling retrieval-augmented generation systems.
+
+| File | Topic | When to Use |
+|------|-------|-------------|
+| `rag-series-index.md` | Series overview & fundamentals | RAG introduction, key concepts, series roadmap |
+| `rag-what-is-rag.md` | RAG basics & architecture | Understanding core RAG patterns, getting started |
+| `rag-levels-of-rag.md` | Maturity model (L0-L3) | Assessing current state, planning improvements |
+| `rag-improving-rag.md` | Optimization strategies | Boosting accuracy, relevance, performance |
+| `rag-six-tips-improving.md` | Quick wins & best practices | Immediate improvements, common fixes |
+| `rag-low-hanging-fruit.md` | Easy implementation gains | Starting optimization, quick ROI |
+| `rag-only-6-evals.md` | Evaluation framework | Measuring performance, building test suites |
+| `rag-anti-patterns-skylar.md` | Common mistakes to avoid | Debugging issues, preventing problems |
+| `rag-plusplus.md` | Advanced techniques | Scaling, enterprise features |
+| `rag-flywheel.md` | Self-improvement systems | Building feedback loops, continuous improvement |
+| `systematically-improving-rag-raindrop.md` | Methodical optimization | Structured improvement process, real case study |
+
+**Core Concepts:** Vector search, hybrid search, re-ranking, chunking, query understanding, precision/recall, data flywheel.
+
+---
+
+## Quick Decision Tree
+
+**User asks about...**
+
+- **"How should agents navigate data?"** → `context-engineering-tool-response.md`
+- **"Building an agent/chatbot?"** → `context-engineering-agent-frameworks.md`
+- **"What is RAG?"** → `rag-series-index.md` → `rag-what-is-rag.md`
+- **"RAG isn't working well"** → `rag-anti-patterns-skylar.md` + `rag-improving-rag.md`
+- **"How to measure RAG?"** → `rag-only-6-evals.md`
+- **"Quick RAG improvements?"** → `rag-low-hanging-fruit.md` + `rag-six-tips-improving.md`
+- **"RAG maturity levels?"** → `rag-levels-of-rag.md`
+- **"Custom commands/tools?"** → `context-engineering-slash-commands.md`
+- **"Token limits?"** → `context-engineering-compaction.md`
+- **"Real case study?"** → `systematically-improving-rag-raindrop.md`
+
+---
+
+## Series Relationships
+
+```
+Context Engineering
+├── Builds on RAG fundamentals
+├── Focus: Agent-centric design
+└── Complements: Tool response structure
+
+RAG Master Series
+├── Foundation for Context Engineering
+├── Focus: Retrieval & generation quality
+└── Complements: Traditional RAG patterns
+```
+
+**Note:** Both series cross-reference each other. Context Engineering applies RAG principles to agentic systems.
+
+---
+
+## Usage Tips
+
+1. **Start broad**: Index files provide overviews
+2. **Follow cross-refs**: Files link to related concepts
+3. **Practical first**: Low-hanging fruit and tips before advanced topics
+4. **Case studies**: Look for "Raindrop" and "Skylar" for real examples
+5. **Series order**: Not required but helpful for foundational concepts

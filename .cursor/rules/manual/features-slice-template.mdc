@@ -1,0 +1,13 @@
+---
+alwaysApply: false
+---
+# Feature Slice Rule
+
+## Boundaries
+- Allowed imports: `features/{slice}/**`, `shared/**`
+- Avoid cross-slice imports (`features/other-slice/**`) unless explicitly justified in PR
+
+## Guidance
+- Co-locate UI, domain, API, infra, tests, and docs in this slice
+- Prefer composition and internal helpers over extracting to `shared/`
+- Scaffold new elements with minimal tests and a short README update

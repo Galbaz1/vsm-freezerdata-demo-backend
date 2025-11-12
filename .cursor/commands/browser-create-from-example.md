@@ -1,0 +1,1 @@
+@browser Analyze this design mockup, extract colors and typography, and generate pixel-perfect HTML and CSS code
