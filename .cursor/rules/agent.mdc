@@ -29,17 +29,23 @@ elysia start  # Opens on http://localhost:8000
 
 ## Weaviate Collections (Verified Counts)
 
+### Active Collections (Preprocessed with Gemini 2.5 Pro ✅)
 - **VSM_ManualSections**: 167 (4 P's classified, 9 opgave test content)
 - **VSM_DiagramUserFacing**: 8 (simple diagrams for technicians (M))
 - **VSM_DiagramAgentInternal**: 8 (complex logic for agent (A))
-- **VSM_TelemetryEvent**: 12 ("uit balans" incidents, historical events that point to telemtry data in the codebase that serve as reference when the agent (A) identified a problem and wants to find a solution)
-- **VSM_VlogCase**: 5 (A1-A5 problem→solution workflows. Video vlogs of historical problem solutions that point to video clips that A can show to M)
+- **VSM_TelemetryEvent**: 12 ("uit balans" incidents, used by `get_alarms` tool)
+- **VSM_VlogCase**: 5 (A1-A5 problem→solution workflows)
 - **VSM_VlogClip**: 15 (individual clips)
 - **VSM_WorldStateSnapshot**: 13 (reference patterns)
 - **FD_Assets**: 1 (commissioning data, Context C)
-- **FD_Alarms**: 2 (test alarms)
 
-**Note**: "VSM_Diagram" doesn't exist; actual collections are `VSM_DiagramUserFacing` and `VSM_DiagramAgentInternal`.
+### Legacy/Unused Collections
+- **FD_Alarms**: 2 (legacy - NOT used by any tools, NOT preprocessed)
+
+**Notes**: 
+- "VSM_Diagram" doesn't exist; actual collections are `VSM_DiagramUserFacing` and `VSM_DiagramAgentInternal`
+- `get_alarms` tool uses **VSM_TelemetryEvent**, NOT FD_Alarms
+- All active collections preprocessed with Gemini 2.5 Pro (Nov 12, 2025)
 
 ---
 
