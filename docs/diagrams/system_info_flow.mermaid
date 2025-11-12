@@ -1,0 +1,97 @@
+flowchart TD
+  %% Overall data and control flow for the VSM Demo on Elysia
+  %% Frontend → API → TreeManager → Tree (Agent) → Branches (SMIDO) → Tools → Data stores → Results back to UI
+
+  subgraph Frontend
+    UI[Elysia Frontend - web UI]
+  end
+
+  subgraph API[Backend: FastAPI + Elysia API]
+    APIEntry[HTTP/WebSocket Endpoints]
+    TM[TreeManager - create/load/process trees]
+  end
+
+  subgraph Agent[Agent: Decision Tree Runtime]
+    T[Tree - Agent Persona + Style + End Goal]
+    B1[M Branch - Melding]
+    B2[T Branch - Technisch]
+    B3[I Branch - Installatie Vertrouwd]
+    BD[D Branch - Diagnose P1-P4]
+    BO[O Branch - Onderdelen uitsluiten]
+  end
+
+  subgraph Bootstrap[Bootstrapping & Config]
+    CFG[Config: branch_initialisation empty<br/>feature_bootstrappers vsm_smido<br/>agent_description style end_goal]
+    REG[Bootstrap Registry<br/>features vsm_tree bootstrap.py]
+    BS[vsm_smido bootstrap - adds branches and tools]
+    SEED[seed_default_config.py<br/>one-time config seeding]
+  end
+
+  subgraph Tools[Tools - Capabilities]
+    getAlarms[get_alarms]
+    getAH[get_asset_health]
+    computeWS[compute_worldstate]
+    analyze[analyze_sensor_pattern]
+    searchManuals[search_manuals_by_smido]
+    queryEvents[query_telemetry_events]
+    vlogCases[query_vlog_cases]
+  end
+
+  subgraph Data[Data Stores]
+    WVT[(Weaviate<br/>VSM collections<br/>ELYSIA_CONFIG)]
+    PARQ[(Parquet Telemetry<br/>features telemetry)]
+    ENR[(fd_assets_enrichment.json)]
+    LOGS[(elysia logs<br/>sessions.jsonl)]
+  end
+
+  %% Frontend → API → Manager → Tree
+  UI --> APIEntry --> TM -->|add_tree| T
+  CFG --> TM
+  REG --> TM
+  SEED --> WVT
+  SEED --> CFG
+
+  %% Bootstrapper applies branches and tools to empty trees
+  TM -->|if branch_initialisation=empty and feature_bootstrappers set| BS
+  BS -->|adds| B1
+  BS -->|adds| B2
+  BS -->|adds| B3
+  BS -->|adds| BD
+  BS -->|adds| BO
+  BS -->|assigns tools| Tools
+
+  %% Agent flow across SMIDO branches
+  T --> B1 --> B2 --> B3 --> BD --> BO
+
+  %% Branch → Tool usage
+  B1 -->|uses| getAlarms
+  B1 -->|uses| getAH
+  B3 -->|uses| searchManuals
+  BD -->|P2 uses| getAH
+  BD -->|P3 uses| computeWS
+  BD -->|P3 uses| analyze
+  BD -->|P4 uses| queryEvents
+  BO -->|uses| vlogCases
+  BO -->|uses| searchManuals
+
+  %% Tools → Data access
+  getAlarms --> WVT
+  searchManuals --> WVT
+  queryEvents --> WVT
+  vlogCases --> WVT
+  analyze --> WVT
+  computeWS --> PARQ
+  getAH --> PARQ
+  getAH --> ENR
+
+  %% Results and logging
+  Tools -->|Status/Result| T
+  T -->|frontend payloads| APIEntry --> UI
+  APIEntry --> LOGS
+  T --> LOGS
+
+  %% Documentation Notes (not rendered in flowchart)
+  %% Config controls persona/style and enables bootstrappers
+  %% Bootstrapper vsm_smido injects SMIDO branches and binds tools per branch
+  %% Weaviate stores manuals, diagrams, telemetry events, snapshots, vlog cases,
+  %% plus ELYSIA_CONFIG__ for default config used by the UI

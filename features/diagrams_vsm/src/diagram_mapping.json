@@ -1,0 +1,43 @@
+{
+  "smido_overview": {
+    "user_facing": "user_facing/smido_overview.mermaid",
+    "agent_internal": "agent_internal/smido_main_flowchart.mermaid",
+    "png_path": "output/pngs/smido_overview.png"
+  },
+  "diagnose_4ps": {
+    "user_facing": "user_facing/diagnose_4ps.mermaid",
+    "agent_internal": "agent_internal/smido_3ps_diagnosis.mermaid",
+    "png_path": "output/pngs/diagnose_4ps.png"
+  },
+  "basic_cycle": {
+    "user_facing": "user_facing/basic_cycle.mermaid",
+    "agent_internal": "agent_internal/basic_refrigeration_cycle.mermaid",
+    "png_path": "output/pngs/basic_cycle.png"
+  },
+  "measurement_points": {
+    "user_facing": "user_facing/measurement_points.mermaid",
+    "agent_internal": "agent_internal/schematic_with_instrumentation.mermaid",
+    "png_path": "output/pngs/measurement_points.png"
+  },
+  "system_balance": {
+    "user_facing": "user_facing/system_balance.mermaid",
+    "agent_internal": "agent_internal/balance_diagram.mermaid",
+    "png_path": "output/pngs/system_balance.png"
+  },
+  "pressostat_settings": {
+    "user_facing": "user_facing/pressostat_settings.mermaid",
+    "agent_internal": "agent_internal/pressostat_adjustment_logic.mermaid",
+    "png_path": "output/pngs/pressostat_settings.png"
+  },
+  "troubleshooting_template": {
+    "user_facing": "user_facing/troubleshooting_template.mermaid",
+    "agent_internal": "agent_internal/troubleshooting_table_flow.mermaid",
+    "png_path": "output/pngs/troubleshooting_template.png"
+  },
+  "frozen_evaporator": {
+    "user_facing": "user_facing/frozen_evaporator.mermaid",
+    "agent_internal": "agent_internal/smido_frozen_evaporator_example.mermaid",
+    "png_path": "output/pngs/frozen_evaporator.png"
+  }
+}
+

@@ -1,0 +1,30 @@
+%% ============================================================
+%% USER-FACING DIAGRAM: Frozen Evaporator (A3 Case)
+%% Purpose: Show example troubleshooting case
+%% Layout: Landscape (LR) - case flow
+%% Complexity: Simple (6 nodes)
+%% When to show: "Show me a similar case" / Frozen evaporator issue
+%% ============================================================
+
+flowchart LR
+    M["<b>M</b> Symptoom<br/><i>Verdamper<br/>bevroren</i>"]
+    
+    T["<b>T</b> Visueel<br/><i>Dikke<br/>ijslaag</i>"]
+    
+    I["<b>I</b> Systeem<br/><i>Ontdooicyclus<br/>bekijken</i>"]
+    
+    D["<b>D</b> Diagnose<br/><i>Timer op<br/>handmatig</i>"]
+    
+    O["<b>O</b> Oplossing<br/><i>Ontdooien<br/>+ reset timer</i>"]
+    
+    End["<b>✓</b> Opgelost"]
+    
+    M --> T --> I --> D --> O --> End
+    
+    %% Consistent styling
+    classDef phase fill:#e3f2fd,stroke:#1976d2,stroke-width:2px,color:#000,font-size:13px
+    classDef success fill:#e8f5e9,stroke:#2e7d32,stroke-width:3px,color:#000,font-size:14px
+    
+    class M,T,I,D,O phase
+    class End success
+

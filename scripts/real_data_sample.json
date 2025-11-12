@@ -1,0 +1,126 @@
+{
+  "alarms": [
+    {
+      "t_end": "2024-08-01T13:24:00",
+      "room_temp_min": 0.0,
+      "asset_id": "135_1570",
+      "description_nl": "Storing gedetecteerd: Temperatuur te hoog (0.0\u00b0C). Deur vaak open (100%). Temperatuur trend: stabiel (0.0\u00b0C/uur). Duur: 95 minuten.",
+      "worldstate_summary": "Flags: main_temp_high. Room: 0.0\u00b0C, HotGas: 21.0\u00b0C, Trend: 0.0\u00b0C/hr",
+      "event_id": "evt_20240801_1149",
+      "ambient_mean": 20.565625,
+      "related_manual_sections": [],
+      "failure_modes": [
+        "te_hoge_temperatuur",
+        "deur_probleem"
+      ],
+      "time_range_end": "2024-08-01T13:24:00",
+      "time_range_start": "2024-08-01T11:49:00",
+      "related_diagrams": [],
+      "affected_components": [
+        "deur"
+      ],
+      "room_temp_trend": 0.0,
+      "parquet_path": "features/telemetry/timeseries_freezerdata/135_1570_cleaned_with_flags.parquet",
+      "liquid_mean": 20.37708333333333,
+      "duration_minutes": 95.0,
+      "severity": "critical",
+      "related_vlog_cases": [],
+      "room_temp_max": 0.0,
+      "t_start": "2024-08-01T11:49:00",
+      "door_open_ratio": 1.0,
+      "hot_gas_mean": 20.954166666666666,
+      "room_temp_mean": 0.0,
+      "suction_mean": 20.73229166666667,
+      "failure_mode": "te_hoge_temperatuur"
+    }
+  ],
+  "vlog_cases": [
+    {
+      "problem_summary": "De koelinstallatie leverde onvoldoende koude lucht. Bij inspectie bleek de verdamper deels bevroren en was er geen hoorbare stroming van koudemiddel. De leiding v\u00f3\u00f3r het expansieventiel was warm, terwijl de leiding erna direct bevroor.",
+      "solution_summary": "Na diagnose via temperatuurmeting en een handmatige test werd het defecte expansieventiel gedemonteerd en vervangen. Na installatie van het nieuwe ventiel herstelde de koudemiddelcirculatie zich, wat leidde tot een correcte werking en herstel van de koelcapaciteit.",
+      "case_id": "A2",
+      "failure_modes": [
+        "ingevroren_verdamper",
+        "verstopt_filter",
+        "te_hoge_temperatuur",
+        "expansieventiel_defect"
+      ],
+      "related_manual_sections": [],
+      "component_primary": "expansieventiel",
+      "related_diagrams": [],
+      "typical_sensor_conditions": "{\"description\": \"Pattern inferred from problem and solution\"}",
+      "clip_ids": [
+        "A2_1",
+        "A2_2",
+        "A2_3"
+      ],
+      "world_state_pattern": "evaporator frozen",
+      "root_cause": "Het expansieventiel was defect of geblokkeerd, waardoor de circulatie van het koudemiddel naar de verdamper verhinderd werd.",
+      "smido_step_primary": "technisch",
+      "smido_steps": [
+        "technisch",
+        "ketens_onderdelen",
+        "procesparameters",
+        "installatie_vertrouwd",
+        "melding"
+      ],
+      "related_telemetry_events": [],
+      "failure_mode": "ingevroren_verdamper",
+      "components": [
+        "expansieventiel",
+        "verdamper"
+      ],
+      "case_title": "Case A2: De koelinstallatie leverde onvoldoende koude lucht. Bij insp...",
+      "transcript_nl": "Onvoldoende koude lucht. Bij controle van het leidingwerk viel op dat de verdamper ijskoud aanvoelt, maar geen stroming hoorbaar was. De leiding van de expansieventiel bleef warm. Expansieventiel is handmatig getest op werking en vervolgens gedemonteerd. Na plaatsing van een nieuw ventiel kwam de circulatie van het koudemiddel weer op gang. De verdampertemperatuur daalde weer en de koeling herstelde zich geleidelijk. Controleer tijdens de inspectie altijd de temperatuurverschillen voor en na het expansieventiel. Een geblokkeerde ventiel leidt vaak tot slechte verdamping en onregelmatige temperaturen in de koelcel."
+    }
+  ],
+  "manual_sections": [],
+  "patterns": [
+    {
+      "is_synthetic": true,
+      "uit_balans_type": "factor_side",
+      "typical_pattern": "Systeem werkt maar ineffici\u00ebnt. Condensatietemperatuur te hoog door hoge omgevingstemperatuur (38\u00b0C). Heetgas extreem warm (72\u00b0C). Compressor zwaar belast. Hoog energieverbruik. Condensor kan warmte niet kwijt.",
+      "affected_components": [
+        "condensor",
+        "compressor"
+      ],
+      "balance_factors": [
+        "Omgevingstemperatuur vs condensatietemperatuur uit balans (P4)",
+        "Condensorcapaciteit onvoldoend voor ambient",
+        "Motorvermogen te hoog belast"
+      ],
+      "failure_mode": "hoge_condensatietemperatuur",
+      "source": "manual_balance_factors",
+      "worldstate_json": "{\"current_state\": {\"room_temp\": -28.0, \"hot_gas_temp\": 72.0, \"liquid_temp\": 50.0, \"suction_temp\": -35.0, \"ambient_temp\": 38.0, \"door_open\": false}, \"flags\": {\"main_temp_high\": false, \"hot_gas_low\": false, \"liquid_extreme\": false, \"suction_extreme\": false, \"ambient_extreme\": true}, \"trends_30m\": {\"room_temp_trend\": 0.3, \"door_open_ratio\": 0.0}, \"health_scores\": {\"cooling_performance\": 75, \"compressor_health\": 50}}",
+      "snapshot_id": "ws_high_condensation_temp",
+      "related_failure_modes": [
+        "hoge_druk",
+        "vuile_condensor",
+        "te_hoog_energieverbruik"
+      ]
+    }
+  ],
+  "worldstate_sample": {
+    "current_state": {
+      "current_room_temp": 0.0,
+      "current_room_temp_secondary": null,
+      "current_hot_gas_temp": 22.6,
+      "current_liquid_temp": 23.3,
+      "current_suction_temp": 22.5,
+      "current_ambient_temp": 22.4,
+      "current_door_open": false,
+      "current_rssi": -90.0,
+      "current_battery": 5.0
+    },
+    "flags": {
+      "flag_secondary_error": true,
+      "flag_main_temp_high": true
+    },
+    "health_scores": {
+      "cooling_performance_score": 55,
+      "compressor_health_score": 62,
+      "system_stability_score": 0,
+      "data_quality_score": 96
+    }
+  }
+}

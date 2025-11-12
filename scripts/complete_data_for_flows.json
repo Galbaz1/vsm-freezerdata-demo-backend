@@ -1,0 +1,205 @@
+{
+  "a3_case": {
+    "problem_summary": "De koelcel bereikt de gewenste temperatuur niet. Bij inspectie blijkt de verdamper volledig bedekt met een dikke laag ijs, wat de luchtcirculatie ernstig belemmert. Dit duidt op een probleem met het ontdooisysteem of de luchtstroom.",
+    "failure_modes": [
+      "ingevroren_verdamper",
+      "slecht_ontdooien",
+      "te_hoge_temperatuur"
+    ],
+    "clip_ids": [
+      "A3_1",
+      "A3_2",
+      "A3_3"
+    ],
+    "related_manual_sections": [],
+    "solution_summary": "De installatie is tijdelijk uitgeschakeld om de verdamper handmatig te ontdooien. Vervolgens zijn de luchtkanalen gereinigd, is de werking van de ontdooicyclus gecontroleerd en is de thermostaat gekalibreerd. Preventief onderhoud en monitoring van de luchtstroming zijn essentieel om herhaling van het probleem te voorkomen.",
+    "smido_steps": [
+      "technisch",
+      "procesinstellingen",
+      "procesparameters",
+      "installatie_vertrouwd",
+      "melding"
+    ],
+    "transcript_nl": "In de koelruimte werd een te hoog binnentemperatuur gemeten, ondanks een actieve vraag. De verdamper was bedekt met een laag ijs en de luchtcirculatie was nauwelijks aanwezig. De luchtgeleider was vochtig en de retourlucht werd niet voldoende afgevoerd. De installatie is tijdelijk uitgeschakeld en de verdamper is handmatig ontdooid. Vervolgens zijn de luchtkanalen gereinigd en is de werking van de ontdooicyclus gecontroleerd. De thermostaat is opnieuw gekalibreerd. Let op signalen van beperkte luchtstroming en controleer of de ontdooiing correct wordt aangestuurd. Regelmatig onderhoud van de verdamper voorkomt ijsvorming en verhoogt de koelcapaciteit.",
+    "related_diagrams": [],
+    "components": [
+      "thermostaat",
+      "verdamper",
+      "schakelkast",
+      "luchtgeleider",
+      "luchtkanalen"
+    ],
+    "typical_sensor_conditions": "{\"description\": \"Pattern inferred from problem and solution\"}",
+    "related_telemetry_events": [],
+    "failure_mode": "ingevroren_verdamper",
+    "case_title": "Case A3: De koelcel bereikt de gewenste temperatuur niet. Bij inspect...",
+    "root_cause": "Een incorrect functionerende of ingestelde ontdooicyclus, mogelijk in combinatie met vervuilde luchtkanalen, heeft geleid tot overmatige ijsvorming op de verdamper. Hierdoor wordt de warmteoverdracht geblokkeerd en kan de ruimte niet meer effectief gekoeld worden.",
+    "world_state_pattern": "evaporator frozen",
+    "component_primary": "thermostaat",
+    "smido_step_primary": "technisch",
+    "case_id": "A3"
+  },
+  "alarms": [
+    {
+      "time_range_end": "2024-08-01T13:24:00",
+      "failure_modes": [
+        "te_hoge_temperatuur",
+        "deur_probleem"
+      ],
+      "hot_gas_mean": 20.954166666666666,
+      "related_manual_sections": [],
+      "door_open_ratio": 1.0,
+      "parquet_path": "features/telemetry/timeseries_freezerdata/135_1570_cleaned_with_flags.parquet",
+      "room_temp_trend": 0.0,
+      "time_range_start": "2024-08-01T11:49:00",
+      "room_temp_min": 0.0,
+      "related_vlog_cases": [],
+      "t_end": "2024-08-01T13:24:00",
+      "severity": "critical",
+      "related_diagrams": [],
+      "liquid_mean": 20.37708333333333,
+      "worldstate_summary": "Flags: main_temp_high. Room: 0.0\u00b0C, HotGas: 21.0\u00b0C, Trend: 0.0\u00b0C/hr",
+      "duration_minutes": 95.0,
+      "room_temp_mean": 0.0,
+      "failure_mode": "te_hoge_temperatuur",
+      "asset_id": "135_1570",
+      "suction_mean": 20.73229166666667,
+      "event_id": "evt_20240801_1149",
+      "affected_components": [
+        "deur"
+      ],
+      "t_start": "2024-08-01T11:49:00",
+      "ambient_mean": 20.565625,
+      "room_temp_max": 0.0,
+      "description_nl": "Storing gedetecteerd: Temperatuur te hoog (0.0\u00b0C). Deur vaak open (100%). Temperatuur trend: stabiel (0.0\u00b0C/uur). Duur: 95 minuten."
+    },
+    {
+      "asset_id": "135_1570",
+      "hot_gas_mean": 20.0,
+      "failure_modes": [
+        "te_hoge_temperatuur",
+        "compressor_draait_niet",
+        "deur_probleem",
+        "expansieventiel_defect",
+        "ingevroren_verdamper"
+      ],
+      "related_manual_sections": [],
+      "door_open_ratio": 1.0,
+      "parquet_path": "features/telemetry/timeseries_freezerdata/135_1570_cleaned_with_flags.parquet",
+      "room_temp_trend": 0.0,
+      "time_range_start": "2024-07-28T13:57:00",
+      "room_temp_min": 0.0,
+      "related_vlog_cases": [],
+      "t_end": "2024-07-28T17:07:00",
+      "severity": "critical",
+      "related_diagrams": [],
+      "liquid_mean": 20.0,
+      "worldstate_summary": "Flags: main_temp_high, hot_gas_low, liquid_extreme, suction_extreme. Room: 0.0\u00b0C, HotGas: 20.0\u00b0C, Trend: 0.0\u00b0C/hr",
+      "duration_minutes": 190.0,
+      "room_temp_mean": 0.0,
+      "failure_mode": "te_hoge_temperatuur",
+      "time_range_end": "2024-07-28T17:07:00",
+      "suction_mean": 20.0,
+      "event_id": "evt_20240728_1357",
+      "affected_components": [
+        "compressor",
+        "expansieventiel",
+        "deur",
+        "filter_droger",
+        "ontdooiheater",
+        "verdamper"
+      ],
+      "t_start": "2024-07-28T13:57:00",
+      "ambient_mean": 19.07068062827225,
+      "room_temp_max": 0.0,
+      "description_nl": "Storing gedetecteerd: Temperatuur te hoog (0.0\u00b0C). Verdamper mogelijk bevroren. Heetgas laag (20.0\u00b0C). Vloeistofleiding extreem. Deur vaak open (100%). Temperatuur trend: stabiel (0.0\u00b0C/uur). Duur: 190 minuten."
+    }
+  ],
+  "manual_sections": {
+    "melding": {
+      "title": "Melding",
+      "content_preview": ""
+    },
+    "technisch": {
+      "title": "Installatie vertrouwd",
+      "content_preview": ""
+    },
+    "installatie_vertrouwd": {
+      "title": "Opbouw installatie en componenten",
+      "content_preview": ""
+    }
+  },
+  "patterns": [
+    {
+      "balance_factors": [
+        "Verdampercapaciteit verminderd door ijslaag",
+        "Luchtstroom te laag door blokkade",
+        "Ontdooicyclus defect"
+      ],
+      "source": "vlog_A3 + telemetry_sample",
+      "is_synthetic": false,
+      "failure_mode": "ingevroren_verdamper",
+      "related_failure_modes": [
+        "slecht_ontdooien",
+        "te_hoge_temperatuur",
+        "vuile_verdamper"
+      ],
+      "snapshot_id": "ws_frozen_evaporator_A3",
+      "uit_balans_type": "factor_side",
+      "affected_components": [
+        "verdamper",
+        "ontdooiheater",
+        "thermostat",
+        "luchtkanalen"
+      ],
+      "worldstate_json": "{\"current_state\": {\"room_temp\": 0.0, \"hot_gas_temp\": 22.9, \"liquid_temp\": 22.8, \"suction_temp\": 20.0, \"ambient_temp\": 23.3, \"door_open\": true}, \"flags\": {\"main_temp_high\": true, \"hot_gas_low\": false, \"liquid_extreme\": false, \"suction_extreme\": true, \"ambient_extreme\": false}, \"trends_30m\": {\"room_temp_trend\": 2.8, \"door_open_ratio\": 0.15}, \"health_scores\": {\"cooling_performance\": 25, \"compressor_health\": 40}}",
+      "typical_pattern": "Koelcel bereikt temperatuur niet (0\u00b0C, veel te hoog). Verdamper volledig bevroren met dikke ijslaag. Zuigleiding extreem koud. Luchtcirculatie nauwelijks aanwezig. Ontdooicyclus werkt niet correct. Warmteoverdracht geblokkeerd door ijs."
+    },
+    {
+      "source": "manual_balance_factors",
+      "balance_factors": [
+        "Omgevingstemperatuur vs condensatietemperatuur uit balans (P4)",
+        "Condensorcapaciteit onvoldoend voor ambient",
+        "Motorvermogen te hoog belast"
+      ],
+      "is_synthetic": true,
+      "failure_mode": "hoge_condensatietemperatuur",
+      "related_failure_modes": [
+        "hoge_druk",
+        "vuile_condensor",
+        "te_hoog_energieverbruik"
+      ],
+      "uit_balans_type": "factor_side",
+      "snapshot_id": "ws_high_condensation_temp",
+      "affected_components": [
+        "condensor",
+        "compressor"
+      ],
+      "worldstate_json": "{\"current_state\": {\"room_temp\": -28.0, \"hot_gas_temp\": 72.0, \"liquid_temp\": 50.0, \"suction_temp\": -35.0, \"ambient_temp\": 38.0, \"door_open\": false}, \"flags\": {\"main_temp_high\": false, \"hot_gas_low\": false, \"liquid_extreme\": false, \"suction_extreme\": false, \"ambient_extreme\": true}, \"trends_30m\": {\"room_temp_trend\": 0.3, \"door_open_ratio\": 0.0}, \"health_scores\": {\"cooling_performance\": 75, \"compressor_health\": 50}}",
+      "typical_pattern": "Systeem werkt maar ineffici\u00ebnt. Condensatietemperatuur te hoog door hoge omgevingstemperatuur (38\u00b0C). Heetgas extreem warm (72\u00b0C). Compressor zwaar belast. Hoog energieverbruik. Condensor kan warmte niet kwijt."
+    }
+  ],
+  "worldstate": {
+    "current_state": {
+      "current_room_temp": 0.0,
+      "current_room_temp_secondary": null,
+      "current_hot_gas_temp": 22.6,
+      "current_liquid_temp": 23.3,
+      "current_suction_temp": 22.5,
+      "current_ambient_temp": 22.4,
+      "current_door_open": false,
+      "current_rssi": -90.0,
+      "current_battery": 5.0
+    },
+    "flags": {
+      "flag_secondary_error": true,
+      "flag_main_temp_high": true
+    },
+    "health_scores": {
+      "cooling_performance_score": 55,
+      "compressor_health_score": 62,
+      "system_stability_score": 0,
+      "data_quality_score": 96
+    }
+  }
+}

@@ -1,0 +1,23 @@
+%% ============================================================
+%% USER-FACING DIAGRAM: Diagnose - 4 P's Checklist
+%% Purpose: Show what to check in diagnosis phase
+%% Layout: Square (TB) - checklist format
+%% Complexity: Simple (5 nodes)
+%% When to show: "What should I check?" (D phase)
+%% ============================================================
+
+flowchart TB
+    D["<b>Diagnose</b><br/><i>4 P's Checklist</i>"]
+    
+    D --> P1["<b>P1</b> Power<br/><i>Voeding OK?</i>"]
+    D --> P2["<b>P2</b> Instellingen<br/><i>Settings correct?</i>"]
+    D --> P3["<b>P3</b> Parameters<br/><i>Measurements OK?</i>"]
+    D --> P4["<b>P4</b> Productinput<br/><i>Conditions OK?</i>"]
+    
+    %% Consistent styling
+    classDef header fill:#e8f5e9,stroke:#1b5e20,stroke-width:3px,color:#000,font-size:16px
+    classDef item fill:#c8e6c9,stroke:#2e7d32,stroke-width:2px,color:#000,font-size:14px
+    
+    class D header
+    class P1,P2,P3,P4 item
+

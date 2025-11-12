@@ -1,0 +1,63 @@
+flowchart TD
+    Start([Fault Reported]) --> Agent[VSM Agent]
+    
+    Agent --> SMIDO[SMIDO Methodology]
+    
+    SMIDO --> M[M - Melding]
+    SMIDO --> T[T - Technisch]
+    SMIDO --> I[I - Installatie]
+    SMIDO --> D[D - Diagnose 3P's]
+    SMIDO --> O[O - Onderdelen]
+    
+    M --> Data1[Data Sources]
+    T --> Data1
+    I --> Data1
+    D --> Data1
+    O --> Data1
+    
+    Data1 --> Telemetry[Telemetry<br/>785K datapoints<br/>15 columns]
+    Data1 --> Manuals[Manuals<br/>3 documents<br/>922 chunks]
+    Data1 --> Vlogs[Video Logs<br/>15 clips<br/>5 cases]
+    
+    Telemetry --> Features[WorldState<br/>Features<br/>60+ metrics]
+    Features --> Current[Current state]
+    Features --> Trends[Trends 30m-24h]
+    Features --> Health[Health scores]
+    Features --> Flags[Boolean flags]
+    
+    Manuals --> Sections[Manual Sections<br/>~200 sections]
+    Sections --> SMIDO_Docs[SMIDO steps]
+    Sections --> Cases[Case studies]
+    Sections --> Tables[Diagnostic tables]
+    Sections --> Photos[Photos/diagrams]
+    
+    Vlogs --> Metadata[Vlog Metadata<br/>5 cases + 15 clips]
+    Metadata --> Problems[Problem phase]
+    Metadata --> Triage[Triage phase]
+    Metadata --> Solutions[Solution phase]
+    
+    Current --> Tools[Agent Tools]
+    Trends --> Tools
+    Health --> Tools
+    Flags --> Tools
+    SMIDO_Docs --> Tools
+    Cases --> Tools
+    Tables --> Tools
+    Problems --> Tools
+    Triage --> Tools
+    Solutions --> Tools
+    
+    Tools --> Weaviate[Weaviate Vector DB]
+    Weaviate --> Query[Semantic Search]
+    Query --> Response[Troubleshooting<br/>Guidance]
+    
+    Response --> Technician[Junior Technician]
+    
+    style Agent fill:#e1f5ff,stroke:#01579b,stroke-width:3px
+    style SMIDO fill:#fff9c4,stroke:#f57f17,stroke-width:3px
+    style Telemetry fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
+    style Manuals fill:#f3e5f5,stroke:#6a1b9a,stroke-width:2px
+    style Vlogs fill:#ffe0b2,stroke:#e65100,stroke-width:2px
+    style Weaviate fill:#e0f2f1,stroke:#00695c,stroke-width:3px
+    style Technician fill:#c5cae9,stroke:#1a237e,stroke-width:3px
+

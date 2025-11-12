@@ -1,0 +1,24 @@
+%% ============================================================
+%% USER-FACING DIAGRAM: Basic Refrigeration Cycle
+%% Purpose: Show 4 main components and flow
+%% Layout: Circular/Square - natural for cycle
+%% Complexity: Simple (4 nodes)
+%% When to show: "How does the system work?" (I phase)
+%% ============================================================
+
+flowchart LR
+    Compressor["<b>Compressor</b><br/><i>Druk verhogen</i>"]
+    Condensor["<b>Condensor</b><br/><i>Warmte afvoeren</i>"]
+    Expansion["<b>Expansieventiel</b><br/><i>Druk verlagen</i>"]
+    Evaporator["<b>Verdamper</b><br/><i>Warmte opnemen</i>"]
+    
+    Compressor -->|Hete gas| Condensor
+    Condensor -->|Vloeistof| Expansion
+    Expansion -->|Koude mix| Evaporator
+    Evaporator -->|Gas| Compressor
+    
+    %% Consistent styling
+    classDef component fill:#e3f2fd,stroke:#1976d2,stroke-width:3px,color:#000,font-size:14px
+    
+    class Compressor,Condensor,Expansion,Evaporator component
+

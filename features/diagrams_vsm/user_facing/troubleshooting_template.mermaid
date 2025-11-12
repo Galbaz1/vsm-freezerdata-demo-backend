@@ -1,0 +1,22 @@
+%% ============================================================
+%% USER-FACING DIAGRAM: Troubleshooting Response Template
+%% Purpose: Show how to structure findings
+%% Layout: Landscape (LR) - process flow
+%% Complexity: Simple (3 nodes)
+%% When to show: Format troubleshooting responses
+%% ============================================================
+
+flowchart LR
+    Symptoms["<b>Verschijnselen</b><br/><i>Symptoms</i><br/>─────────<br/>Wat zie je?<br/>Waar precies?"]
+    
+    Causes["<b>Mogelijke Oorzaken</b><br/><i>Possible Causes</i><br/>─────────<br/>1. Oorzaak A<br/>2. Oorzaak B<br/>3. Oorzaak C"]
+    
+    Solutions["<b>Oplossingen</b><br/><i>Solutions</i><br/>─────────<br/>Wat controleren?<br/>Wat aanpassen?"]
+    
+    Symptoms --> Causes --> Solutions
+    
+    %% Consistent styling
+    classDef step fill:#e3f2fd,stroke:#1976d2,stroke-width:3px,color:#000,font-size:14px
+    
+    class Symptoms,Causes,Solutions step
+

@@ -1,0 +1,26 @@
+%% ============================================================
+%% USER-FACING DIAGRAM: Pressostat Settings
+%% Purpose: Show START and DIFF adjustment
+%% Layout: Square (TB) - simple logic
+%% Complexity: Simple (6 nodes)
+%% When to show: "How do I adjust pressostat?" (P2 phase)
+%% ============================================================
+
+flowchart TB
+    Start["<b>Pressostat Instellingen</b>"]
+    
+    Start --> LP["<b>LP</b> Lage Druk<br/><i>Low Pressure</i>"]
+    Start --> HP["<b>HP</b> Hoge Druk<br/><i>High Pressure</i>"]
+    
+    LP --> LPSet["START: Uitschakeldruk<br/>DIFF: Inschakeldruk"]
+    HP --> HPSet["START: Uitschakeldruk<br/>DIFF: Inschakeldruk"]
+    
+    %% Consistent styling
+    classDef header fill:#fff9c4,stroke:#f57f17,stroke-width:3px,color:#000,font-size:16px
+    classDef type fill:#e3f2fd,stroke:#1976d2,stroke-width:2px,color:#000,font-size:14px
+    classDef setting fill:#f5f5f5,stroke:#616161,stroke-width:2px,color:#000,font-size:12px
+    
+    class Start header
+    class LP,HP type
+    class LPSet,HPSet setting
+
