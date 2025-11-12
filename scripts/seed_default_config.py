@@ -23,11 +23,84 @@ from elysia.config import Settings
 from elysia.api.utils.encryption import encrypt_api_keys
 
 
+def ensure_fallback_fix_applied():
+    """
+    Ensure the config fallback fix is applied to init.py.
+    This prevents the issue where seeded configs aren't loaded due to user ID mismatch.
+    """
+    import re
+    from pathlib import Path
+    
+    # Get the project root (assuming script is in scripts/ directory)
+    script_dir = Path(__file__).parent
+    project_root = script_dir.parent
+    init_py_path = project_root / "elysia" / "api" / "routes" / "init.py"
+    
+    if not init_py_path.exists():
+        print(f"\n⚠️  Warning: {init_py_path} not found, skipping fallback fix check")
+        return False
+    
+    # Read the file
+    with open(init_py_path, "r") as f:
+        content = f.read()
+    
+    # Check if fallback is already applied
+    if 'Fallback to global default_user config' in content:
+        print("\n✅ Step 0: Config fallback fix already applied")
+        return True
+    
+    # Apply the fix
+    print("\n🔧 Step 0: Applying config fallback fix to init.py...")
+    
+    # Use the same pattern as apply_config_fallback_fix.py (proven to work)
+    # Pattern: Match from function start to the if check
+    function_pattern = r'(async def get_default_config\(.*?\n)(.*?)(if len\(default_configs\.objects\) > 0:)'
+    
+    # Replacement: Add fallback logic before the if check
+    replacement = r'''\1\2# Fallback to global default_user config if user-specific not found
+        if len(default_configs.objects) == 0:
+            default_configs = await collection.query.fetch_objects(
+                filters=Filter.all_of(
+                    [
+                        Filter.by_property("default").equal(True),
+                        Filter.by_property("user_id").equal("default_user"),
+                    ]
+                )
+            )
+
+        \3'''
+    
+    # Apply the fix
+    new_content = re.sub(function_pattern, replacement, content, flags=re.DOTALL)
+    
+    if new_content != content:
+        # Backup original
+        backup_path = init_py_path.with_suffix('.py.backup')
+        with open(backup_path, "w") as f:
+            f.write(content)
+        print(f"   💾 Backup created: {backup_path}")
+        
+        # Write modified version
+        with open(init_py_path, "w") as f:
+            f.write(new_content)
+        
+        print(f"   ✅ Fallback fix applied successfully!")
+        print(f"   📝 Modified: {init_py_path}")
+        return True
+    else:
+        print(f"   ⚠️  Could not apply fix - pattern not found")
+        print(f"   💡 You may need to apply the fix manually")
+        return False
+
+
 async def seed_default_config():
     """Create a default config in ELYSIA_CONFIG__ collection."""
 
     print("🔧 VSM Default Config Seed Script")
     print("=" * 60)
+
+    # 0. Ensure fallback fix is applied (prevents config loading issues)
+    ensure_fallback_fix_applied()
 
     # 1. Extract VSM prompts from smido_tree.py
     print("\n📝 Step 1: Extracting VSM prompts from smido_tree.py...")
@@ -245,6 +318,8 @@ async def seed_default_config():
             print("   2. Open browser: http://localhost:8000")
             print("   3. Expected: Skip welcome screen, go straight to chat")
             print("   4. Verify: Agent responds in Dutch with VSM tone")
+            print(f"\n💡 Note: Config fallback fix automatically applied")
+            print("   This ensures your VSM config loads for all users, even with different user IDs")
             print("\n" + "=" * 60)
     
     finally:

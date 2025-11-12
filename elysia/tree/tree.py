@@ -1313,32 +1313,18 @@ class Tree:
 
         if isinstance(result, Error):
             self._add_error(decision.function_name, result)
-            if self.settings.LOGGING_LEVEL_INT <= 20:
-                print(
-                    Panel.fit(
-                        (
-                            result.error_message
-                            if result.feedback == "An unknown issue occurred."
-                            else result.feedback
-                        ),
-                        title="Error",
-                        border_style="red",
-                        padding=(1, 1),
-                    )
-                )
-            error = True
+            error_message = f"Error in tool '{decision.function_name}': {result.error_message}\nTraceback: {result.traceback}"
+            self.settings.logger.error(error_message)
+
+        if isinstance(result, Warning):
+            self._add_warning(decision.function_name, result)
 
         if isinstance(result, Text):
             self._update_conversation_history("assistant", result.text)
-            if self.settings.LOGGING_LEVEL_INT <= 20:
-                print(
-                    Panel.fit(
-                        result.text,
-                        title="Assistant response",
-                        border_style="cyan",
-                        padding=(1, 1),
-                    )
-                )
+            self.settings.logger.debug(f"Assistant response: {result.text}")
+
+        if isinstance(result, Update):
+            pass
 
         return (
             await self.returner(
@@ -1506,15 +1492,13 @@ class Tree:
             # If there are any empty branches, remove them (no tools attached to them)
             self._remove_empty_branches()
 
-            if self.settings.LOGGING_LEVEL_INT <= 20:
-                print(
-                    Panel.fit(
-                        user_prompt,
-                        title="User prompt",
-                        border_style="yellow",
-                        padding=(1, 1),
-                    )
-                )
+            self.settings.logger.debug(f"User prompt: {user_prompt}")
+
+            # start the timer
+            if "total_time" not in self.tracker.trackers:
+                self.tracker.add_tracker("total_time")
+            self.tracker.start_tracking("total_time")
+            yielded_results = []
 
         # Start the tree at the root node
         if self.root is not None:
@@ -1640,33 +1624,23 @@ class Tree:
             self.decision_history[-1].append(self.current_decision.function_name)
 
             # print the current node information
-            if self.settings.LOGGING_LEVEL_INT <= 20:
-                print(
-                    Panel.fit(
-                        f"[bold]Node:[/bold] [magenta]{current_decision_node.id}[/magenta]\n"
-                        f"[bold]Decision:[/bold] [green]{self.current_decision.function_name}[/green]\n"
-                        f"[bold]Reasoning:[/bold] {self.current_decision.reasoning}\n",
-                        title="Current Decision",
-                        border_style="magenta",
-                        padding=(1, 1),
-                    )
-                )
-
-            self.tree_data.update_tasks_completed(
-                prompt=self.user_prompt,
-                task=self.current_decision.function_name,
-                num_trees_completed=self.tree_data.num_trees_completed,
-                reasoning=self.current_decision.reasoning,
-                action=action_fn is not None,
+            decision_info = (
+                f"Current Decision:\n"
+                f"  - Node: {current_decision_node.id}\n"
+                f"  - Decision: {self.current_decision.function_name}\n"
+                f"  - Reasoning: {self.current_decision.reasoning}"
             )
+            self.settings.logger.debug(decision_info)
 
-            # evaluate the action if this is not a branch
-            if action_fn is not None:
+            # run the tool associated with the decision
+            try:
+                # get the tool
+                tool_instance = self.tools[self.current_decision.function_name]
                 self.tracker.start_tracking(self.current_decision.function_name)
                 self.tree_data.set_current_task(self.current_decision.function_name)
                 successful_action = True
                 with ElysiaKeyManager(self.settings):
-                    async for result in action_fn(
+                    async for result in tool_instance(
                         tree_data=self.tree_data,
                         inputs=self.current_decision.function_inputs,
                         base_lm=self.base_lm,
@@ -1699,6 +1673,9 @@ class Tree:
                     self.base_lm if not self.low_memory else None,
                     self.complex_lm if not self.low_memory else None,
                 )
+
+            except Exception as e:
+                self.settings.logger.error(f"Error running tool '{self.current_decision.function_name}': {str(e)}")
 
             yield (
                 await self._evaluate_result(

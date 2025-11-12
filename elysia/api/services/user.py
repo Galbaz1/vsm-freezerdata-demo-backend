@@ -112,6 +112,7 @@ class UserManager:
         agent_description: str | None = None,
         end_goal: str | None = None,
         branch_initialisation: str | None = None,
+        feature_bootstrappers: list[str] | None = None,
     ):
         local_user = await self.get_user_local(user_id)
         local_user["tree_manager"].update_config(
@@ -123,6 +124,7 @@ class UserManager:
             agent_description,
             end_goal,
             branch_initialisation,
+            feature_bootstrappers,
         )
 
         await local_user["client_manager"].reset_keys(

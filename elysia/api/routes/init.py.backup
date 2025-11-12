@@ -34,17 +34,6 @@ async def get_default_config(
             )
         )
 
-        # Fallback to global default_user config if user-specific not found
-        if len(default_configs.objects) == 0:
-            default_configs = await collection.query.fetch_objects(
-                filters=Filter.all_of(
-                    [
-                        Filter.by_property("default").equal(True),
-                        Filter.by_property("user_id").equal("default_user"),
-                    ]
-                )
-            )
-
         if len(default_configs.objects) > 0:
             default_config: dict = default_configs.objects[0].properties  # type: ignore
             try:

@@ -1,0 +1,80 @@
+# Logging Configuration Rules
+
+## Overview
+The VSM backend uses a dual-handler logging system that keeps the terminal clean while preserving a complete audit trail in log files.
+
+## Key Points
+
+### Terminal Output
+- **Console Level**: INFO (only important messages)
+- **File Level**: DEBUG (all details)
+- **Result**: Clean, professional terminal output
+
+### Log Files
+- `logs/elysia.log` - All Python application logs (DEBUG+)
+- `logs/uvicorn.log` - HTTP server logs (INFO+)
+- `logs/sessions.jsonl` - Session records
+- `logs/sessions/` - Per-session detailed logs
+
+### File Handlers vs Console Handlers
+- **File handler** (DEBUG): Captures everything for audit trail
+- **Console handler** (INFO): Shows only critical info to user
+- **Uvicorn handler**: HTTP traffic isolated to separate file
+
+## Usage
+
+### Start Server
+```bash
+elysia start
+```
+
+Output shows where logs are being written.
+
+### Monitor Logs
+```bash
+# All events
+tail -f logs/elysia.log
+
+# HTTP traffic
+tail -f logs/uvicorn.log
+
+# Search for errors
+grep ERROR logs/elysia.log
+```
+
+### Control Terminal Verbosity
+```bash
+# Debug level in terminal
+elysia start --log-level debug
+
+# Warning level in terminal (minimal)
+elysia start --log-level warning
+```
+
+## For Developers
+
+When adding new features, use standard Python logging:
+
+```python
+from elysia.api.core.log import logger
+
+# Automatically logs to both file and console
+logger.debug("Diagnostic details")
+logger.info("Important milestone")
+logger.warning("Unexpected condition")
+logger.error("Operation failed")
+```
+
+## Documentation
+- Quick start: `LOGGING_QUICK_START.md`
+- Cheatsheet: `LOGGING_CHEATSHEET.txt`
+- Full guide: `docs/LOGGING_CONFIGURATION.md`
+- Integration: `docs/LOGGING_INTEGRATION_GUIDE.md`
+- Navigation: `docs/LOGGING_INDEX.md`
+
+## Key Benefits
+✅ Clean terminal during operations
+✅ Complete searchable audit trail
+✅ Real-time monitoring capability
+✅ Backward compatible (no code changes needed)
+✅ Production-ready logging system

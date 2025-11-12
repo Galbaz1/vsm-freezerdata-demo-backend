@@ -6,6 +6,7 @@ from uuid import uuid4
 
 from elysia.config import Settings
 from elysia.util.client import ClientManager
+from elysia.api.core.log import logger
 
 BranchInitType = Literal["default", "one_branch", "multi_branch", "empty"]
 
@@ -36,7 +37,10 @@ class Config:
             self.name = name
 
         if settings is None:
+            # Create Settings instance, then override level for prints
             self.settings = Settings().from_smart_setup()
+            self.settings.LOGGING_LEVEL = "WARNING"
+            self.settings.LOGGING_LEVEL_INT = 30  # WARNING
         else:
             self.settings = settings
 

@@ -224,6 +224,7 @@ class TreeManager:
         tree = await Tree.import_from_weaviate(
             "ELYSIA_TREES__", conversation_id, client_manager
         )
+        
         if conversation_id not in self.trees:
             self.trees[conversation_id] = {
                 "tree": None,

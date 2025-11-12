@@ -13,6 +13,10 @@
     { 
       "command": "cd presentation && pnpm run test:affected-slices || true", 
       "description": "Run tests for touched slices (non-blocking)" 
+    },
+    {
+      "command": "python3 scripts/summarize_logs.py || true",
+      "description": "Summarize backend logs into logs/summary.md (non-blocking)"
     }
   ]
 }

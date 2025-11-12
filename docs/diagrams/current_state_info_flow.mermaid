@@ -1,0 +1,189 @@
+```mermaid
+flowchart TB
+    %% ============================================================================
+    %% CURRENT STATE INFORMATION FLOW - LOW-LEVEL DETAIL
+    %% Shows the complete path from user query to response for "What's the current state?"
+    %% ============================================================================
+    
+    subgraph Frontend["🖥️ FRONTEND (Elysia UI)"]
+        User["👤 User<br/>Query: 'What's the current state?'"]
+        WS_Client["WebSocket Client"]
+        UI_Display["UI Display<br/>(Tree visualization)"]
+    end
+    
+    subgraph API["⚙️ FASTAPI BACKEND"]
+        WS_Endpoint["WebSocket Endpoint<br/>elysia/api/routes/query.py<br/>process()"]
+        UserMgr["UserManager<br/>elysia/api/services/user.py<br/>process_tree()"]
+        TreeMgr["TreeManager<br/>elysia/api/services/tree.py<br/>process_tree()"]
+    end
+    
+    subgraph TreeExecution["🌲 TREE EXECUTION LAYER"]
+        Tree["Tree<br/>elysia/tree/tree.py<br/>async_run()"]
+        ConvHistory["Conversation History<br/>tree_data.conversation_history[]"]
+        RootNode["Root DecisionNode<br/>'smido_melding'<br/>elysia/tree/util.py"]
+    end
+    
+    subgraph LLM_Decision["🤖 LLM DECISION MAKING"]
+        DecisionPrompt["DecisionPrompt Module<br/>(DSPy ChainOfThought)"]
+        LLM_Base["BASE_MODEL<br/>(gemini-2.5-flash)"]
+        DecisionResult["Decision Object<br/>{<br/>  function_name: 'get_current_status',<br/>  reasoning: '...',<br/>  function_inputs: {<br/>    asset_id: '135_1570',<br/>    timestamp: null<br/>  }<br/>}"]
+    end
+    
+    subgraph ToolExecution["🔧 TOOL EXECUTION"]
+        GetCurrentStatus["@tool: get_current_status<br/>elysia/api/custom_tools.py<br/>(NOT IMPLEMENTED YET)"]
+        FallbackTools["Fallback Path (Current Behavior):<br/>get_alarms → get_asset_health<br/>→ search_manuals_by_smido"]
+    end
+    
+    subgraph DataLayer["💾 DATA LAYER"]
+        TreeCache["tree._initial_worldstate_cache<br/>(Pre-seeded at startup)<br/>PLANNED: Not yet implemented"]
+        ParquetFile["Parquet File<br/>features/telemetry/timeseries_freezerdata/<br/>135_1570_cleaned_with_flags.parquet<br/>(785K rows)"]
+        WeaviateDB["Weaviate Cloud<br/>VSM Collections"]
+    end
+    
+    subgraph Processing["⚡ DATA PROCESSING"]
+        WSEngine["WorldStateEngine<br/>features/telemetry_vsm/src/<br/>worldstate_engine.py<br/>compute_worldstate()"]
+        HealthCalc["Asset Health Calculation<br/>W vs C comparison"]
+        ManualSearch["Manual Search<br/>VSM_ManualSections query"]
+    end
+    
+    subgraph Results["📊 RESULTS FORMATTING"]
+        StatusYield["Status Messages<br/>(via yield)"]
+        ResultYield["Result Objects<br/>(via yield)"]
+        ResponseFormat["Response Formatter<br/>to_frontend()"]
+    end
+    
+    %% ============================================================================
+    %% FLOW: User Query → API
+    %% ============================================================================
+    User -->|"WebSocket message<br/>{query, user_id, conversation_id}"| WS_Client
+    WS_Client -->|WebSocket connection| WS_Endpoint
+    WS_Endpoint -->|"format_ner_response()"| WS_Client
+    WS_Endpoint -->|"user_manager.process_tree()"| UserMgr
+    
+    %% ============================================================================
+    %% FLOW: API → Tree Manager
+    %% ============================================================================
+    UserMgr -->|"Check timeout<br/>Get local user"| TreeMgr
+    TreeMgr -->|"get_tree(conversation_id)<br/>Wait for event.idle"| Tree
+    
+    %% ============================================================================
+    %% FLOW: Tree Execution Start
+    %% ============================================================================
+    Tree -->|"1. Append user query to<br/>conversation_history"| ConvHistory
+    Tree -->|"2. Find current branch<br/>(root = 'smido_melding')"| RootNode
+    
+    %% ============================================================================
+    %% FLOW: Tool Availability Check
+    %% ============================================================================
+    RootNode -->|"3. Get available tools<br/>in smido_melding branch"| ToolExecution
+    ToolExecution -->|"Tools assigned to M branch:<br/>- get_alarms<br/>- get_asset_health<br/>- (get_current_status planned)"| RootNode
+    
+    %% ============================================================================
+    %% FLOW: LLM Decision Making
+    %% ============================================================================
+    RootNode -->|"4. Call DecisionNode.__call__()<br/>Build available_options JSON"| DecisionPrompt
+    
+    DecisionPrompt -->|"5. Construct prompt with:<br/>- agent_description<br/>- M branch instruction<br/>- available_options<br/>- conversation_history<br/>- user query"| LLM_Base
+    
+    LLM_Base -->|"6. LLM chooses tool based on:<br/>- Query intent ('current state')<br/>- Tool descriptions<br/>- SMIDO phase context"| DecisionResult
+    
+    %% ============================================================================
+    %% FLOW: Current Behavior (get_current_status NOT implemented)
+    %% ============================================================================
+    DecisionResult -.->|"PLANNED: Choose get_current_status<br/>(fast path)"| GetCurrentStatus
+    GetCurrentStatus -.->|"PLANNED: Read from cache"| TreeCache
+    TreeCache -.->|"PLANNED: Return cached WorldState<br/>(instant, <100ms)"| ResultYield
+    
+    %% ============================================================================
+    %% FLOW: Actual Behavior (Fallback to slow path)
+    %% ============================================================================
+    DecisionResult -->|"CURRENT: Chooses get_asset_health<br/>(slow path, no fast-path tool)"| FallbackTools
+    
+    FallbackTools -->|"7a. Call get_asset_health tool"| WSEngine
+    WSEngine -->|"8. Read parquet file"| ParquetFile
+    ParquetFile -->|"9. Return dataframe"| WSEngine
+    WSEngine -->|"10. compute_worldstate()<br/>Calculate 60+ features"| HealthCalc
+    
+    HealthCalc -->|"11. Compare W vs C<br/>(WorldState vs Context)"| FallbackTools
+    FallbackTools -->|"12. Yield Status messages"| StatusYield
+    
+    %% ============================================================================
+    %% FLOW: Additional Tool Calls (Problem: Too many tools)
+    %% ============================================================================
+    FallbackTools -->|"13. LLM decides to call<br/>search_manuals_by_smido<br/>(UNNECESSARY for status)"| ManualSearch
+    ManualSearch -->|"14. Query Weaviate"| WeaviateDB
+    WeaviateDB -->|"15. Return manual sections + diagrams"| ManualSearch
+    ManualSearch -->|"16. Yield Results"| ResultYield
+    
+    %% ============================================================================
+    %% FLOW: Results → Frontend
+    %% ============================================================================
+    StatusYield -->|"async generator yields"| ResponseFormat
+    ResultYield -->|"async generator yields"| ResponseFormat
+    
+    ResponseFormat -->|"17. to_frontend() format<br/>{type: 'status/result', payload: {...}}"| WS_Endpoint
+    WS_Endpoint -->|"18. websocket.send_json()"| WS_Client
+    WS_Client -->|"19. Update UI"| UI_Display
+    UI_Display -->|"20. Show results to user"| User
+    
+    %% ============================================================================
+    %% FLOW: Tree completion
+    %% ============================================================================
+    Tree -->|"21. Check if end_actions=True"| RootNode
+    RootNode -->|"22. If more tools available,<br/>LLM decides next tool<br/>(REPEATS steps 4-20)"| DecisionPrompt
+    
+    Tree -->|"23. When complete,<br/>yield Completed()"| ResponseFormat
+    ResponseFormat -->|"24. Save tree state to Weaviate<br/>(optional, if configured)"| WeaviateDB
+    
+    %% ============================================================================
+    %% ANNOTATIONS
+    %% ============================================================================
+    
+    classDef planned fill:#ffffcc,stroke:#ff9900,stroke-width:3px,stroke-dasharray: 5 5
+    classDef current fill:#ffcccc,stroke:#cc0000,stroke-width:2px
+    classDef data fill:#cce5ff,stroke:#0066cc,stroke-width:2px
+    classDef llm fill:#e6ccff,stroke:#9933ff,stroke-width:2px
+    classDef fast fill:#ccffcc,stroke:#00cc00,stroke-width:3px
+    
+    class GetCurrentStatus,TreeCache planned
+    class FallbackTools,ManualSearch current
+    class ParquetFile,WeaviateDB,WSEngine data
+    class DecisionPrompt,LLM_Base,DecisionResult llm
+    class StatusYield,ResultYield fast
+    
+    %% ============================================================================
+    %% NOTES IN DIAGRAM
+    %% ============================================================================
+    
+    Note1["📝 KEY INSIGHTS:<br/><br/>PLANNED (Yellow dashed):<br/>- get_current_status tool<br/>- Pre-seeded cache<br/>- Fast path (<100ms)<br/><br/>CURRENT (Red):<br/>- Multiple tools called<br/>- Parquet reads (slow)<br/>- 2-3 minutes response time<br/><br/>ROOT CAUSE:<br/>get_current_status NOT implemented<br/>in elysia/api/custom_tools.py"]
+    
+    Note1 -.-> GetCurrentStatus
+    Note1 -.-> FallbackTools
+```
+
+**TIMING BREAKDOWN:**
+
+**Planned Fast Path** (get_current_status):
+- Tree routing: ~50ms
+- LLM decision: ~100ms (cached similar decisions)
+- Cache read: <1ms
+- Format response: ~10ms
+- **TOTAL: <200ms** ✅
+
+**Current Slow Path** (get_asset_health + search_manuals):
+- Tree routing: ~50ms
+- LLM decision #1: ~500ms
+- Parquet read: ~800ms
+- WorldState computation: ~400ms
+- LLM decision #2: ~500ms (unnecessary)
+- Weaviate query: ~600ms (unnecessary)
+- Format response: ~50ms
+- **TOTAL: 2-3 minutes** ❌
+
+**BOTTLENECKS:**
+1. No get_current_status tool → Falls back to diagnostic tools
+2. LLM calls search_manuals (irrelevant for status query)
+3. Multiple I/O operations (parquet + Weaviate)
+4. No pre-seeded cache → Cold start every time
+```
+
