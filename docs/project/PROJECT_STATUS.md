@@ -85,7 +85,8 @@ AI agent helping junior cooling technicians troubleshoot freezer installations u
 
 2. **get_current_status tool missing** 🔴
    - Status query ("What's current state?") takes 2-3 minutes
-   - Should use run_if_true for auto-execution (<200ms)
+   - Should return cached WorldState (<200ms)
+   - Clear description guides LLM to use it for status queries
    - **Impact**: Poor UX for simple status checks
 
 3. **Diagram search broken** 🔴

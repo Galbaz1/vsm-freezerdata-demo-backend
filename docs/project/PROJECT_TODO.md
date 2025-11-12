@@ -105,12 +105,13 @@
 **Impact**: Poor UX, frustrating for users
 
 **Tasks**:
-- [ ] Add keyword detection in I branch instruction
-  - Detect: "Ja, ik ken het systeem", "Ik heb het schema", "Ik zie de regelaar"
-  - If user mentions specific components → assume familiar
-- [ ] Improve I→D transition criteria
-  - Single confirmation sufficient
-  - Skip repetitive asking
+- [ ] Improve I branch instruction clarity
+  - Guide: "After user confirms familiarity ONCE, proceed to D"
+  - Recognize answers: Affirmative response, component knowledge, schema reference
+  - No repetition needed if user shows familiarity
+- [ ] Update root instruction
+  - Clear transition criteria between phases
+  - Single confirmation sufficient for I→D
 - [ ] Test with interactive flow (not just scripts)
 
 **File**: `features/vsm_tree/smido_tree.py` (I branch instruction, lines ~184-214)

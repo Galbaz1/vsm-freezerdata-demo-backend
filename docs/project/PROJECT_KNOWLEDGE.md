@@ -294,14 +294,14 @@ tree_manager.add_tree("conv_456")  # Bootstrap applied here!
 
 ### Problem: I Phase Asks Repeatedly for Confirmation
 **Date**: Nov 12, 2025  
-**Root Cause**: No keyword detection for user confirmation  
+**Root Cause**: Unclear I branch instruction about transition criteria  
 **Symptoms**: Agent asks 3-4 times "Ben je bekend met systeem?"  
 **Solution Needed**:
-- Detect: "Ja, ik ken het systeem", "Ik zie de regelaar"
-- If user mentions specific components → assume familiar
-- Skip to D after first confirmation
+- Clarify I branch instruction: "After ONE confirmation, proceed to D"
+- Guide recognition: Affirmative response, component knowledge, schema reference
+- No repetition: Single confirmation is sufficient
 **Status**: Open issue  
-**Learning**: Need better conversation state tracking
+**Learning**: Clear transition instructions prevent loops (no keyword detection needed)
 
 ---
 
