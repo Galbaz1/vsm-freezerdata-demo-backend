@@ -192,21 +192,57 @@ python3 scripts/test_plan7_full_tree.py  # Full A3 scenario
 
 ## Status (Nov 12, 2025)
 
-- ✅ Phase 1: Data Upload COMPLETE (221 objects in Weaviate)
-- ✅ Phase 2: Agent & Tools COMPLETE (7 tools, 9 branches, tests passing)
+- ✅ Phase 1: Data Upload COMPLETE (221 objects)
+- ✅ Phase 2: Agent & Tools COMPLETE (7 VSM tools, tests passing)
 - 🔄 Phase 3: UX & Performance IN PROGRESS (20% complete)
 
 **Critical TODOs**:
-1. Implement `get_current_status` tool (<200ms status queries)
-2. Fix diagram search (returns 0 despite 8+8=16 diagrams in Weaviate)
-3. Optimize `get_asset_health` (<10s target)
+1. Redesign branching (flat root + native tools, Weaviate's one_branch pattern)
+2. Implement `get_current_status` with `run_if_true` (<200ms)
+3. Fix diagram search (VSM_DiagramUserFacing + AgentInternal)
+
+---
+
+## Desired State (Target Architecture)
+
+### Tree Structure
+**Pattern**: Flat root + post-tool chains (Weaviate's one_branch philosophy)
+
+```
+Root (base)
+├── get_current_status (run_if_true → auto-runs if "status" keywords)
+├── get_alarms → [get_asset_health, query] (M flow)
+├── compute_worldstate → [analyze_pattern, visualise] (P3 flow)
+├── query_vlog_cases → [search_manuals, aggregate] (O flow)
+├── search_manuals_by_smido
+├── query, aggregate (native)
+└── text_response, cited_summarize (always)
+```
+
+### Tools Available
+- **Root**: 10-12 tools (VSM + native, agent chooses based on intent)
+- **Post-tool**: 3-5 tools (context-specific, via `from_tool_ids`)
+- **Total**: 7 VSM + 5 native + forced_text_response
+
+### Key Changes from Current
+- ❌ Remove: Deep SMIDO hierarchy (M→T→I→D→O branches)
+- ✅ Add: Flat root with all tools
+- ✅ Add: Native Elysia tools (query, aggregate, visualise)
+- ✅ Add: Fast path via `run_if_true`
+- ✅ Use: Post-tool chains for SMIDO flows
+
+### Benefits
+- <200ms status checks (run_if_true)
+- Native search/stats capabilities
+- Simpler code (~200 lines vs ~500)
+- Follows Weaviate's proven patterns
+- SMIDO methodology preserved (via tool sequences)
 
 ---
 
 ## Documentation
 
-- **Project Status**: `docs/project/PROJECT_STATUS.md`
+- **Status**: `docs/project/PROJECT_STATUS.md`
 - **History**: `docs/project/PROJECT_HISTORY.md`
 - **Knowledge**: `docs/project/PROJECT_KNOWLEDGE.md`
 - **TODOs**: `docs/project/PROJECT_TODO.md`
-- **This File**: Complete agent reference

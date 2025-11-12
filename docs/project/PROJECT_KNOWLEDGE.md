@@ -530,6 +530,34 @@ section = {
 
 ## 🏗️ Architectural Patterns
 
+### Pattern: Tree Branching (Weaviate's Philosophy)
+
+**Weaviate uses FLAT structures**:
+- `one_branch`: All tools at root, agent chooses based on descriptions
+- `multi_branch`: Max 2 levels (root + search sub-branch)
+- Post-tool chains: `from_tool_ids` for sequential flows
+
+**VSM Current** (non-standard):
+- Deep hierarchy: M→T→I→D[P1-P4]→O (5+ levels)
+- Pre-defined workflow
+- Tools scattered across branches
+
+**VSM Improved** (planned):
+- Flat root with all tools (10-12 tools)
+- SMIDO flows via post-tool chains
+- Tools trigger next phase (not branch navigation)
+
+**Example**:
+```python
+# Old (hierarchical)
+tree.add_branch("smido_melding", root=True)
+tree.add_tool(get_alarms, branch_id="smido_melding")
+
+# New (flat + chains)
+tree.add_tool(get_alarms, branch_id="base")  # At root
+tree.add_tool(get_asset_health, from_tool_ids=["get_alarms"])  # Chain
+```
+
 ### Pattern: Hybrid Data Access
 
 **When to use each**:

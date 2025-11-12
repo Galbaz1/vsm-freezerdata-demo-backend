@@ -39,14 +39,25 @@ AI agent helping junior cooling technicians troubleshoot freezer installations u
 - **Communication**: Educational Dutch, safety-first, one-step-at-a-time
 - **Prompts**: Three-level hierarchy (agent/branch/tool) with A3 examples
 
-### Custom Tools (7 implemented, tested)
-1. **search_manuals_by_smido** - SMIDO-filtered manual search with diagrams
-2. **get_alarms** - Query VSM_TelemetryEvent by severity
-3. **query_telemetry_events** - Find historical "uit balans" incidents
-4. **query_vlog_cases** - Find similar troubleshooting workflows (A1-A5)
-5. **compute_worldstate** - Calculate 58 features from 785K parquet rows (<500ms)
-6. **get_asset_health** - Compare WorldState (W) vs Context (C) for balance check
-7. **analyze_sensor_pattern** - Match current state against 13 reference patterns
+### Tools
+**Current**: 7 VSM custom tools, NO native Elysia tools  
+**Planned**: 7 VSM + 5 native tools (flat root pattern)
+
+**VSM Custom** (7):
+1. search_manuals_by_smido - SMIDO-filtered manual + diagram search
+2. get_alarms - Query VSM_TelemetryEvent by severity
+3. query_telemetry_events - Historical "uit balans" incidents
+4. query_vlog_cases - Find A1-A5 cases
+5. compute_worldstate - 58 features from parquet (<500ms)
+6. get_asset_health - W vs C balance check
+7. analyze_sensor_pattern - Match against 13 patterns
+
+**Native Elysia** (planned, not yet added):
+1. query - Flexible Weaviate search
+2. aggregate - Statistics, counts, grouping
+3. visualise - Charts (after data tools)
+4. cited_summarize - Summarize with citations
+5. text_response - Direct answers
 
 ### Data Processing Complete
 - Telemetry: 785K rows (Oct 2022 - Dec 2024, rebased to 2024-2026)
@@ -66,14 +77,19 @@ AI agent helping junior cooling technicians troubleshoot freezer installations u
 ## ⚠️ Known Issues (Phase 3)
 
 ### Critical (Blocking Production)
-1. **get_current_status tool missing** 🔴
+1. **Branching strategy needs redesign** 🔴
+   - Current: Deep SMIDO hierarchy (M→T→I→D→O branches)
+   - Problem: No native Elysia tools, no fast path, inefficient navigation
+   - Solution: Flat root + post-tool chains (Weaviate's one_branch pattern)
+   - **Impact**: Status checks slow (2-3min), limited capabilities
+
+2. **get_current_status tool missing** 🔴
    - Status query ("What's current state?") takes 2-3 minutes
-   - Falls back to diagnostic tools (unnecessary parquet reads)
-   - Should respond in <200ms with cached data
+   - Should use run_if_true for auto-execution (<200ms)
    - **Impact**: Poor UX for simple status checks
 
-2. **Diagram search broken** 🔴
-   - search_manuals_by_smido returns "0 diagrams" despite 9 in Weaviate
+3. **Diagram search broken** 🔴
+   - search_manuals_by_smido returns "0 diagrams" despite 16 in Weaviate
    - Users don't see schemas/flowcharts
    - **Impact**: Missing visual aids during troubleshooting
 

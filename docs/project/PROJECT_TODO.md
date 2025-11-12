@@ -8,33 +8,33 @@
 
 ## 🔴 CRITICAL (Must Fix for Production)
 
-### 1. Implement get_current_status Tool (PRIMARY BLOCKER)
-**Problem**: Status queries take 2-3 minutes, fall back to diagnostic tools  
-**Impact**: Poor UX, unnecessary parquet reads, irrelevant manual searches  
-**Target**: <200ms response time
+### 1. Implement Improved Branching Strategy (PRIMARY BLOCKER)
+**Problem**: 
+- Status queries take 2-3 minutes (no fast path)
+- No native Elysia tools (query, aggregate, visualise)
+- Deep SMIDO hierarchy inefficient
+**Impact**: Poor UX, limited capabilities, doesn't follow Elysia best practices  
+**Target**: Flat root + native tools + fast path
 
 **Tasks**:
-- [ ] Create `get_current_status` tool in `elysia/api/custom_tools.py`
-  - Read from `tree._initial_worldstate_cache` (pre-seeded)
-  - Return 5 sensors (room, hot_gas, suction, liquid, ambient)
-  - Return active flags, trend, health scores
-  - Fallback to synthetic "today" if cache missing
-- [ ] Pre-seed cache in `features/vsm_tree/bootstrap.py`
-  - Generate synthetic WorldState in `vsm_smido_bootstrap()`
-  - Store in `tree._initial_worldstate_cache`
-- [ ] Add to M branch in `features/vsm_tree/smido_tree.py`
-  - Import get_current_status
-  - Add as first tool: `tree.add_tool(get_current_status, branch_id="smido_melding")`
-- [ ] Update M branch instructions for intent detection
-  - Detect "status check" vs "problem report" vs "diagnosis request"
-  - Use get_current_status for status, stop before T/I/D
-- [ ] Create test: `scripts/test_current_status_fast_path.py`
-  - Verify cache pre-seeded (<10ms)
-  - Verify response time <200ms
-  - Verify concise output (not diagnostic)
-  - Verify agent stops (doesn't auto-route)
+- [ ] Create `get_current_status` with `run_if_true` method
+  - Auto-detect status keywords ("status", "hoe gaat het")
+  - Return cached WorldState <200ms
+  - Bypass decision tree entirely
+- [ ] Rewrite `vsm_smido_bootstrap()` in `features/vsm_tree/bootstrap.py`
+  - Flat root pattern (Weaviate's one_branch style)
+  - Add all tools at base: 7 VSM + 5 native
+  - Use `from_tool_ids` for post-tool chains
+  - Remove hierarchical SMIDO branch functions
+- [ ] Add native tools:
+  - Query (flexible Weaviate search)
+  - Aggregate (statistics, counts)
+  - Visualise (charts after data tools)
+  - CitedSummarizer, FakeTextResponse (always)
+- [ ] Update root instruction for tool-based selection
+- [ ] Test all flows: status, query, SMIDO, visualize
 
-**Reference**: `docs/QUICK_STATUS_IMPLEMENTATION.md`, `docs/diagrams/current_state_info_flow.mermaid`
+**Reference**: `docs/IMPROVED_VSM_BRANCHING_STRATEGY.md` (archived after migration)
 
 ---
 
