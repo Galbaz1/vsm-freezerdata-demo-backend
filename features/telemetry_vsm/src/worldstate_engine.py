@@ -62,7 +62,22 @@ class WorldStateEngine:
             - flags: Boolean indicators
             - incidents: Derived incident features
             - health_scores: Composite health metrics
+        
+        Note: If timestamp matches today's date (datetime.now()), returns
+        synthetic A3 problem (frozen evaporator) for demo purposes.
         """
+        # Auto-detect if timestamp is "today" → inject A3 synthetic problem for demo
+        from datetime import datetime as dt_class
+        
+        # Handle string timestamps
+        if isinstance(timestamp, str):
+            timestamp = pd.to_datetime(timestamp)
+        
+        # If timestamp matches today's date → use synthetic A3 data
+        if timestamp.date() == dt_class.now().date():
+            return self.generate_synthetic_worldstate_A3(asset_id, timestamp)
+        
+        # Otherwise use real parquet data
         df = self._load_data()
         
         # Filter time window
@@ -88,6 +103,80 @@ class WorldStateEngine:
             "incidents": self._compute_incidents(window_df, df, timestamp),
             "health_scores": self._compute_health_scores(window_df, df, timestamp),
             "context": self._compute_context_features(timestamp, window_df)
+        }
+        
+        return worldstate
+    
+    def generate_synthetic_worldstate_A3(
+        self,
+        asset_id: str,
+        timestamp: datetime
+    ) -> Dict[str, Any]:
+        """
+        Generate synthetic A3 WorldState (frozen evaporator scenario).
+        
+        Used for demo purposes when timestamp matches today's date.
+        Based on worldstate_snapshots.jsonl snapshot_id="ws_frozen_evaporator_A3".
+        
+        Characteristics:
+        - Room temp too high (0.0°C instead of -33°C)
+        - Suction temp extreme (frozen evaporator)
+        - Low cooling performance (25/100)
+        - Flags: main_temp_high=True, suction_extreme=True
+        """
+        import random
+        
+        # Realistic variations for demo
+        room_temp_var = random.uniform(-1.0, 1.0)
+        
+        worldstate = {
+            "asset_id": asset_id,
+            "timestamp": timestamp.isoformat(),
+            "current_state": {
+                "current_room_temp": 0.0 + room_temp_var,  # Too high (should be -33°C)
+                "current_hot_gas_temp": 22.9,
+                "current_liquid_temp": 22.8,
+                "current_suction_temp": 20.0,  # Extreme (frozen evaporator)
+                "current_ambient_temp": 23.3,
+                "current_door_open": random.choice([True, False])
+            },
+            "trends_30m": {
+                "room_temp_mean_30m": 0.0,
+                "room_temp_delta_30m": 2.8,  # Rising temp
+                "door_open_ratio_30m": 0.15
+            },
+            "trends_2h": {
+                "room_temp_trend_2h": 3.5,  # Warming up
+                "hot_gas_std_2h": 2.1
+            },
+            "trends_24h": {
+                "room_temp_range_24h": 5.0
+            },
+            "flags": {
+                "_flag_main_temp_high": True,  # Main indicator
+                "_flag_hot_gas_low": False,
+                "_flag_liquid_extreme": False,
+                "_flag_suction_extreme": True,  # Main indicator
+                "_flag_ambient_extreme": False,
+                "door_open_recent": True
+            },
+            "incidents": {
+                "suspected_issue": "ingevroren_verdamper",  # A3 failure mode
+                "severity": "critical",
+                "notes": "Synthetic A3 problem for demo - today's date detected"
+            },
+            "health_scores": {
+                "cooling_performance_score": max(0, min(100, int(random.gauss(25, 8)))),
+                "compressor_health_score": max(0, min(100, int(random.gauss(40, 10)))),
+                "system_stability_score": max(0, min(100, int(random.gauss(55, 10)))),
+                "data_quality_score": 100
+            },
+            "context": {
+                "is_business_hours": 8 <= timestamp.hour <= 18,
+                "synthetic_reference": "ws_frozen_evaporator_A3",
+                "demo_mode": True
+            },
+            "is_synthetic_today": True
         }
         
         return worldstate

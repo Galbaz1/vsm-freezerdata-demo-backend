@@ -229,7 +229,11 @@ Tool categories for reference:
 - Quick status checks: get_current_status, get_alarms, get_asset_health
 - Deep analysis: compute_worldstate, analyze_sensor_pattern
 - Knowledge search: search_manuals_by_smido, query_vlog_cases, query
-- Statistics: aggregate
+- Statistics & Data:
+  * compute_worldstate: Sensor analysis (785K parquet rows, 1-min intervals)
+  * aggregate: Collection statistics (use on VSM_ManualSections, VSM_VlogCase, etc.)
+    NOTE: VSM_TelemetryEvent has only 12 reference events, not suitable for monthly stats
+  * query: Flexible search across all collections
 - Visualization: visualise (after data tools)
 - Communication: cited_summarize, text_response
 

@@ -362,16 +362,24 @@ async def query_telemetry_events(
     """
     Query historical "uit balans" incidents to find patterns.
     
+    IMPORTANT: VSM_TelemetryEvent contains only 12 REFERENCE incidents (not daily/monthly data).
+    For monthly stats or trends, use compute_worldstate + parquet data instead.
+    
     Use when:
     - You've identified a failure mode and want to see when it happened before
-    - Looking for temporal patterns (does this happen every night? weekend?)
+    - Looking for patterns in the 12 tagged reference incidents
     - Comparing current incident to past similar events
+    
+    NOT for:
+    - Monthly statistics (use compute_worldstate → parquet has 785K rows)
+    - Daily trends (use compute_worldstate with time window)
+    - Aggregating continuous sensor data (use compute_worldstate or custom parquet query)
     
     Different from get_alarms:
     - get_alarms: Current active alarms (what's wrong RIGHT NOW)
     - query_telemetry_events: Historical incidents (when did this happen BEFORE)
     
-    Source: VSM_TelemetryEvent collection (12 tagged incidents)
+    Source: VSM_TelemetryEvent collection (12 tagged incidents, Jul 2024 - Jan 2025)
     
     Args:
         failure_mode: Filter by failure mode (e.g., "ingevroren_verdamper")
@@ -613,6 +621,9 @@ async def get_current_status(
     """Quick status check - current temps, flags, health.
 
     Use when the user requests the current system status.
+    
+    NOTE: For demo purposes, if current timestamp is TODAY (datetime.now()),
+    returns synthetic A3 problem (frozen evaporator). Otherwise returns real sensor data.
 
     Returns:
     - 5 key sensors (room, hot-gas, suction, liquid, ambient)
@@ -623,11 +634,15 @@ async def get_current_status(
     yield Status("Loading system status...")
 
     from features.telemetry_vsm.src.worldstate_engine import WorldStateEngine
+    from datetime import datetime
 
     engine = WorldStateEngine(
         "features/telemetry/timeseries_freezerdata/135_1570_cleaned_with_flags.parquet"
     )
-    worldstate = engine.generate_synthetic_a3_worldstate(asset_id)
+    
+    # Use current time - worldstate_engine auto-detects "today" and injects A3
+    now = datetime.now()
+    worldstate = engine.compute_worldstate(asset_id, now, 60)
 
     current = worldstate.get("current_state", {})
     flags = worldstate.get("flags", {})
