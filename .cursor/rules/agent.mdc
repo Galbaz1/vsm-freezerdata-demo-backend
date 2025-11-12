@@ -210,7 +210,7 @@ python3 scripts/test_plan7_full_tree.py  # Full A3 scenario
 
 ```
 Root (base)
-├── get_current_status (run_if_true → auto-runs if "status" keywords)
+├── get_current_status (<200ms, cached WorldState)
 ├── get_alarms → [get_asset_health, query] (M flow)
 ├── compute_worldstate → [analyze_pattern, visualise] (P3 flow)
 ├── query_vlog_cases → [search_manuals, aggregate] (O flow)
@@ -228,8 +228,9 @@ Root (base)
 - ❌ Remove: Deep SMIDO hierarchy (M→T→I→D→O branches)
 - ✅ Add: Flat root with all tools
 - ✅ Add: Native Elysia tools (query, aggregate, visualise)
-- ✅ Add: Fast path via `run_if_true`
+- ✅ Add: Fast status tool (get_current_status)
 - ✅ Use: Post-tool chains for SMIDO flows
+- ✅ Use: Clear tool descriptions (no keyword detection)
 
 ### Benefits
 - <200ms status checks (run_if_true)
