@@ -110,6 +110,7 @@ async def initialise_user(
                             style=default_config.style,
                             agent_description=default_config.agent_description,
                             end_goal=default_config.end_goal,
+                            suggestions_context=default_config.suggestions_context,
                             branch_initialisation=default_config.branch_initialisation,
                             feature_bootstrappers=default_config.feature_bootstrappers,
                         )

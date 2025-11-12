@@ -111,6 +111,7 @@ class UserManager:
         style: str | None = None,
         agent_description: str | None = None,
         end_goal: str | None = None,
+        suggestions_context: str | None = None,
         branch_initialisation: str | None = None,
         feature_bootstrappers: list[str] | None = None,
     ):
@@ -123,6 +124,7 @@ class UserManager:
             style,
             agent_description,
             end_goal,
+            suggestions_context,
             branch_initialisation,
             feature_bootstrappers,
         )

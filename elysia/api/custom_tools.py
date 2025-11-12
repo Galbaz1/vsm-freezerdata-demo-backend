@@ -2,6 +2,7 @@ from elysia import Tool, tool
 from elysia.objects import Response, Status, Result, Error
 from weaviate.classes.query import Filter
 from datetime import datetime
+from pathlib import Path
 
 # Import a custom tool from a separate file
 from elysia.tools.visualisation.linear_regression import BasicLinearRegression
@@ -109,23 +110,26 @@ async def get_current_status(
     worldstate = None
     now = datetime.now()
     
-    if tree_data and hasattr(tree_data.tree, '_initial_worldstate_cache'):
-        cached_ws = tree_data.tree._initial_worldstate_cache
-        # Check if cache is for today
-        try:
-            cached_date = datetime.fromisoformat(cached_ws["timestamp"]).date()
-            if cached_date == now.date():
-                worldstate = cached_ws
-        except (KeyError, ValueError):
-            pass
+    # Check hidden_environment for cached worldstate (same pattern as compute_worldstate)
+    if tree_data and hasattr(tree_data.environment, 'hidden_environment'):
+        if "worldstate" in tree_data.environment.hidden_environment:
+            cached_ws = tree_data.environment.hidden_environment["worldstate"]
+            # Check if cache is for today
+            try:
+                cached_date = datetime.fromisoformat(cached_ws["timestamp"]).date()
+                if cached_date == now.date():
+                    worldstate = cached_ws
+            except (KeyError, ValueError):
+                pass
     
     # Fallback: generate if not cached or stale
     if worldstate is None:
         engine = WorldStateEngine("features/telemetry/timeseries_freezerdata/135_1570_cleaned_with_flags.parquet")
         worldstate = engine.compute_worldstate(asset_id, now, 60)
-        # Update cache
-        if tree_data:
-            tree_data.tree._initial_worldstate_cache = worldstate
+        # Update cache in hidden_environment (same pattern as compute_worldstate)
+        if tree_data and hasattr(tree_data.environment, 'hidden_environment'):
+            tree_data.environment.hidden_environment["worldstate"] = worldstate
+            tree_data.environment.hidden_environment["worldstate_timestamp"] = worldstate["timestamp"]
     
     # Extract concise status
     current = worldstate.get("current_state", {})
@@ -1184,7 +1188,7 @@ async def show_diagram(
     **kwargs
 ):
     """
-    Display a user-facing diagram (PNG) while loading the corresponding complex diagram internally for agent understanding.
+    Display a user-facing Mermaid diagram while loading the corresponding complex diagram internally for agent understanding.
     
     Args:
         diagram_id: ID of the diagram to show (e.g., "smido_overview", "basic_cycle").
@@ -1205,7 +1209,7 @@ async def show_diagram(
     - frozen_evaporator: A3 case example
     
     Returns:
-        - PNG URL for frontend display
+        - Mermaid code in markdown code fence for frontend rendering
         - Diagram metadata (title, description)
         - Complex Mermaid code loaded in tree environment for agent context
     """
@@ -1220,8 +1224,17 @@ async def show_diagram(
     try:
         yield Status(f"Loading diagram '{diagram_id}'...")
         
+        # 1. Read user-facing Mermaid file from filesystem
+        diagram_file = Path(__file__).parent.parent.parent / "features" / "diagrams_vsm" / "user_facing" / f"{diagram_id}.mermaid"
+        
+        if not diagram_file.exists():
+            yield Error(f"Diagram file '{diagram_file}' not found.")
+            return
+        
+        user_facing_mermaid = diagram_file.read_text(encoding="utf-8").strip()
+        
+        # 2. Fetch metadata from Weaviate for title, description, and agent diagram ID
         async with client_manager.connect_to_async_client() as client:
-            # 1. Fetch user-facing diagram from VSM_DiagramUserFacing
             if not await client.collections.exists("VSM_DiagramUserFacing"):
                 yield Error("VSM_DiagramUserFacing collection not found. Please upload diagrams first.")
                 return
@@ -1238,35 +1251,31 @@ async def show_diagram(
             
             user_diagram = user_result.objects[0]
             user_props = user_diagram.properties
+            title = user_props.get("title", diagram_id)
+            description = user_props.get("description", "")
             
             # Get agent diagram ID from user-facing diagram
             agent_diagram_id = user_props.get("agent_diagram_id")
             
-            if not agent_diagram_id:
-                yield Error(f"User-facing diagram '{diagram_id}' has no linked agent diagram.")
-                return
-            
-            # 2. Fetch agent-internal diagram from VSM_DiagramAgentInternal
-            if not await client.collections.exists("VSM_DiagramAgentInternal"):
-                yield Error("VSM_DiagramAgentInternal collection not found. Please upload diagrams first.")
-                return
-            
-            agent_coll = client.collections.get("VSM_DiagramAgentInternal")
-            agent_result = await agent_coll.query.fetch_objects(
-                filters=Filter.by_property("diagram_id").equal(agent_diagram_id),
-                limit=1
-            )
-            
+            # 3. Fetch agent-internal diagram from VSM_DiagramAgentInternal
             agent_mermaid_code = None
             agent_title = None
             
-            if agent_result.objects:
-                agent_diagram = agent_result.objects[0]
-                agent_props = agent_diagram.properties
-                agent_mermaid_code = agent_props.get("mermaid_code", "")
-                agent_title = agent_props.get("title", "")
+            if agent_diagram_id:
+                if await client.collections.exists("VSM_DiagramAgentInternal"):
+                    agent_coll = client.collections.get("VSM_DiagramAgentInternal")
+                    agent_result = await agent_coll.query.fetch_objects(
+                        filters=Filter.by_property("diagram_id").equal(agent_diagram_id),
+                        limit=1
+                    )
+                    
+                    if agent_result.objects:
+                        agent_diagram = agent_result.objects[0]
+                        agent_props = agent_diagram.properties
+                        agent_mermaid_code = agent_props.get("mermaid_code", "")
+                        agent_title = agent_props.get("title", "")
             
-            # 3. Store complex Mermaid in tree environment for agent context
+            # 4. Store complex Mermaid in tree environment for agent context
             if tree_data and agent_mermaid_code:
                 if not hasattr(tree_data.environment, 'hidden_environment'):
                     tree_data.environment.hidden_environment = {}
@@ -1274,41 +1283,15 @@ async def show_diagram(
                 tree_data.environment.hidden_environment[f"diagram_{diagram_id}_mermaid"] = agent_mermaid_code
                 tree_data.environment.hidden_environment[f"diagram_{diagram_id}_agent_title"] = agent_title
             
-            # 4. Return Result with PNG URL for frontend display
-            thumb_url = ""
-            try:
-                png_url_val = user_props.get("png_url", "")
-                if isinstance(png_url_val, str) and png_url_val:
-                    thumb_url = png_url_val.replace("/static/diagrams/", "/static/diagrams/thumbs/")
-            except Exception:
-                thumb_url = user_props.get("png_url", "")
-            yield Result(
-                objects=[{
-                    "diagram_id": diagram_id,
-                    "png_url": user_props.get("png_url", ""),
-                    "thumb_url": thumb_url,
-                    "title": user_props.get("title", ""),
-                    "description": user_props.get("description", ""),
-                    "when_to_show": user_props.get("when_to_show", ""),
-                    "png_width": user_props.get("png_width", 1200),
-                    "png_height": user_props.get("png_height", 800),
-                }],
-                payload_type="product",  # Use built-in type with image support
-                name="diagram",
-                mapping={
-                    "name": "title",
-                    "description": "description",
-                    "image": "thumb_url",
-                    "url": "png_url",
-                },
-                unmapped_keys=["diagram_id", "when_to_show", "png_width", "png_height", "thumb_url", "_REF_ID"],
-                metadata={
-                    "agent_mermaid_loaded": agent_mermaid_code is not None,
-                    "agent_diagram_id": agent_diagram_id,
-                    "agent_title": agent_title,
-                },
-                llm_message=f"Displayed diagram '{user_props.get('title', diagram_id)}' to technician. Complex version loaded internally for your understanding."
-            )
+            # 5. Return Response with Mermaid code fence for frontend rendering
+            mermaid_markdown = f"```mermaid\n{user_facing_mermaid}\n```"
+            
+            if description:
+                response_text = f"**{title}**: {description}\n\n{mermaid_markdown}"
+            else:
+                response_text = f"**{title}**\n\n{mermaid_markdown}"
+            
+            yield Response(response_text)
             
     except Exception as e:
         yield Error(f"Error loading diagram: {str(e)}")

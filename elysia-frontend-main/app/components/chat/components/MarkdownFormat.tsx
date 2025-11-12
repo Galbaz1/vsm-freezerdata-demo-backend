@@ -5,11 +5,12 @@
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeHighlight from "rehype-highlight";
-import { useContext } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import { ChatContext } from "../../contexts/ChatContext";
 import CitationBubble from "./CitationBubble";
 import { visit } from "unist-util-visit";
 import { Element, Root } from "hast";
+import mermaid from "mermaid";
 
 interface MarkdownFormatProps {
   text?: string;
@@ -140,6 +141,71 @@ const MarkdownFormat: React.FC<MarkdownFormatProps> = ({
     return processedText;
   };
 
+  // Initialize Mermaid on component mount
+  useEffect(() => {
+    mermaid.initialize({
+      startOnLoad: false,
+      theme: "default",
+      securityLevel: "loose",
+    });
+  }, []);
+
+  // Custom code component for Mermaid rendering
+  const MermaidCode = ({ inline, className, children, ...props }: any) => {
+    const [svg, setSvg] = useState<string | null>(null);
+    const [error, setError] = useState<string | null>(null);
+    const idRef = useRef(`mermaid-${Math.random().toString(36).substr(2, 9)}`);
+
+    const isMermaid = className && /^language-mermaid/.test(className.toLowerCase());
+
+    useEffect(() => {
+      if (!isMermaid || inline || !children) {
+        return;
+      }
+
+      const code = String(children).replace(/\n$/, "");
+      
+      mermaid
+        .render(idRef.current, code)
+        .then(({ svg: renderedSvg }) => {
+          setSvg(renderedSvg);
+          setError(null);
+        })
+        .catch((err) => {
+          console.error("Mermaid rendering error:", err);
+          setError(err.message || "Failed to render Mermaid diagram");
+          setSvg(null);
+        });
+    }, [isMermaid, inline, children]);
+
+    if (inline || !isMermaid) {
+      return <code className={className} {...props}>{children}</code>;
+    }
+
+    if (error) {
+      return (
+        <div className="mermaid-container my-4 p-4 bg-red-50 border border-red-200 rounded">
+          <pre className="text-red-600 text-sm">Mermaid Error: {error}</pre>
+        </div>
+      );
+    }
+
+    if (svg) {
+      return (
+        <div 
+          className="mermaid-container my-4 flex justify-center"
+          dangerouslySetInnerHTML={{ __html: svg }}
+        />
+      );
+    }
+
+    return (
+      <div className="mermaid-container my-4 p-4 bg-gray-50 border border-gray-200 rounded">
+        <div className="text-gray-500 text-sm">Loading diagram...</div>
+      </div>
+    );
+  };
+
   // Custom component renderer for citation spans
   const components = {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -159,6 +225,7 @@ const MarkdownFormat: React.FC<MarkdownFormatProps> = ({
 
       return <span {...props} />;
     },
+    code: MermaidCode,
   };
 
   const paragraph_class = `${
@@ -168,7 +235,7 @@ const MarkdownFormat: React.FC<MarkdownFormatProps> = ({
         ? "prose-p:text-secondary"
         : "prose-p:text-highlight"
   } prose-p:leading-relaxed prose-p:my-2`;
-  const img_class = "prose-img:hidden";
+  const img_class = "prose-img:max-w-full prose-img:h-auto";
   const strong_class = "prose-strong:text-primary prose-strong:font-bold";
   const a_class = "prose-a:text-primary";
   const heading_class =

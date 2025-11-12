@@ -361,6 +361,7 @@ async def save_config_user(
                 style=data.config.get("style"),
                 agent_description=data.config.get("agent_description"),
                 end_goal=data.config.get("end_goal"),
+                suggestions_context=data.config.get("suggestions_context"),
                 branch_initialisation=data.config.get("branch_initialisation"),
                 feature_bootstrappers=data.config.get("feature_bootstrappers"),
             )
@@ -666,6 +667,7 @@ async def load_config_user(
             style=renamed_config["style"],
             agent_description=renamed_config["agent_description"],
             end_goal=renamed_config["end_goal"],
+            suggestions_context=renamed_config.get("suggestions_context"),
             branch_initialisation=renamed_config["branch_initialisation"],
             feature_bootstrappers=renamed_config.get("feature_bootstrappers"),
         )

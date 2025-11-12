@@ -103,6 +103,7 @@ async def seed_default_config():
                         Property(name="end_goal", data_type=DataType.TEXT),
                         Property(name="suggestions_context", data_type=DataType.TEXT),
                         Property(name="branch_initialisation", data_type=DataType.TEXT),
+                        Property(name="use_elysia_collections", data_type=DataType.BOOL),
                         Property(name="user_id", data_type=DataType.TEXT),
                         Property(name="config_id", data_type=DataType.TEXT),
                         Property(name="default", data_type=DataType.BOOL),
@@ -114,7 +115,7 @@ async def seed_default_config():
                 )
                 print("   ✅ Collection created")
 
-            # Ensure feature_bootstrappers and suggestions_context properties exist (for existing collections)
+            # Ensure all required properties exist (for existing collections)
             print("\n🛠️  Step 5a: Ensuring schema includes all required properties...")
             schema_config = await collection.config.get(simple=True)
             schema_props = schema_config.to_dict().get("properties", [])
@@ -148,6 +149,20 @@ async def seed_default_config():
                 print("   ✅ Added 'suggestions_context' property to schema")
             else:
                 print("   ✅ Schema already includes 'suggestions_context'")
+            
+            if "use_elysia_collections" not in property_names:
+                print("   ⚠️  Adding missing 'use_elysia_collections' property...")
+                add_result = collection.config.add_property(
+                    Property(
+                        name="use_elysia_collections",
+                        data_type=DataType.BOOL,
+                    )
+                )
+                if inspect.isawaitable(add_result):
+                    await add_result
+                print("   ✅ Added 'use_elysia_collections' property to schema")
+            else:
+                print("   ✅ Schema already includes 'use_elysia_collections'")
 
             # 6. Check if a default config already exists for this user
             print("\n🔍 Step 5: Checking for existing default configs...")
@@ -183,6 +198,7 @@ async def seed_default_config():
                 "end_goal": end_goal,
                 "suggestions_context": suggestions_context,
                 "branch_initialisation": branch_initialisation,
+                "use_elysia_collections": True,  # Enable Elysia collections
                 "feature_bootstrappers": feature_bootstrappers,
                 "frontend_config": frontend_config,
                 "config_id": config_id,
@@ -242,6 +258,11 @@ async def seed_default_config():
                 print("   ✅ Schema includes suggestions_context")
             else:
                 print("   ❌ WARNING: Schema missing suggestions_context after write")
+            
+            if "use_elysia_collections" in schema_properties:
+                print("   ✅ Schema includes use_elysia_collections")
+            else:
+                print("   ❌ WARNING: Schema missing use_elysia_collections after write")
 
             # 10. Summary
             print("\n" + "=" * 60)
