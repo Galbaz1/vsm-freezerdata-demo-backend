@@ -17,12 +17,12 @@
 **Target**: Flat root + native tools + fast path
 
 **Tasks**:
-- [ ] Create `get_current_status` tool
-  - Return cached/synthetic WorldState (<200ms)
-  - 5 key sensors: room, hot_gas, suction, liquid, ambient
-  - Active flags + health score
-  - Clear description: "Quick status check - current temps, flags, health"
-  - No run_if_true (let agent decide via description)
+- [x] Create `get_current_status` tool
+  - Return cached/synthetic WorldState (<200ms) ✅
+  - 5 key sensors: room, hot_gas, suction, liquid, ambient ✅
+  - Active flags + health score ✅
+  - Clear description: "Quick status check - current temps, flags, health" ✅
+  - No run_if_true (let agent decide via description) ✅
 - [ ] Rewrite `vsm_smido_bootstrap()` in `features/vsm_tree/bootstrap.py`
   - Flat root pattern (Weaviate's one_branch style)
   - Add all tools at base: 7 VSM + 5 native
@@ -39,7 +39,7 @@
   - Example: "Choose tool that matches request - read descriptions carefully"
 - [ ] Test all flows: status, query, SMIDO, visualize
 
-**Reference**: `docs/IMPROVED_VSM_BRANCHING_STRATEGY.md` (archived after migration)
+**Reference**: `docs/project/IMPROVED_VSM_BRANCHING_STRATEGY.md` 
 
 ---
 

@@ -106,37 +106,168 @@ def bootstrap_tree(tree: Tree, bootstrapper_names: list[str], context: Optional[
         logger.warning(f"Failed to apply {len(failed)} bootstrapper(s): {', '.join(failed)}")
 
 
+# ============================================================================
+# VSM SMIDO Flat Root Bootstrap (Weaviate's one_branch Pattern)
+# ============================================================================
+
+def _register_root_tools(tree: Tree) -> None:
+    """
+    Register all core tools at base root following one_branch pattern.
+    
+    Pattern: elysia/tree/tree.py lines 261-265
+    Adds 12 tools total: 8 VSM custom + 4 native (visualise handled separately)
+    """
+    # Import VSM custom tools
+    from elysia.api.custom_tools import (
+        get_current_status,
+        get_alarms,
+        get_asset_health,
+        compute_worldstate,
+        query_telemetry_events,
+        search_manuals_by_smido,
+        query_vlog_cases,
+        analyze_sensor_pattern
+    )
+    
+    # Import native Elysia tools
+    from elysia.tools.retrieval.query import Query
+    from elysia.tools.retrieval.aggregate import Aggregate
+    from elysia.tools.text.text import CitedSummarizer, FakeTextResponse
+    
+    # Always-available tools (following one_branch pattern)
+    tree.add_tool(branch_id="base", tool=CitedSummarizer)
+    tree.add_tool(branch_id="base", tool=FakeTextResponse)
+    
+    # VSM custom tools
+    tree.add_tool(branch_id="base", tool=get_current_status)
+    tree.add_tool(branch_id="base", tool=get_alarms)
+    tree.add_tool(branch_id="base", tool=get_asset_health)
+    tree.add_tool(branch_id="base", tool=compute_worldstate)
+    tree.add_tool(branch_id="base", tool=query_telemetry_events)
+    tree.add_tool(branch_id="base", tool=search_manuals_by_smido)
+    tree.add_tool(branch_id="base", tool=query_vlog_cases)
+    tree.add_tool(branch_id="base", tool=analyze_sensor_pattern)
+    
+    # Native tools
+    tree.add_tool(branch_id="base", tool=Query, summariser_in_tree=True)
+    tree.add_tool(branch_id="base", tool=Aggregate)
+    
+    logger.debug("Registered 12 tools at base root")
+
+
+def _add_smido_post_tool_chains(tree: Tree) -> None:
+    """
+    Add SMIDO workflow chains using from_tool_ids pattern.
+    
+    Pattern: elysia/tree/tree.py line 248 (SummariseItems with from_tool_ids)
+    Reference: docs/project/IMPROVED_VSM_BRANCHING_STRATEGY.md lines 144-214
+    
+    Implements 3 SMIDO flows: M (Melding), P3 (Parameters), O (Onderdelen)
+    """
+    from elysia.api.custom_tools import (
+        get_asset_health,
+        search_manuals_by_smido,
+        analyze_sensor_pattern,
+        query_telemetry_events
+    )
+    from elysia.tools.retrieval.aggregate import Aggregate
+    
+    # M flow: After get_alarms completes → offer health check + manual search
+    tree.add_tool(get_asset_health, branch_id="base", from_tool_ids=["get_alarms"])
+    tree.add_tool(search_manuals_by_smido, branch_id="base", from_tool_ids=["get_alarms"])
+    
+    # P3 flow: After compute_worldstate completes → offer pattern analysis
+    tree.add_tool(analyze_sensor_pattern, branch_id="base", from_tool_ids=["compute_worldstate"])
+    
+    # O flow: After query_vlog_cases completes → offer manual + stats
+    tree.add_tool(search_manuals_by_smido, branch_id="base", from_tool_ids=["query_vlog_cases"])
+    tree.add_tool(Aggregate, branch_id="base", from_tool_ids=["query_vlog_cases"])
+    
+    logger.debug("Added SMIDO post-tool chains (M, P3, O flows)")
+
+
+def _add_visualization_chains(tree: Tree) -> None:
+    """
+    Make Visualise available after any data-producing tool.
+    
+    Pattern: Multi-parent from_tool_ids
+    Reference: docs/project/IMPROVED_VSM_BRANCHING_STRATEGY.md lines 217-222
+    
+    Visualise is cross-cutting, not SMIDO-specific.
+    """
+    from elysia.tools.visualisation.visualise import Visualise
+    
+    # Visualise available after these 4 data tools
+    data_tool_ids = [
+        "compute_worldstate",
+        "get_asset_health",
+        "query",
+        "aggregate"
+    ]
+    
+    for tool_id in data_tool_ids:
+        tree.add_tool(Visualise, branch_id="base", from_tool_ids=[tool_id])
+    
+    logger.debug("Added Visualise chains after 4 data tools")
+
+
+def _set_root_instruction(tree: Tree) -> None:
+    """
+    Set clear root instruction following one_branch style.
+    
+    Pattern: elysia/tree/tree.py lines 254-258
+    Reference: docs/project/IMPROVED_VSM_BRANCHING_STRATEGY.md lines 93-121
+    
+    Key principle: NO keyword detection. Trust LLM to read tool descriptions.
+    """
+    tree.decision_nodes["base"].instruction = """
+Choose tool based on user's immediate need.
+Decide based on tools available and their descriptions.
+Read them thoroughly and match actions to user prompt.
+
+**Quick checks**: get_current_status, get_alarms
+**Deep analysis**: compute_worldstate, get_asset_health, analyze_sensor_pattern
+**Search knowledge**: search_manuals_by_smido, query_vlog_cases, query
+**Statistics**: aggregate
+**Visualization**: visualise (after data tools)
+**Communicate**: cited_summarize, text_response
+
+After a tool completes, more tools may become available.
+"""
+    logger.debug("Set root instruction (one_branch style)")
+
+
 # Register VSM SMIDO bootstrapper
 def _register_vsm_smido_bootstrapper():
-    """Register the VSM SMIDO bootstrapper."""
-    from features.vsm_tree.smido_tree import (
-        _add_m_branch,
-        _add_t_branch,
-        _add_i_branch,
-        _add_d_branch,
-        _add_o_branch,
-        _assign_tools_to_branches
-    )
+    """Register the VSM SMIDO flat root bootstrapper."""
     
     def vsm_smido_bootstrap(tree: Tree, context: Dict[str, Any]) -> None:
         """
-        Bootstrap VSM SMIDO tree structure.
+        Bootstrap VSM following Weaviate's one_branch flat root pattern.
         
-        Adds all SMIDO branches (M→T→I→D[P1,P2,P3,P4]→O) and assigns tools.
+        Replaces deep SMIDO hierarchy with:
+        - Flat root (all 12 tools visible at base)
+        - Post-tool chains for SMIDO flows
+        - Native Elysia tools integrated
+        
+        Pattern: elysia/tree/tree.py lines 250-266 (one_branch_init)
         """
-        logger.info("Bootstrapping VSM SMIDO tree structure...")
+        logger.info("Bootstrapping VSM with flat root architecture...")
         
-        # Add SMIDO branches (M→T→I→D→O)
-        _add_m_branch(tree)
-        _add_t_branch(tree)
-        _add_i_branch(tree)
-        _add_d_branch(tree)  # Includes P1-P4 sub-branches
-        _add_o_branch(tree)
+        # 1. Register all tools at base (one_branch pattern)
+        _register_root_tools(tree)
         
-        # Assign tools to branches
-        _assign_tools_to_branches(tree)
+        # 2. Add SMIDO workflow chains (from_tool_ids pattern)
+        _add_smido_post_tool_chains(tree)
         
-        logger.info("VSM SMIDO tree structure bootstrapped successfully")
+        # 3. Add visualization chains (multi-parent pattern)
+        _add_visualization_chains(tree)
+        
+        # 4. Set clear root instruction
+        _set_root_instruction(tree)
+        
+        tool_count = len(tree.decision_nodes['base'].options)
+        logger.info(f"VSM flat root bootstrapped: {tool_count} tools at root")
     
     register_bootstrapper("vsm_smido", vsm_smido_bootstrap)
 

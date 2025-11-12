@@ -3,11 +3,13 @@ WorldState Engine - Computes 60+ features from telemetry parquet data.
 Implements on-demand computation for flexible time windows.
 """
 
-import pandas as pd
-import numpy as np
+import random
 from datetime import datetime, timedelta
-from typing import Dict, Any, Optional
 from pathlib import Path
+from typing import Any, Dict, Optional
+
+import numpy as np
+import pandas as pd
 
 
 class WorldStateEngine:
@@ -86,6 +88,74 @@ class WorldStateEngine:
             "incidents": self._compute_incidents(window_df, df, timestamp),
             "health_scores": self._compute_health_scores(window_df, df, timestamp),
             "context": self._compute_context_features(timestamp, window_df)
+        }
+        
+        return worldstate
+    
+    def generate_synthetic_a3_worldstate(
+        self,
+        asset_id: str,
+        timestamp: Optional[datetime] = None
+    ) -> Dict[str, Any]:
+        """
+        Generate synthetic current-day WorldState based on A3 frozen evaporator pattern.
+        
+        Adds light randomness around reference values so repeated calls remain realistic
+        while still reflecting the frozen evaporator scenario.
+        """
+        if timestamp is None:
+            timestamp = datetime.now()
+        
+        def jitter(base: float, delta: float) -> float:
+            return round(base + random.uniform(-delta, delta), 2)
+        
+        current_state = {
+            "current_room_temp": jitter(0.0, 2.0),
+            "current_hot_gas_temp": jitter(22.9, 3.0),
+            "current_liquid_temp": jitter(22.8, 2.0),
+            "current_suction_temp": jitter(-40.0, 5.0),
+            "current_ambient_temp": jitter(23.3, 3.0),
+            "current_door_open": random.random() < 0.2,
+            "current_rssi": jitter(-65.0, 5.0),
+            "current_battery": jitter(3.6, 0.2)
+        }
+        
+        room_delta = round(random.uniform(2.3, 3.3), 2)
+        door_open_ratio = round(random.uniform(0.1, 0.25), 2)
+        
+        worldstate = {
+            "asset_id": asset_id,
+            "timestamp": timestamp.isoformat(),
+            "current_state": current_state,
+            "trends_30m": {
+                "room_temp_delta_30m": room_delta,
+                "door_open_ratio_30m": door_open_ratio,
+                "room_temp_mean_30m": jitter(1.0, 0.5),
+            },
+            "trends_2h": {
+                "room_temp_delta_2h": round(room_delta * random.uniform(1.6, 2.0), 2)
+            },
+            "trends_24h": {},
+            "flags": {
+                "main_temp_high": True,
+                "suction_extreme": True,
+                "hot_gas_low": current_state["current_hot_gas_temp"] < 20,
+                "door_open_recent": door_open_ratio > 0.18
+            },
+            "incidents": {
+                "suspected_issue": "frozen_evaporator",
+                "notes": "Synthetic current-day status based on A3 pattern"
+            },
+            "health_scores": {
+                "cooling_performance_score": max(0, min(100, int(random.gauss(25, 8)))),
+                "compressor_health_score": max(0, min(100, int(random.gauss(40, 10)))),
+                "system_stability_score": max(0, min(100, int(random.gauss(55, 10))))
+            },
+            "context": {
+                "is_business_hours": 8 <= timestamp.hour <= 18,
+                "synthetic_reference": "ws_frozen_evaporator_A3"
+            },
+            "is_synthetic_today": True
         }
         
         return worldstate

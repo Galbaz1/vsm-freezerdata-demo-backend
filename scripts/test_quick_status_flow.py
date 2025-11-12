@@ -30,7 +30,7 @@ def test_quick_status():
     now = datetime.now()
     
     # This is what bootstrap does at tree creation
-    synthetic_ws = engine.compute_worldstate('135_1570', now, 60)
+    synthetic_ws = engine.generate_synthetic_a3_worldstate('135_1570', now)
     tree_cache = synthetic_ws  # Stored in tree._initial_worldstate_cache
     
     elapsed_startup = time.time() - start

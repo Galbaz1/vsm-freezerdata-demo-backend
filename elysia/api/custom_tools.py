@@ -549,6 +549,75 @@ Returns:
 
 
 @tool(
+    status="Retrieving current status...",
+    branch_id="smido_melding"
+)
+async def get_current_status(
+    asset_id: str = "135_1570",
+    tree_data=None,
+    **kwargs
+):
+    """Quick status check - current temps, flags, health.
+
+    Use when the user requests the current system status.
+
+    Returns:
+    - 5 key sensors (room, hot-gas, suction, liquid, ambient)
+    - Active warning flags
+    - 30-minute trend (stijgend/stabiel/dalend)
+    - Health score summary (cooling, compressor, stability)
+    """
+    yield Status("Loading system status...")
+
+    from features.telemetry_vsm.src.worldstate_engine import WorldStateEngine
+
+    engine = WorldStateEngine(
+        "features/telemetry/timeseries_freezerdata/135_1570_cleaned_with_flags.parquet"
+    )
+    worldstate = engine.generate_synthetic_a3_worldstate(asset_id)
+
+    current = worldstate.get("current_state", {})
+    flags = worldstate.get("flags", {})
+    trends = worldstate.get("trends_30m", {})
+    health = worldstate.get("health_scores", {})
+
+    active_flags = [flag for flag, active in flags.items() if active]
+
+    room_delta = trends.get("room_temp_delta_30m", 0.0)
+    if room_delta > 0.5:
+        trend_description = "stijgend"
+    elif room_delta < -0.5:
+        trend_description = "dalend"
+    else:
+        trend_description = "stabiel"
+
+    status_summary = {
+        "asset_id": asset_id,
+        "timestamp": worldstate.get("timestamp"),
+        "readings": {
+            "room_temp_C": current.get("current_room_temp"),
+            "hot_gas_temp_C": current.get("current_hot_gas_temp"),
+            "suction_temp_C": current.get("current_suction_temp"),
+            "liquid_temp_C": current.get("current_liquid_temp"),
+            "ambient_temp_C": current.get("current_ambient_temp"),
+        },
+        "active_flags": active_flags,
+        "trend_30m": {
+            "room_temp_delta_C": room_delta,
+            "description": trend_description,
+        },
+        "health_scores": {
+            "cooling": health.get("cooling_performance_score"),
+            "compressor": health.get("compressor_health_score"),
+            "stability": health.get("system_stability_score"),
+        },
+        "is_synthetic_today": worldstate.get("is_synthetic_today", False),
+    }
+
+    yield Result(objects=[status_summary])
+
+
+@tool(
     status="Computing WorldState features from telemetry...",
     branch_id="smido_p3_procesparameters"
 )
