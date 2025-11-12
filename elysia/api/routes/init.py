@@ -62,12 +62,17 @@ async def initialise_user(
             - config (dict): The user's config.
             - frontend_config (dict): The user's frontend config.
     """
+    from elysia.api.utils.session_logger import get_session_logger
+    
+    session_logger = get_session_logger()
     logger.debug(f"/initialise_user API request received")
+    
+    # Check if user exists and log the session
+    user_exists = user_manager.user_exists(user_id)
+    log_entry = session_logger.log_user_session(user_id, is_new=not user_exists)
+    session_logger.print_session_location(log_entry)
 
     try:
-
-        user_exists = user_manager.user_exists(user_id)
-
         # if a user does not exist, create a user and set up the configs
         if not user_exists:
             try:
@@ -159,10 +164,20 @@ async def initialise_tree(
             - tree (dict): The tree.
             - error (str): Any error message (empty string if no error).
     """
+    from elysia.api.utils.session_logger import get_session_logger
+    
+    session_logger = get_session_logger()
     logger.debug(f"/initialise_tree API request received")
     logger.debug(f"User ID: {user_id}")
     logger.debug(f"Conversation ID: {conversation_id}")
     logger.debug(f"Low Memory: {data.low_memory}")
+    
+    # Check if conversation exists and log the session
+    tree_manager = user_manager.users[user_id]["tree_manager"] if user_id in user_manager.users else None
+    tree_exists = tree_manager and tree_manager.tree_exists(conversation_id) if tree_manager else False
+    
+    log_entry = session_logger.log_conversation_session(user_id, conversation_id, is_new=not tree_exists)
+    session_logger.print_session_location(log_entry)
 
     try:
         tree = await user_manager.initialise_tree(

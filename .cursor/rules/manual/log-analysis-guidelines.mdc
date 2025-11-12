@@ -1,0 +1,619 @@
+---
+description: Comprehensive guidelines for analyzing backend logs and system diagnostics
+tags: [logging, diagnostics, debugging, analysis, performance]
+---
+
+# Log Analysis Guidelines for Coding Agents
+
+## Purpose
+Provide systematic methodology for analyzing backend logs to identify issues, performance problems, and architectural failures. Applicable to FastAPI, async systems, WebSocket connections, and multi-component integrations.
+
+---
+
+## Analysis Framework
+
+### Phase 1: Log Structure Analysis
+**Objective**: Understand what data is available and organize it
+
+1. **Identify Log Boundaries**
+   - Find start time (first timestamp/event)
+   - Find end time (last timestamp/event)
+   - Calculate total duration
+   - Identify any gaps or discontinuities
+
+2. **Categorize Log Types**
+   - Application logs (business logic)
+   - Infrastructure logs (framework, middleware)
+   - Network logs (HTTP, WebSocket, async)
+   - Error/exception logs
+   - Performance metrics (timing, resource usage)
+
+3. **Extract Key Metadata**
+   - Log levels: DEBUG, INFO, WARNING, ERROR, CRITICAL
+   - Component/module sources
+   - Request IDs or correlation IDs (if available)
+   - User/session identifiers
+   - API endpoints or operations
+
+4. **Timeline Visualization**
+   ```
+   [Start] ─── [Event A] ─── [Event B] ─── [ERROR] ─── [Recovery/End]
+           t₀         t₁         t₂         t₃       t₄
+   ```
+   Map major events chronologically with timestamps
+
+---
+
+### Phase 2: Request/Operation Tracing
+**Objective**: Follow the journey of a single operation end-to-end
+
+1. **Identify Operation Units**
+   - HTTP requests
+   - WebSocket connections
+   - Async tasks
+   - Background jobs
+   - Callbacks or event handlers
+
+2. **For Each Operation, Extract**
+   - Start point (entry)
+   - Method/function call sequence
+   - External calls (DB, API, etc.)
+   - Timing for each stage
+   - End point (success/failure)
+   - Any side effects
+
+3. **Correlate Events Across Components**
+   - Frontend action → Backend handler
+   - Handler → Database query
+   - Database query → Response
+   - Response → Frontend display
+   - Look for misalignment or missing links
+
+4. **Track State Transitions**
+   ```
+   CREATED → PROCESSING → API_CALL → WAITING → RESPONSE_READY → DELIVERY → COMPLETE
+      ✓          ✓           ✓        ✓           ✓              ❌        ✗
+   ```
+
+---
+
+### Phase 3: Failure Detection
+**Objective**: Identify what went wrong
+
+1. **Look for Error Indicators**
+   - Explicit ERROR/CRITICAL/EXCEPTION logs
+   - Warnings (WARNING, WARN)
+   - Unexpected state transitions
+   - Mismatched input/output
+   - Resource exhaustion (timeouts, limits)
+   - Connection closures/resets
+
+2. **Identify Error Categories**
+   
+   **Application Errors**
+   - Null pointer exceptions
+   - Type mismatches
+   - Business logic failures
+   - Validation errors
+   
+   **Infrastructure Errors**
+   - Connection failures
+   - Resource limits hit
+   - Configuration problems
+   - Missing dependencies
+   
+   **Integration Errors**
+   - External API failures (non-200 status)
+   - Database connection issues
+   - Message queue problems
+   - Timeout exceeded
+   
+   **Timing/Race Condition Errors**
+   - Events arriving in wrong order
+   - Shutdown during active operations
+   - Concurrent modification issues
+
+3. **For Each Error, Extract**
+   - Error message/code
+   - Stack trace (if available)
+   - Timestamp
+   - Component/module
+   - Severity level
+   - Context (what was happening)
+   - Related errors (cascading failures)
+
+---
+
+### Phase 4: Root Cause Analysis
+**Objective**: Determine the underlying cause (not just symptoms)
+
+1. **Build Cause Chain**
+   ```
+   SYMPTOM (what you see)
+        ↓
+   DIRECT CAUSE (immediate reason)
+        ↓
+   UNDERLYING CAUSE (why that happened)
+        ↓
+   ROOT CAUSE (fundamental issue)
+   ```
+
+2. **Distinguish Between**
+   - **Trigger**: The event that initiated the failure
+   - **Cause**: Why the failure occurred
+   - **Contributing Factor**: Condition that made failure possible
+
+   Example:
+   ```
+   Trigger:        File modified during request
+   Cause:          Reload was triggered
+   Contributing:   No protection for in-flight requests
+   Root Cause:     File watcher didn't check for active connections
+   ```
+
+3. **Heuristics for Root Cause**
+   - Look for the FIRST deviation from expected behavior
+   - Question each log entry: "Why did this happen?"
+   - Find the decision/condition that created the problem
+   - Check if problem was preventable
+   - Identify what safeguards were missing
+
+4. **Validate Root Cause Against Evidence**
+   - Does it explain ALL observed symptoms?
+   - Is it supported by log evidence?
+   - Are there alternative causes?
+   - Would fixing this prevent recurrence?
+
+---
+
+### Phase 5: Expected vs Actual Behavior
+**Objective**: Create clear specification of what should have happened
+
+1. **Define Expected Behavior**
+   - What should happen in normal operation
+   - Success criteria for each operation
+   - Valid state transitions
+   - Expected timings and resource usage
+   - Error handling procedures
+
+2. **Document Actual Behavior**
+   - What actually happened (from logs)
+   - When it deviated from expected
+   - By how much (timing, values, state)
+   - Consequences of deviation
+
+3. **Create Comparison Table**
+   ```
+   | Stage | Expected | Actual | Status |
+   |-------|----------|--------|--------|
+   | Init  | X        | X      | ✓      |
+   | Proc  | Y        | Y      | ✓      |
+   | API   | Z        | Z      | ✓      |
+   | Send  | W        | -      | ✗      |
+   ```
+
+4. **Identify Gap Points**
+   - Where did actual deviate from expected?
+   - What was the last successful operation?
+   - What was the first failed operation?
+   - What happened between last success and first failure?
+
+---
+
+### Phase 6: Impact Assessment
+**Objective**: Determine severity and scope
+
+1. **Severity Levels**
+   - 🔴 **CRITICAL**: System down, data loss, security breach
+   - 🟠 **HIGH**: Major feature broken, significant performance impact
+   - 🟡 **MEDIUM**: Feature partially broken, edge case affected
+   - 🟢 **LOW**: Minor issue, workaround available
+
+2. **Determine Impact On**
+   - User experience (what did user see?)
+   - Data integrity (was data corrupted/lost?)
+   - System stability (can it recover?)
+   - Performance (response time, throughput)
+   - Security (exposure, compliance)
+
+3. **Calculate Scope**
+   - Single user / all users
+   - Single operation / all operations
+   - Transient / persistent
+   - One-time / recurring
+
+4. **Assess Criticality**
+   - Primary path affected? (main user workflow)
+   - Fallback available?
+   - Can user retry?
+   - Is it customer-facing?
+
+---
+
+### Phase 7: Performance Analysis (if applicable)
+**Objective**: Identify performance characteristics and anomalies
+
+1. **Extract Timing Data**
+   - Operation start → end times
+   - External API response times
+   - Database query times
+   - Network latency
+   - Async task completion times
+
+2. **Identify Baselines**
+   - Expected operation duration
+   - Normal response time ranges
+   - Expected resource usage
+   - Acceptable timeout values
+
+3. **Detect Anomalies**
+   - Operations taking 10x longer than expected
+   - Unusual spike in processing time
+   - Resource usage exceeding limits
+   - Cascading slowdowns
+
+4. **Performance Metrics**
+   ```
+   | Component | Expected | Actual | Ratio |
+   |-----------|----------|--------|-------|
+   | Query     | 500ms    | 450ms  | 0.9x  |
+   | LLM API   | 30s      | 27.75s | 0.93x |
+   | Send      | 100ms    | ∞      | ✗     |
+   ```
+
+---
+
+### Phase 8: Contextual Analysis
+**Objective**: Understand environmental and systemic factors
+
+1. **System Configuration**
+   - What versions are running?
+   - What settings are active?
+   - What resources are available?
+   - What dependencies are present?
+
+2. **Operational Context**
+   - When did failure occur (time of day)?
+   - What was the system doing?
+   - Were there resource constraints?
+   - Was it under load?
+
+3. **Recent Changes**
+   - What code was deployed recently?
+   - What configuration changed?
+   - What files were modified?
+   - What operations were running?
+
+4. **Historical Pattern**
+   - Has this happened before?
+   - Under what conditions?
+   - Was it fixed? How?
+   - Is it recurring?
+
+---
+
+## Output Format
+
+### Standard Report Structure
+
+```markdown
+# [System] Log Analysis - [Date]
+
+## Executive Summary
+[1-2 sentences describing overall status and primary issue]
+
+---
+
+## Timeline Overview
+- **Duration**: [start] - [end] = [total]
+- **Successful Operations**: [count]
+- **Failed Operations**: [count]
+- **Critical Events**: [count]
+
+---
+
+## Critical Issues Found
+
+### Issue #[N]: [Issue Title]
+- **Severity**: 🔴 CRITICAL / 🟠 HIGH / 🟡 MEDIUM / 🟢 LOW
+- **Time**: [timestamp]
+- **Message**: [exact log message]
+- **Component**: [what system/module]
+- **Root Cause**: [underlying reason]
+- **Impact**: [what went wrong for user]
+
+### Issue #[N+1]: ...
+
+---
+
+## Expected vs Actual
+
+| Stage | Expected | Actual | Status |
+|-------|----------|--------|--------|
+| ... | ... | ... | ... |
+
+---
+
+## Root Cause Summary
+
+**Primary Cause**: [What directly caused failure]
+
+**Contributing Factors**:
+- Factor A
+- Factor B
+- Factor C
+
+**Proof**: [Log evidence]
+
+---
+
+## Performance Analysis
+
+| Metric | Value | Status |
+|--------|-------|--------|
+| ... | ... | ... |
+
+---
+
+## Recommendations
+
+### 🔴 CRITICAL (Implement First)
+1. [Fix 1 - most impactful]
+2. [Fix 2]
+
+### 🟡 IMPORTANT (Implement Second)
+3. [Fix 3]
+
+### 🟢 NICE-TO-HAVE (Later)
+4. [Fix 4]
+
+---
+
+## Related Evidence
+
+### Log Excerpts
+[Include relevant log snippets with line numbers]
+
+### Correlations
+[Events that are related/causal]
+
+---
+
+## Verification Steps
+
+To confirm this analysis:
+1. [Test scenario 1]
+2. [Test scenario 2]
+3. [Test scenario 3]
+
+---
+
+## Conclusion
+
+[Summary of findings and recommended next steps]
+```
+
+---
+
+## Analysis Heuristics & Patterns
+
+### Common Failure Patterns
+
+**Pattern 1: Shutdown During Active Request**
+```
+Signal: Shutdown initiated | Active request pending | Response never sent
+Cause:  No protection for in-flight requests
+Fix:    Wait for active_requests to complete before shutdown
+```
+
+**Pattern 2: Resource Exhaustion**
+```
+Signal: Timeout | Connection refused | Max connections exceeded
+Cause:  Resource limits hit during processing
+Fix:    Increase limits or implement backpressure
+```
+
+**Pattern 3: Cascading Errors**
+```
+Signal: Error → Handler fails → Handler error → Cleanup fails
+Cause:  Poor error handling, attempting operations on failed resources
+Fix:    Defensive error handling, state checking before operations
+```
+
+**Pattern 4: Timing Race Condition**
+```
+Signal: Events out of order | Inconsistent state | Duplicate operations
+Cause:  Async operations without proper synchronization
+Fix:    Add locks, queues, or sequential processing where needed
+```
+
+**Pattern 5: Missing Context/Dependency**
+```
+Signal: Null reference | Missing import | Configuration missing
+Cause:  Incomplete initialization or missing prerequisite
+Fix:    Add validation, explicit dependency checks, setup verification
+```
+
+**Pattern 6: State Machine Violation**
+```
+Signal: Invalid state | Unexpected transition | Can't proceed
+Cause:  State not properly managed or validated
+Fix:    Implement explicit state machine with transition guards
+```
+
+### Red Flags to Look For
+
+- ❌ Timestamps showing very fast state transitions (< 1ms) - may indicate missing delays or batching
+- ❌ Same error repeated multiple times - likely cascading failure
+- ❌ Warnings before errors - indicates degradation path
+- ❌ Resource limits appearing in logs - system approaching constraint
+- ❌ Async/await issues - "callback" or "pending" language without resolution
+- ❌ Thread/connection pool exhaustion - indicates concurrency problem
+- ❌ File/resource not found after successful previous access - environment issue
+- ❌ API returning 5xx errors - external system problem or bad request
+
+---
+
+## Analysis Checklist
+
+### Pre-Analysis
+- [ ] Logs are complete (no truncation)?
+- [ ] Timestamp format is consistent?
+- [ ] Log levels are accurate?
+- [ ] Context/correlation IDs present (if applicable)?
+- [ ] All related components logged?
+
+### During Analysis
+- [ ] Identified all user-facing operations?
+- [ ] Traced each operation end-to-end?
+- [ ] Located first error occurrence?
+- [ ] Identified all related errors?
+- [ ] Distinguished symptoms from root cause?
+- [ ] Validated root cause with evidence?
+- [ ] Calculated impact on users?
+- [ ] Assessed performance metrics?
+
+### Post-Analysis
+- [ ] Created expected vs actual table?
+- [ ] Listed all recommendations?
+- [ ] Prioritized by severity and impact?
+- [ ] Identified verification tests?
+- [ ] Documented assumptions?
+- [ ] Explained technical concepts clearly?
+
+---
+
+## Special Cases
+
+### WebSocket Analysis
+1. Check connection lifecycle: CONNECTING → CONNECTED → DISCONNECTING → DISCONNECTED
+2. Look for unexpected state transitions
+3. Verify data sent/received on each side
+4. Check for proper close handshake
+5. Identify who initiated close (client/server)
+
+### Async Task Analysis
+1. Track promise/future creation and resolution
+2. Look for orphaned tasks (created but not awaited)
+3. Check for timeout/cancellation
+4. Verify callback execution
+5. Look for race conditions in shared state
+
+### Database Query Analysis
+1. Record query execution time
+2. Check for connection pool exhaustion
+3. Verify query results match expected
+4. Look for transaction isolation issues
+5. Check for long-running locks
+
+### API Integration Analysis
+1. Verify request was sent correctly
+2. Check response status code (200 vs 4xx vs 5xx)
+3. Verify response structure/content
+4. Check for timeout
+5. Look for rate limiting or quota issues
+
+---
+
+## When Analysis is Complete
+
+You should be able to answer:
+
+1. ✅ **What happened?** - Clear description of failure
+2. ✅ **Why did it happen?** - Root cause identified
+3. ✅ **When did it happen?** - Specific timestamp
+4. ✅ **Where did it happen?** - Component/module
+5. ✅ **Who was affected?** - Users/operations/data
+6. ✅ **How did it happen?** - Detailed sequence
+7. ✅ **Why wasn't it caught?** - Missing safeguards
+8. ✅ **How to fix it?** - Concrete recommendations
+9. ✅ **How to prevent?** - Architectural changes
+10. ✅ **How to verify?** - Test scenarios
+
+---
+
+## Tool/Library Recommendations
+
+### For Log Analysis
+- **grep/rg**: Extract relevant lines
+- **jq**: Parse JSON logs
+- **awk**: Extract timing data
+- **sort/uniq**: Identify patterns
+- **diff**: Compare before/after logs
+
+### For Visualization
+- **Timeline tools**: Visualize event sequences
+- **Graphing tools**: Plot performance metrics
+- **Mermaid diagrams**: Show cause chains
+
+### For Tracking
+- **Spreadsheets**: Expected vs actual tables
+- **Flowcharts**: State machine diagrams
+- **Git blame**: Track recent changes
+
+---
+
+## Common Analysis Mistakes to Avoid
+
+❌ **Mistake 1**: Stopping at first error instead of root cause
+- **Fix**: Keep asking "Why?" until you reach the fundamental issue
+
+❌ **Mistake 2**: Assuming correlation = causation
+- **Fix**: Verify with evidence, check alternative causes
+
+❌ **Mistake 3**: Ignoring context and environmental factors
+- **Fix**: Always check timing, load, recent changes, configuration
+
+❌ **Mistake 4**: Missing cascading failures
+- **Fix**: Look for error handlers generating new errors
+
+❌ **Mistake 5**: Not distinguishing symptoms from causes
+- **Fix**: Ask "Is this the problem or a consequence of the problem?"
+
+❌ **Mistake 6**: Overlooking the obvious
+- **Fix**: Check basics first (permissions, configuration, dependencies)
+
+❌ **Mistake 7**: Creating recommendations before understanding cause
+- **Fix**: Understand root cause fully before proposing fixes
+
+---
+
+## Quick Reference: Analysis Questions
+
+### When You See an Error
+- "What was the system trying to do?"
+- "Why did that fail?"
+- "What state was it in before the error?"
+- "What should have prevented this?"
+- "Is this the real problem or a symptom?"
+
+### When Tracing an Operation
+- "When did it start?"
+- "When did it complete (or fail)?"
+- "How long did each stage take?"
+- "Where did it call external systems?"
+- "What was the result at each stage?"
+
+### When Assessing Impact
+- "Did the user see the failure?"
+- "What operation failed?"
+- "Did data get corrupted?"
+- "Can the user retry?"
+- "Is it recoverable?"
+
+### When Building Root Cause
+- "What is the first thing that went wrong?"
+- "Why did that happen?"
+- "What allowed that to happen?"
+- "What safeguard was missing?"
+- "Is this the fundamental issue?"
+
+---
+
+## References
+
+- [Effective Debugging Strategies](https://en.wikipedia.org/wiki/Debugging)
+- [Root Cause Analysis](https://en.wikipedia.org/wiki/Root_cause_analysis)
+- [The 5 Whys Technique](https://en.wikipedia.org/wiki/Five_whys)
+- [Fault Tree Analysis](https://en.wikipedia.org/wiki/Fault_tree_analysis)
+- [Understanding Async Patterns](https://developer.mozilla.org/en-US/docs/Learn/JavaScript/Asynchronous)

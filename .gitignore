@@ -34,7 +34,6 @@ htmlcov/
 .ipynb_checkpoints
 
 # IDEs
-.vscode/
 .idea/
 *.swp
 *.swo
@@ -46,6 +45,8 @@ Thumbs.db
 
 # Logs
 *.log
+logs/
+logs/**
 
 # Temporary files
 *.tmp
