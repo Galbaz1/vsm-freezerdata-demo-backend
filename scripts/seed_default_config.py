@@ -47,7 +47,8 @@ async def seed_default_config():
     print(f"   ✅ Branch Init: {branch_initialisation}")
 
     # 2. Set up config values
-    config_id = str(uuid4())
+    # Use consistent config_id so we UPDATE instead of creating new config each time
+    config_id = "vsm-default-config-v1"  # Fixed ID ensures updates work
     user_id = "default_user"  # Default user for all new users
     config_name = "VSM Default Config"
 

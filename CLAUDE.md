@@ -59,12 +59,12 @@ All required API keys and configuration are stored in the `.env` file at root of
 **Critical Model Configuration**:
 ```bash
 BASE_MODEL=gpt-4.1
-COMPLEX_MODEL=gemini/gemini-2.5-pro  # Note: gemini/ prefix required!
+COMPLEX_MODEL=gemini-2.5-pro  # Note: NO prefix in model name!
 BASE_PROVIDER=openai
-COMPLEX_PROVIDER=google
+COMPLEX_PROVIDER=gemini  # Use "gemini" not "google"
 ```
 
-**Important**: The `gemini/` prefix is required for Gemini models to use Google AI Studio (GOOGLE_API_KEY). Without it, DSPy/LiteLLM will attempt to use Vertex AI authentication which requires Google Cloud credentials.
+**Important**: Use `COMPLEX_PROVIDER=gemini` (not `google`). Elysia's `load_lm()` function automatically combines the provider and model name into `gemini/gemini-2.5-pro`, which routes to Google AI Studio using your `GOOGLE_API_KEY`. Do NOT include the `gemini/` prefix in the model name itself, as this would result in `google/gemini/gemini-2.5-pro` which is invalid.
 
 ### Running Elysia
 

@@ -10,9 +10,9 @@
 ### Environment Variables (.env)
 ```bash
 BASE_MODEL=gpt-4.1
-COMPLEX_MODEL=gemini/gemini-2.5-pro
+COMPLEX_MODEL=gemini-2.5-pro
 BASE_PROVIDER=openai
-COMPLEX_PROVIDER=google
+COMPLEX_PROVIDER=gemini
 
 OPENAI_API_KEY=sk-proj-*** (present)
 GOOGLE_API_KEY=AIzaSyAN*** (present)
@@ -35,8 +35,8 @@ WCD_API_KEY=*** (present)
 
 ### ✅ Complex Model (Gemini 2.5 Pro via Google AI Studio)
 - **Status**: CONFIGURED CORRECTLY
-- **Provider**: google
-- **Model**: gemini/gemini-2.5-pro
+- **Provider**: gemini
+- **Model**: gemini-2.5-pro (combined by Elysia to: gemini/gemini-2.5-pro)
 - **API Key**: GOOGLE_API_KEY
 - **Usage**: Complex reasoning tasks, query/aggregate tools
 - **Note**: Uses Google AI Studio (not Vertex AI)
@@ -45,20 +45,25 @@ WCD_API_KEY=*** (present)
 
 ## Important Model Name Format
 
-### ❌ INCORRECT (causes Vertex AI authentication error):
+### ❌ INCORRECT (creates double-prefixed model name):
 ```bash
-COMPLEX_MODEL=gemini-2.5-pro  # Triggers Vertex AI, requires gcloud credentials
+COMPLEX_MODEL=gemini/gemini-2.5-pro  # DO NOT include gemini/ prefix!
+COMPLEX_PROVIDER=google                # Wrong provider
+# Results in: google/gemini/gemini-2.5-pro (invalid)
 ```
 
 ### ✅ CORRECT (uses Google AI Studio with GOOGLE_API_KEY):
 ```bash
-COMPLEX_MODEL=gemini/gemini-2.5-pro  # Uses AI Studio, works with GOOGLE_API_KEY
+COMPLEX_MODEL=gemini-2.5-pro   # NO prefix in model name
+COMPLEX_PROVIDER=gemini        # Use "gemini" as provider
+# Results in: gemini/gemini-2.5-pro (valid, routes to Google AI Studio)
 ```
 
-**Why the `gemini/` prefix?**
-- DSPy/LiteLLM routing convention
-- `gemini/` prefix → Google AI Studio (uses GOOGLE_API_KEY)
-- No prefix → Vertex AI (requires Google Cloud Application Default Credentials)
+**Why `COMPLEX_PROVIDER=gemini` (not `google`)?**
+- Elysia's `load_lm()` function concatenates: `{provider}/{model}`
+- `gemini` + `gemini-2.5-pro` = `gemini/gemini-2.5-pro` ✅
+- This routes to Google AI Studio (uses GOOGLE_API_KEY)
+- Do NOT use `google` as provider - it creates invalid `google/gemini/gemini-2.5-pro`
 
 ---
 
@@ -154,7 +159,7 @@ python3 scripts/test_models_via_tree.py
 - **Tool Selection**: Picks appropriate diagnostic tools
 - **Response Generation**: Formats final troubleshooting advice
 
-### Complex Model (gemini/gemini-2.5-pro) Usage
+### Complex Model (gemini-2.5-pro via gemini provider) Usage
 - **Query Tool**: Semantic search in manual sections (Plan 3)
 - **Aggregate Tool**: Pattern analysis across telemetry events
 - **Complex Reasoning**: "Uit balans" detection (Plan 4)
@@ -164,9 +169,11 @@ python3 scripts/test_models_via_tree.py
 
 ## Troubleshooting
 
-### Issue: "DefaultCredentialsError: Your default credentials were not found"
-**Cause**: Model name `gemini-2.5-pro` without `gemini/` prefix triggers Vertex AI
-**Fix**: Use `COMPLEX_MODEL=gemini/gemini-2.5-pro` in .env
+### Issue: "LLM Provider NOT provided" or "google/gemini/gemini-2.5-pro" error
+**Cause**: Using `COMPLEX_PROVIDER=google` creates invalid double-prefixed model name
+**Fix**:
+1. Set `COMPLEX_PROVIDER=gemini` (not `google`)
+2. Set `COMPLEX_MODEL=gemini-2.5-pro` (NO `gemini/` prefix)
 
 ### Issue: Base model not responding
 **Check**:
@@ -177,8 +184,8 @@ python3 scripts/test_models_via_tree.py
 ### Issue: Complex model errors in query tool
 **Check**:
 1. GOOGLE_API_KEY is set in .env
-2. COMPLEX_PROVIDER=google
-3. COMPLEX_MODEL=gemini/gemini-2.5-pro (with `gemini/` prefix!)
+2. COMPLEX_PROVIDER=gemini (not `google`!)
+3. COMPLEX_MODEL=gemini-2.5-pro (NO `gemini/` prefix!)
 
 ---
 
@@ -217,4 +224,4 @@ Current configuration is production-ready:
 - Configuration follows Elysia/DSPy/LiteLLM conventions
 - Ready for Phase 2 full tree execution (Plan 7)
 
-The key insight: Use `gemini/gemini-2.5-pro` format to ensure Google AI Studio routing with GOOGLE_API_KEY, not Vertex AI.
+The key insight: Use `COMPLEX_PROVIDER=gemini` with `COMPLEX_MODEL=gemini-2.5-pro` (no prefix). Elysia combines these into `gemini/gemini-2.5-pro`, which routes to Google AI Studio using GOOGLE_API_KEY.
