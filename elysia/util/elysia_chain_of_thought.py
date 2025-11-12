@@ -276,6 +276,8 @@ class ElysiaChainOfThought(Module):
             message_update_desc = (
                 "Continue your current message to the user "
                 "(latest assistant field in conversation history) with ONE concise sentence that: "
+                "- CRITICAL: Follow the writing style and language from `atlas.style` field EXACTLY "
+                "- If atlas.style is in Dutch, respond in Dutch. If English, respond in English. Match the tone. "
                 "- Describes NEW technical details about your latest action "
                 "- Highlights specific parameters or logic you just applied "
                 "- Avoids repeating anything from conversation history "
