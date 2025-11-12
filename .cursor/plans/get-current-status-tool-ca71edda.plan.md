@@ -1,381 +1,448 @@
-<!-- ca71edda-5954-48e4-8847-390f58d462a4 07968d79-1d53-4717-bbdd-396f4472c5fd -->
-# Rewrite VSM Bootstrap - Flat Root Architecture (Modular)
+<!-- ca71edda-5954-48e4-8847-390f58d462a4 8b80c09e-a618-4a6d-922b-43283176c491 -->
+# Fix Diagram Search in searchmanualsby_smido
 
-Completely rewrite [`features/vsm_tree/bootstrap.py`](features/vsm_tree/bootstrap.py) using 4 focused, modular functions to implement Weaviate's flat root philosophy.
+Fix diagram fetching in [`elysia/api/custom_tools.py`](elysia/api/custom_tools.py) to use correct collection names with intelligent fallback and performance optimization.
+
+## Problem Analysis
+
+**Root Cause**: Collection name mismatch
+
+- Code searches: `VSM_Diagram` (DOES NOT EXIST)
+- Reality: `VSM_DiagramUserFacing` (8 objects) + `VSM_DiagramAgentInternal` (8 objects)
+- Result: Always returns "0 related diagrams"
+
+**Reference**: [`.cursor/rules/agent.mdc`](.cursor/rules/agent.mdc) line 42: _"VSM_Diagram doesn't exist"_
 
 ## Expected Result
 
-**BEFORE**: Deep hierarchy (M→T→I→D[P1-P4]→O), 9 branches, NO native tools, 400+ lines
+**BEFORE**:
 
-**AFTER**: Flat root with 12 tools, post-tool chains, native tools integrated, ~200 lines
+- Searches non-existent `VSM_Diagram` → 0 diagrams
+- Users see no visual aids
 
-**Tree structure:**
+**AFTER**:
 
-```
-base (root) — 12 tools visible
-├── get_current_status, get_alarms, compute_worldstate, etc.
-├── query, aggregate, visualise (native)
-├── Post-tool chains: get_alarms → [health, manuals]
-└── Post-tool chains: compute_worldstate → [analyze, visualise]
-```
+- Searches both `VSM_DiagramUserFacing` AND `VSM_DiagramAgentInternal`
+- Falls back to SMIDO phase filtering if `related_diagram_ids` empty
+- Batch fetches for performance (<500ms for 10 diagrams)
+- Returns relevant diagrams (UserFacing for M, both for other phases)
 
----
+## Implementation Strategy (4 Phases)
 
-## Task 1: Read and Internalize Weaviate's one_branch Pattern
+### Phase 1: Discovery & Verification (MANDATORY FIRST)
 
-**MANDATORY REFERENCE**: [`elysia/tree/tree.py`](elysia/tree/tree.py) lines 250-266
+**Purpose**: Understand actual data structure before coding
 
-**What to do**:
+**Step 1a: Verify Collections Exist**
 
-1. Read `one_branch_init()` function completely
-2. Note the pattern: ALL tools at `branch_id="base"`
-3. Note the root instruction style: "Decide based on tools available and their descriptions"
-4. Count tools: 5 tools (CitedSummarizer, FakeTextResponse, Aggregate, Query, Visualise)
-5. Note `from_tool_ids` usage: SummariseItems after query (line 266)
+**MANDATORY REFERENCE**: [`scripts/test_diagram_upload_simple.py`](scripts/test_diagram_upload_simple.py) lines 30-45
 
-**Success**: You can explain Weaviate's one_branch pattern without looking at code
+**Command**:
 
----
-
-## Task 2: Read multi_branch Pattern for Comparison
-
-**MANDATORY REFERENCE**: [`elysia/tree/tree.py`](elysia/tree/tree.py) lines 214-248
-
-**What to do**:
-
-1. Read `multi_branch_init()` completely
-2. Identify the structure: `base` branch → `search` sub-branch
-3. Count depth: 2 levels max (root + 1 sub-branch)
-4. Note how tools are split: text tools at base, data tools in search
-5. Compare with VSM current (5+ levels) - VSM violates this pattern
-
-**Success**: You understand WHY VSM needs to change (5 levels → 2 levels max)
-
----
-
-## Task 3: Study from_tool_ids Pattern
-
-**MANDATORY REFERENCES**:
-
-- [`elysia/tree/tree.py`](elysia/tree/tree.py) lines 684-727 (add_tool implementation)
-- [`docs/offical/Advanced/advanced_tool_construction.md`](docs/offical/Advanced/advanced_tool_construction.md) lines 181-189
-
-**What to do**:
-
-1. Read how `from_tool_ids` creates new branches dynamically
-2. Understand: `from_tool_ids=["query"]` means "run after query completes"
-3. Note: multiple parents allowed (line 217 in IMPROVED_VSM_BRANCHING_STRATEGY.md)
-4. Example: `tree.add_tool(Visualise, branch_id="base", from_tool_ids=["compute_worldstate", "query"])`
-
-**Success**: You can explain how post-tool chains replace pre-defined branches
-
----
-
-## Task 4: Review VSM Strategy Document
-
-**MANDATORY REFERENCE**: [`docs/project/IMPROVED_VSM_BRANCHING_STRATEGY.md`](docs/project/IMPROVED_VSM_BRANCHING_STRATEGY.md) lines 70-223
-
-**What to do**:
-
-1. Read the complete bootstrap code example (lines 72-223)
-2. Identify the 4 sections: Root instruction, Root tools, Post-tool chains, Visualization chains
-3. Note specific tool chains: get_alarms → [get_asset_health, search_manuals] (lines 146-162)
-4. Note multi-parent visualise: after 4 different tools (lines 217-222)
-
-**Success**: You have the complete reference implementation in mind
-
----
-
-## Task 5: Create _register_root_tools() Function
-
-**MANDATORY PATTERN**: Follow [`elysia/tree/tree.py`](elysia/tree/tree.py) lines 261-265 (one_branch tool registration)
-
-**What to write**:
-
-```python
-def _register_root_tools(tree: Tree) -> None:
-    """Register all core tools at base root following one_branch pattern."""
-    # Import 8 VSM tools from elysia.api.custom_tools
-    # Import 4 native: Query, Aggregate, CitedSummarizer, FakeTextResponse
-    # Add EVERY tool with branch_id="base" (NO from_tool_ids here)
-    # Order: Always-available first, then VSM tools, then native tools
+```bash
+source .venv/bin/activate
+python3 scripts/test_diagram_upload_simple.py
 ```
 
-**Files to reference while coding**:
+**Expected Output**:
 
-- VSM tool imports: [`elysia/api/custom_tools.py`](elysia/api/custom_tools.py) lines 48-1106 (all @tool definitions)
-- Native tool imports: [`elysia/tree/tree.py`](elysia/tree/tree.py) lines 6-13 (import statements)
-
-**Success**: Function adds exactly 12 tools, all at branch_id="base"
-
----
-
-## Task 6: Create _add_smido_post_tool_chains() Function
-
-**MANDATORY PATTERN**: Follow [`elysia/tree/tree.py`](elysia/tree/tree.py) line 248 (SummariseItems with from_tool_ids)
-
-**MANDATORY REFERENCE**: [`docs/project/IMPROVED_VSM_BRANCHING_STRATEGY.md`](docs/project/IMPROVED_VSM_BRANCHING_STRATEGY.md) lines 144-214
-
-**What to write**:
-
-```python
-def _add_smido_post_tool_chains(tree: Tree) -> None:
-    """Add SMIDO workflow chains using from_tool_ids pattern."""
-    # M flow: After get_alarms completes
-    tree.add_tool(get_asset_health, branch_id="base", from_tool_ids=["get_alarms"])
-    tree.add_tool(search_manuals_by_smido, branch_id="base", from_tool_ids=["get_alarms"])
-    
-    # P3 flow: After compute_worldstate completes
-    tree.add_tool(analyze_sensor_pattern, branch_id="base", from_tool_ids=["compute_worldstate"])
-    
-    # O flow: After query_vlog_cases completes
-    tree.add_tool(search_manuals_by_smido, branch_id="base", from_tool_ids=["query_vlog_cases"])
-    tree.add_tool(Aggregate, branch_id="base", from_tool_ids=["query_vlog_cases"])
+```
+✅ VSM_DiagramUserFacing: 8 diagrams
+✅ VSM_DiagramAgentInternal: 8 diagrams
 ```
 
-**Reference implementation**: Lines 177-214 of IMPROVED_VSM_BRANCHING_STRATEGY.md
+**If FAILS**: Diagrams not uploaded, this task blocked. Escalate.
 
-**Success**: 3 SMIDO flows implemented (M, P3, O) using from_tool_ids
+**Step 1b: Check related_diagram_ids Population**
 
----
+**MANDATORY**: Understand linking mechanism
 
-## Task 7: Create _add_visualization_chains() Function
-
-**MANDATORY PATTERN**: Multi-parent from_tool_ids (Visualise after multiple tools)
-
-**MANDATORY REFERENCE**: [`docs/project/IMPROVED_VSM_BRANCHING_STRATEGY.md`](docs/project/IMPROVED_VSM_BRANCHING_STRATEGY.md) lines 217-222
-
-**What to write**:
-
-```python
-def _add_visualization_chains(tree: Tree) -> None:
-    """Make Visualise available after any data-producing tool."""
-    from elysia.tools.visualisation.visualise import Visualise
-    
-    # Multi-parent pattern: Visualise available after 4 different tools
-    data_tools = ["compute_worldstate", "get_asset_health", "query", "aggregate"]
-    for tool_id in data_tools:
-        tree.add_tool(Visualise, branch_id="base", from_tool_ids=[tool_id])
-```
-
-**Why this pattern**: Visualization is cross-cutting, not SMIDO-specific
-
-**Success**: Visualise added 4 times with different from_tool_ids
-
----
-
-## Task 8: Create _set_root_instruction() Function
-
-**MANDATORY PATTERN**: Follow [`elysia/tree/tree.py`](elysia/tree/tree.py) lines 254-258 (one_branch instruction)
-
-**MANDATORY REFERENCE**: [`docs/project/IMPROVED_VSM_BRANCHING_STRATEGY.md`](docs/project/IMPROVED_VSM_BRANCHING_STRATEGY.md) lines 93-121
-
-**What to write**:
-
-```python
-def _set_root_instruction(tree: Tree) -> None:
-    """Set clear root instruction following one_branch style."""
-    tree.decision_nodes["base"].instruction = """
-Choose tool based on user's immediate need.
-Decide based on tools available and their descriptions.
-Read them thoroughly and match actions to user prompt.
-
-**Quick checks**: get_current_status, get_alarms
-**Deep analysis**: compute_worldstate, get_asset_health, analyze_sensor_pattern
-**Search knowledge**: search_manuals_by_smido, query_vlog_cases, query
-**Statistics**: aggregate
-**Visualization**: visualise (after data tools)
-**Communicate**: cited_summarize, text_response
-
-After a tool completes, more tools may become available.
-"""
-```
-
-**Key principle**: NO keyword detection. Trust LLM to read tool descriptions.
-
-**Success**: Instruction groups tools by purpose, <20 lines, mirrors one_branch style
-
----
-
-## Task 9: Rewrite vsm_smido_bootstrap() Orchestrator
-
-**MANDATORY PATTERN**: Simple orchestrator calling helper functions
-
-**What to write**:
-
-```python
-def vsm_smido_bootstrap(tree: Tree, context: Dict[str, Any]) -> None:
-    """
-    Bootstrap VSM following Weaviate's one_branch flat root pattern.
-    
-    Replaces deep SMIDO hierarchy with:
-    - Flat root (all 12 tools visible at base)
-    - Post-tool chains for SMIDO flows
-    - Native Elysia tools integrated
-    """
-    logger.info("Bootstrapping VSM with flat root architecture...")
-    
-    # 1. Register all tools at base (one_branch pattern)
-    _register_root_tools(tree)
-    
-    # 2. Add SMIDO workflow chains (from_tool_ids pattern)
-    _add_smido_post_tool_chains(tree)
-    
-    # 3. Add visualization chains (multi-parent pattern)
-    _add_visualization_chains(tree)
-    
-    # 4. Set clear root instruction
-    _set_root_instruction(tree)
-    
-    logger.info(f"VSM flat root bootstrapped: {len(tree.decision_nodes['base'].options)} tools at root")
-```
-
-**Success**: Orchestrator is <25 lines, calls 4 functions, logs result
-
----
-
-## Task 10: Delete Hierarchical Branch Functions
-
-**Files to modify**: [`features/vsm_tree/smido_tree.py`](features/vsm_tree/smido_tree.py)
-
-**What to delete**: Lines ~100-517
-
-- `_add_m_branch()` (lines ~101-142)
-- `_add_t_branch()` (lines ~144-177)
-- `_add_i_branch()` (lines ~180-230)
-- `_add_d_branch()` (lines ~232-380, includes P1-P4)
-- `_add_o_branch()` (lines ~382-425)
-- `_assign_tools_to_branches()` (lines ~428-517)
-
-**What to keep**:
-
-- Lines 1-99: Imports, docstring, `create_vsm_tree()`
-- Update `create_vsm_tree()`: Remove calls to deleted functions (lines 75-82)
-
-**Success**: smido_tree.py reduced from ~520 lines to ~100 lines
-
----
-
-## Task 11: Remove branch_id from Tool Decorators
-
-**Files to modify**: [`elysia/api/custom_tools.py`](elysia/api/custom_tools.py)
-
-**MANDATORY REFERENCE**: [`elysia/objects.py`](elysia/objects.py) lines 257-264 (@tool decorator signature)
-
-**What to change**: Find all `@tool(branch_id=...)` decorators and remove `branch_id` parameter
-
-**Tools to update** (search for these):
-
-- `search_manuals_by_smido` (line ~48)
-- `get_alarms` (search pattern: `@tool.*branch_id`)
-- `get_asset_health`
-- `compute_worldstate`
-- `query_telemetry_events`
-- `query_vlog_cases`
-- `analyze_sensor_pattern`
-- `get_current_status`
-
-**Pattern**:
-
-```python
-# BEFORE
-@tool(status="Searching manuals...", branch_id="smido_installatie")
-
-# AFTER
-@tool(status="Searching manuals...")
-```
-
-**Why**: Tools are branch-agnostic. Bootstrap assigns branch placement.
-
-**Success**: Zero `branch_id` parameters in @tool decorators
-
----
-
-## Task 12: Comprehensive Testing and Validation
-
-**Test 1 - Bootstrap Structure** (MANDATORY):
+**Command**:
 
 ```bash
 python3 -c "
-from features.vsm_tree.bootstrap import bootstrap_tree
-from elysia import Tree
-t = Tree(branch_initialisation='empty')
-bootstrap_tree(t, ['vsm_smido'], {})
-print(f'Tools at root: {len(t.decision_nodes[\"base\"].options)}')
-assert len(t.decision_nodes['base'].options) == 12, 'Expected 12 tools at root'
-print('✅ Bootstrap structure valid')
+import asyncio
+from elysia.util.client import ClientManager
+
+async def check():
+    cm = ClientManager()
+    async with cm.connect_to_async_client() as client:
+        coll = client.collections.get('VSM_ManualSections')
+        results = await coll.query.fetch_objects(limit=50)
+        
+        with_ids = [obj for obj in results.objects 
+                    if obj.properties.get('related_diagram_ids')]
+        
+        print(f'Sections with diagram IDs: {len(with_ids)}/50')
+        print(f'Population rate: {len(with_ids)/50*100:.1f}%')
+        
+        # Show examples
+        for obj in with_ids[:5]:
+            ids = obj.properties.get('related_diagram_ids', [])
+            title = obj.properties.get('title', 'Unknown')[:50]
+            print(f'  \"{title}\": {ids}')
+        
+        # Check if empty
+        if len(with_ids) == 0:
+            print('\\n⚠️  WARNING: related_diagram_ids NOT populated!')
+            print('   Will need fallback strategy (SMIDO phase matching)')
+
+asyncio.run(check())
 "
 ```
 
-**Test 2 - Quick Status Flow**:
+**Possible Outcomes**:
+
+- **High population (>50%)**: Use `related_diagram_ids` as primary strategy
+- **Low/Zero population**: Use SMIDO phase fallback (implemented in Step 2b)
+
+**Step 1c: Inspect Diagram Schema**
+
+**MANDATORY REFERENCE**: [`docs/archive/moved_docs/docs/review/weaviate_diagram_collections_analysis.md`](docs/archive/moved_docs/docs/review/weaviate_diagram_collections_analysis.md) lines 10-49
+
+**What to verify**:
+
+1. `VSM_DiagramUserFacing` has: `diagram_id`, `smido_phases`, `mermaid_code`, `agent_diagram_id`
+2. `VSM_DiagramAgentInternal` has: `diagram_id`, `smido_phases`, `mermaid_code`
+3. Both have filterable `smido_phases` (TEXT_ARRAY)
+
+**Command**:
 
 ```bash
-pytest scripts/test_quick_status_flow.py -v
-# Expected: PASS, <200ms
+python3 -c "
+import asyncio
+from elysia.util.client import ClientManager
+
+async def check():
+    cm = ClientManager()
+    async with cm.connect_to_async_client() as client:
+        # Check UserFacing
+        coll = client.collections.get('VSM_DiagramUserFacing')
+        result = await coll.query.fetch_objects(limit=1)
+        if result.objects:
+            print('UserFacing properties:', list(result.objects[0].properties.keys()))
+        
+        # Check AgentInternal  
+        coll = client.collections.get('VSM_DiagramAgentInternal')
+        result = await coll.query.fetch_objects(limit=1)
+        if result.objects:
+            print('AgentInternal properties:', list(result.objects[0].properties.keys()))
+
+asyncio.run(check())
+"
 ```
 
-**Test 3 - A3 SMIDO Scenario**:
-
-```bash
-python3 scripts/test_plan7_full_tree.py
-# Expected: PASS, frozen evaporator diagnosis completes
-```
-
-**Test 4 - Manual Tests** (via Elysia UI):
-
-1. Start Elysia: `elysia start`
-2. Ask: "Hoeveel manual sections zijn er?" → Verify `aggregate` or `query` available
-3. Request alarms → After `get_alarms`, verify `get_asset_health` available
-4. Request WorldState → After `compute_worldstate`, verify `analyze_sensor_pattern` + `visualise` available
-
-**Success**: All 4 test categories pass
+**Decision Point**: After Phase 1, choose implementation strategy based on `related_diagram_ids` population rate.
 
 ---
 
-## Reference Documents (READ BEFORE CODING)
+### Phase 2: Implementation (Choose Strategy)
 
-**MANDATORY READING ORDER**:
+**Step 2a: Fix Collection Names (ALWAYS REQUIRED)**
 
-1. [`elysia/tree/tree.py`](elysia/tree/tree.py) lines 250-266 (one_branch pattern)
-2. [`elysia/tree/tree.py`](elysia/tree/tree.py) lines 214-248 (multi_branch pattern)
-3. [`elysia/tree/tree.py`](elysia/tree/tree.py) lines 684-727 (from_tool_ids implementation)
-4. [`docs/project/IMPROVED_VSM_BRANCHING_STRATEGY.md`](docs/project/IMPROVED_VSM_BRANCHING_STRATEGY.md) lines 70-223 (VSM implementation)
-5. [`docs/offical/Advanced/advanced_tool_construction.md`](docs/offical/Advanced/advanced_tool_construction.md) lines 181-189 (from_tool_ids usage)
+**Location**: [`elysia/api/custom_tools.py`](elysia/api/custom_tools.py) lines 160-189
 
-**ALWAYS cross-reference**: When implementing a pattern, have the official Elysia code open side-by-side.
+**MANDATORY REFERENCE**: [`elysia/api/custom_tools.py`](elysia/api/custom_tools.py) lines 160-189 (current implementation)
+
+**Change**:
+
+```python
+# BEFORE (lines 165)
+if await client.collections.exists("VSM_Diagram"):
+
+# AFTER
+user_exists = await client.collections.exists("VSM_DiagramUserFacing")
+agent_exists = await client.collections.exists("VSM_DiagramAgentInternal")
+
+if user_exists or agent_exists:
+```
+
+**Step 2b: Implement Dual-Strategy Fetching**
+
+**Strategy A**: If `related_diagram_ids` populated (>50%)
+
+```python
+# Fetch by diagram_id (existing logic, but from both collections)
+```
+
+**Strategy B**: If `related_diagram_ids` empty or low (<50%)
+
+```python
+# Fallback: Fetch by SMIDO phase matching
+if smido_step:
+    # Map smido_step to smido_phases filter
+    phase_map = {
+        "melding": ["M", "melding"],
+        "technisch": ["T", "technisch"],
+        "installatie_vertrouwd": ["I", "installatie"],
+        "3P_power": ["D", "P1", "power"],
+        "3P_procesinstellingen": ["D", "P2", "procesinstellingen"],
+        "3P_procesparameters": ["D", "P3", "procesparameters"],
+        "3P_productinput": ["D", "P4", "productinput"],
+        "ketens_onderdelen": ["O", "onderdelen"],
+    }
+    
+    if smido_step in phase_map:
+        phases = phase_map[smido_step]
+        # Fetch diagrams where smido_phases contains ANY of phases
+```
+
+**Complete Implementation**:
+
+```python
+diagram_objects = []
+if include_diagrams:
+    yield Status("Fetching related diagrams...")
+    
+    # Check both collections exist
+    user_exists = await client.collections.exists("VSM_DiagramUserFacing")
+    agent_exists = await client.collections.exists("VSM_DiagramAgentInternal")
+    
+    if not (user_exists or agent_exists):
+        yield Status("No diagram collections found")
+        # Continue without diagrams
+    else:
+        # Strategy 1: Fetch by related_diagram_ids (if populated)
+        diagram_ids = []
+        for obj in results.objects:
+            related_ids = obj.properties.get("related_diagram_ids", [])
+            if related_ids:
+                diagram_ids.extend(related_ids)
+        
+        if diagram_ids:
+            # Batch fetch by IDs (PRIMARY STRATEGY)
+            unique_ids = list(set(diagram_ids))
+            
+            if user_exists:
+                user_coll = client.collections.get("VSM_DiagramUserFacing")
+                # PERFORMANCE: Batch fetch instead of loop
+                user_results = await user_coll.query.fetch_objects(
+                    filters=Filter.by_property("diagram_id").contains_any(unique_ids),
+                    limit=20
+                )
+                diagram_objects.extend(user_results.objects)
+            
+            if agent_exists:
+                agent_coll = client.collections.get("VSM_DiagramAgentInternal")
+                agent_results = await agent_coll.query.fetch_objects(
+                    filters=Filter.by_property("diagram_id").contains_any(unique_ids),
+                    limit=20
+                )
+                diagram_objects.extend(agent_results.objects)
+        
+        # Strategy 2: Fallback to SMIDO phase matching (if no IDs found)
+        elif smido_step:
+            phase_map = {
+                "melding": ["M", "melding"],
+                "technisch": ["T", "technisch"],
+                "installatie_vertrouwd": ["I", "installatie"],
+                "3P_power": ["P1", "power"],
+                "3P_procesinstellingen": ["P2", "procesinstellingen"],
+                "3P_procesparameters": ["P3", "procesparameters"],
+                "3P_productinput": ["P4", "productinput"],
+                "ketens_onderdelen": ["O", "onderdelen"],
+            }
+            
+            if smido_step in phase_map:
+                phases = phase_map[smido_step]
+                
+                if user_exists:
+                    user_coll = client.collections.get("VSM_DiagramUserFacing")
+                    user_results = await user_coll.query.fetch_objects(
+                        filters=Filter.by_property("smido_phases").contains_any(phases),
+                        limit=5
+                    )
+                    diagram_objects.extend(user_results.objects)
+                
+                # Only fetch AgentInternal for non-M phases
+                if agent_exists and smido_step != "melding":
+                    agent_coll = client.collections.get("VSM_DiagramAgentInternal")
+                    agent_results = await agent_coll.query.fetch_objects(
+                        filters=Filter.by_property("smido_phases").contains_any(phases),
+                        limit=5
+                    )
+                    diagram_objects.extend(agent_results.objects)
+        
+        yield Status(f"Found {len(diagram_objects)} related diagrams")
+```
+
+**Key Improvements**:
+
+1. ✅ Batch fetching (`contains_any` instead of loop)
+2. ✅ Dual strategy (IDs first, phase fallback)
+3. ✅ Smart filtering (UserFacing only for M phase)
+4. ✅ Performance optimized (<500ms)
 
 ---
 
-## Success Criteria
+### Phase 3: Testing & Validation
 
-**Code Quality**:
+**Test 1: Collections Accessible**
 
-- ✅ Bootstrap: 4 focused functions (~50 lines each) + orchestrator (~20 lines) = ~220 lines
-- ✅ Each function follows official Elysia pattern exactly
-- ✅ smido_tree.py reduced from 520 to ~100 lines
-- ✅ Zero branch_id in @tool decorators
+```bash
+python3 scripts/test_diagram_upload_simple.py
+# Expected: ✅ Both collections, 8 objects each
+```
 
-**Functionality**:
+**Test 2: Diagram Fetching (Unit Test)**
 
-- ✅ 12 tools at root (verified by bootstrap structure test)
-- ✅ Post-tool chains work (manual test verification)
-- ✅ Status <200ms (test_quick_status_flow.py)
-- ✅ A3 scenario passes (test_plan7_full_tree.py)
+Create: `scripts/test_diagram_fetch.py`
 
-**Architecture**:
+```python
+#!/usr/bin/env python3
+import asyncio
+from elysia.util.client import ClientManager
+from weaviate.classes.query import Filter
 
-- ✅ Follows one_branch pattern (flat root, all tools at base)
-- ✅ Follows from_tool_ids pattern (post-tool chains)
-- ✅ Max 2 tree levels (root → post-tool)
-- ✅ No keyword detection
+async def test():
+    cm = ClientManager()
+    async with cm.connect_to_async_client() as client:
+        # Test batch fetch
+        user_coll = client.collections.get('VSM_DiagramUserFacing')
+        
+        # Test: Fetch by smido_phases
+        result = await user_coll.query.fetch_objects(
+            filters=Filter.by_property("smido_phases").contains_any(["M", "melding"]),
+            limit=5
+        )
+        
+        print(f'M-phase diagrams: {len(result.objects)}')
+        for obj in result.objects:
+            print(f'  - {obj.properties.get("title")}')
+        
+        assert len(result.objects) > 0, "Should find M-phase diagrams"
+        print('✅ Diagram fetch test passed')
+
+asyncio.run(test())
+```
+
+**Run**: `python3 scripts/test_diagram_fetch.py`
+
+**Test 3: Integration Test (via search_manuals_by_smido)**
+
+Create: `scripts/test_manual_diagram_integration.py`
+
+```python
+#!/usr/bin/env python3
+import asyncio
+from elysia import Tree
+from elysia.util.client import ClientManager
+
+async def test():
+    tree = Tree(branch_initialisation="empty")
+    cm = ClientManager()
+    
+    # Import tool
+    from elysia.api.custom_tools import search_manuals_by_smido
+    
+    # Call with SMIDO step
+    results = []
+    async for item in search_manuals_by_smido(
+        query="verdamper",
+        smido_step="3P_procesparameters",
+        include_diagrams=True,
+        tree_data=tree.tree_data,
+        client_manager=cm
+    ):
+        results.append(item)
+    
+    # Check Result object
+    from elysia.objects import Result
+    result_obj = [r for r in results if isinstance(r, Result)]
+    
+    if result_obj:
+        metadata = result_obj[0].metadata
+        diagram_count = metadata.get('diagram_count', 0)
+        print(f'Diagrams returned: {diagram_count}')
+        
+        if diagram_count > 0:
+            diagrams = metadata.get('diagrams', [])
+            print(f'Diagram details: {len(diagrams)} objects')
+            for d in diagrams[:2]:
+                print(f'  - {d.get("title")} (ID: {d.get("diagram_id")})')
+            print('✅ Integration test PASSED')
+        else:
+            print('⚠️  No diagrams returned (may be expected if related_diagram_ids empty)')
+    
+    await cm.close_clients()
+
+asyncio.run(test())
+```
+
+**Run**: `python3 scripts/test_manual_diagram_integration.py`
+
+**Expected**: >0 diagrams if either strategy works
+
+---
+
+### Phase 4: Documentation & Cleanup
+
+**Update**: [`.cursor/rules/agent.mdc`](.cursor/rules/agent.mdc)
+
+- Add note: "Diagram search uses dual strategy: related_diagram_ids OR smido_phases fallback"
+
+**Update**: [`docs/project/PROJECT_TODO.md`](docs/project/PROJECT_TODO.md)
+
+- Mark task #2 as completed
+
+---
+
+## Acceptance Criteria (STRICT)
+
+**MUST PASS ALL**:
+
+1. ✅ Code searches `VSM_DiagramUserFacing` (not `VSM_Diagram`)
+2. ✅ Code searches `VSM_DiagramAgentInternal` (not `VSM_Diagram`)
+3. ✅ Batch fetching implemented (`contains_any`, not loop)
+4. ✅ Fallback strategy works if `related_diagram_ids` empty
+5. ✅ No errors when either collection missing
+6. ✅ `test_diagram_fetch.py` passes
+7. ✅ `test_manual_diagram_integration.py` returns >0 diagrams
+8. ✅ Performance <500ms for fetching 10 diagrams
+
+## Files to Modify
+
+**Primary**:
+
+- [`elysia/api/custom_tools.py`](elysia/api/custom_tools.py) lines 160-189 (~30 lines changed)
+
+**New Test Files**:
+
+- `scripts/test_diagram_fetch.py` (new, ~30 lines)
+- `scripts/test_manual_diagram_integration.py` (new, ~40 lines)
+
+## Risk Mitigation
+
+**Risk 1**: Both strategies fail (IDs empty AND phase matching empty)
+
+- **Mitigation**: Return 0 diagrams gracefully, log warning
+
+**Risk 2**: Performance degradation (2 collection queries)
+
+- **Mitigation**: Batch fetching, limit to 20 diagrams total
+
+**Risk 3**: Frontend breaks if metadata format changes
+
+- **Mitigation**: Metadata format unchanged (still `diagrams` array)
+
+## Reference Documents (READ IN ORDER)
+
+1. [`.cursor/rules/agent.mdc`](.cursor/rules/agent.mdc) lines 30-42 - Collection names
+2. [`elysia/api/custom_tools.py`](elysia/api/custom_tools.py) lines 160-220 - Current code
+3. [`docs/archive/moved_docs/docs/review/weaviate_diagram_collections_analysis.md`](docs/archive/moved_docs/docs/review/weaviate_diagram_collections_analysis.md) - Schemas
+4. [`scripts/test_diagram_upload_simple.py`](scripts/test_diagram_upload_simple.py) - Validation pattern
 
 ### To-dos
 
-- [ ] Add imports for 5 native Elysia tools (Query, Aggregate, Visualise, CitedSummarizer, FakeTextResponse) to bootstrap.py
-- [ ] Rewrite vsm_smido_bootstrap() to register all 12 tools at base root (flat pattern, no hierarchical branches)
-- [ ] Implement post-tool chains using from_tool_ids for SMIDO flows (get_alarms→health, compute_worldstate→analyze, etc.)
-- [ ] Write clear root instruction grouping tools by purpose, no keyword detection, trust LLM to read descriptions
-- [ ] Delete/comment out 6 hierarchical branch functions in smido_tree.py (_add_m_branch, _add_t_branch, etc.)
-- [ ] Run test_quick_status_flow.py to verify get_current_status still works (<100ms)
-- [ ] Run test_plan7_full_tree.py to verify A3 scenario still completes correctly with new flat architecture
-- [ ] Manual test: verify Query, Aggregate, and Visualise are now available and selectable by the agent
+- [ ] MANDATORY: Run test_diagram_upload_simple.py to verify both collections exist (8 objects each).
+- [ ] MANDATORY: Check related_diagram_ids population rate in VSM_ManualSections (determines primary vs fallback strategy).
+- [ ] MANDATORY: Verify both collections have diagram_id, smido_phases, mermaid_code properties.
+- [ ] MANDATORY: Read elysia/api/custom_tools.py lines 160-220 to understand current diagram fetching logic.
+- [ ] Replace VSM_Diagram with VSM_DiagramUserFacing + VSM_DiagramAgentInternal checks.
+- [ ] Replace one-by-one fetching with batch fetch using Filter.contains_any() for performance.
+- [ ] Add SMIDO phase matching fallback if related_diagram_ids empty or unpopulated.
+- [ ] Create scripts/test_diagram_fetch.py to test direct diagram queries by smido_phases.
+- [ ] Create scripts/test_manual_diagram_integration.py to test search_manuals_by_smido with diagrams.
+- [ ] Run test_diagram_fetch.py, verify >0 diagrams returned for M-phase query.
+- [ ] Run test_manual_diagram_integration.py, verify diagrams in metadata with correct format.
+- [ ] Measure diagram fetch time, ensure <500ms for 10 diagrams (batch vs loop improvement).

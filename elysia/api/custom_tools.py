@@ -161,9 +161,14 @@ async def search_manuals_by_smido(
             if include_diagrams:
                 yield Status("Fetching related diagrams...")
                 
-                # Check if VSM_Diagram collection exists
-                if await client.collections.exists("VSM_Diagram"):
-                    # Get diagram IDs from sections
+                # Check both diagram collections exist
+                user_exists = await client.collections.exists("VSM_DiagramUserFacing")
+                agent_exists = await client.collections.exists("VSM_DiagramAgentInternal")
+                
+                if not (user_exists or agent_exists):
+                    yield Status("No diagram collections found")
+                else:
+                    # Strategy 1: Fetch by related_diagram_ids (if populated)
                     diagram_ids = []
                     for obj in results.objects:
                         related_ids = obj.properties.get("related_diagram_ids", [])
@@ -171,20 +176,51 @@ async def search_manuals_by_smido(
                             diagram_ids.extend(related_ids)
                     
                     if diagram_ids:
-                        diagram_coll = client.collections.get("VSM_Diagram")
-                        # Fetch unique diagrams
-                        unique_diagram_ids = list(set(diagram_ids))
-                        for diagram_id in unique_diagram_ids:
-                            try:
-                                diagram_result = await diagram_coll.query.fetch_objects(
-                                    filters=Filter.by_property("diagram_id").equal(diagram_id),
-                                    limit=1
+                        # Batch fetch by IDs from both collections
+                        unique_ids = list(set(diagram_ids))
+                        
+                        if user_exists:
+                            user_coll = client.collections.get("VSM_DiagramUserFacing")
+                            user_results = await user_coll.query.fetch_objects(
+                                filters=Filter.by_property("diagram_id").contains_any(unique_ids),
+                                limit=20
+                            )
+                            diagram_objects.extend(user_results.objects)
+                        
+                        if agent_exists:
+                            agent_coll = client.collections.get("VSM_DiagramAgentInternal")
+                            agent_results = await agent_coll.query.fetch_objects(
+                                filters=Filter.by_property("diagram_id").contains_any(unique_ids),
+                                limit=20
+                            )
+                            diagram_objects.extend(agent_results.objects)
+                    
+                    # Strategy 2: Fallback to SMIDO phase matching (if no IDs found)
+                    elif smido_step:
+                        # Map SMIDO step to phase tags
+                        phase_map = {
+                            "melding": ["M", "melding"],
+                            "technisch": ["T", "technisch"],
+                            "installatie_vertrouwd": ["I", "installatie"],
+                            "3P_power": ["P1", "power"],
+                            "3P_procesinstellingen": ["P2", "procesinstellingen"],
+                            "3P_procesparameters": ["P3", "procesparameters"],
+                            "3P_productinput": ["P4", "productinput"],
+                            "ketens_onderdelen": ["O", "onderdelen"],
+                        }
+                        
+                        if smido_step in phase_map:
+                            phases = phase_map[smido_step]
+                            
+                            # Only AgentInternal has populated smido_phases
+                            # UserFacing has empty arrays, so we only search AgentInternal
+                            if agent_exists:
+                                agent_coll = client.collections.get("VSM_DiagramAgentInternal")
+                                agent_results = await agent_coll.query.fetch_objects(
+                                    filters=Filter.by_property("smido_phases").contains_any(phases),
+                                    limit=10
                                 )
-                                if diagram_result.objects:
-                                    diagram_objects.extend(diagram_result.objects)
-                            except Exception as e:
-                                # Skip if diagram not found
-                                continue
+                                diagram_objects.extend(agent_results.objects)
                 
                 yield Status(f"Found {len(diagram_objects)} related diagrams")
             
