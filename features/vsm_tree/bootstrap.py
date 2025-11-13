@@ -126,7 +126,8 @@ def _register_root_tools(tree: Tree) -> None:
         query_telemetry_events,
         search_manuals_by_smido,
         query_vlog_cases,
-        analyze_sensor_pattern
+        analyze_sensor_pattern,
+        search_manual_images
     )
     
     # Import native Elysia tools
@@ -147,6 +148,7 @@ def _register_root_tools(tree: Tree) -> None:
     tree.add_tool(branch_id="base", tool=search_manuals_by_smido)
     tree.add_tool(branch_id="base", tool=query_vlog_cases)
     tree.add_tool(branch_id="base", tool=analyze_sensor_pattern)
+    tree.add_tool(branch_id="base", tool=search_manual_images)
     
     # Native tools
     tree.add_tool(branch_id="base", tool=Query, summariser_in_tree=True)
@@ -168,7 +170,8 @@ def _add_smido_post_tool_chains(tree: Tree) -> None:
         get_asset_health,
         search_manuals_by_smido,
         analyze_sensor_pattern,
-        query_telemetry_events
+        query_telemetry_events,
+        search_manual_images
     )
     from elysia.tools.retrieval.aggregate import Aggregate
     
@@ -183,7 +186,10 @@ def _add_smido_post_tool_chains(tree: Tree) -> None:
     tree.add_tool(search_manuals_by_smido, branch_id="base", from_tool_ids=["query_vlog_cases"])
     tree.add_tool(Aggregate, branch_id="base", from_tool_ids=["query_vlog_cases"])
     
-    logger.debug("Added SMIDO post-tool chains (M, P3, O flows)")
+    # I/T flow: After search_manuals completes → offer visual images
+    tree.add_tool(search_manual_images, branch_id="base", from_tool_ids=["search_manuals_by_smido"])
+    
+    logger.debug("Added SMIDO post-tool chains (M, P3, O, I/T flows)")
 
 
 def _add_visualization_chains(tree: Tree) -> None:

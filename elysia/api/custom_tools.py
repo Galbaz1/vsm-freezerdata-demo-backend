@@ -241,6 +241,22 @@ async def search_manuals_by_smido(
                 diagram_dict["uuid"] = str(obj.uuid)
                 diagram_dicts.append(diagram_dict)
             
+            # If diagrams found, output them as Response with Mermaid markdown
+            if diagram_dicts:
+                for diagram in diagram_dicts:
+                    title = diagram.get("title", "Diagram")
+                    mermaid_code = diagram.get("mermaid_code", "")
+                    description = diagram.get("description", "")
+                    
+                    if mermaid_code:
+                        # Create formatted markdown with Mermaid diagram
+                        markdown = f"\n\n**📊 {title}**\n\n"
+                        if description:
+                            markdown += f"*{description}*\n\n"
+                        markdown += f"```mermaid\n{mermaid_code}\n```\n"
+                        
+                        yield Response(markdown)
+            
             # Yield results
             yield Result(
                 objects=manual_objects,
@@ -1178,4 +1194,296 @@ Returns:
             
     except Exception as e:
         yield Error(f"Error querying patterns: {str(e)}")
+        return
+
+
+@tool(
+    status="Fetching diagram...",
+    branch_id="smido_installatie"
+)
+async def show_diagram(
+    diagram_id: str = None,
+    smido_step: str = None,
+    tree_data=None,
+    client_manager=None,
+    **kwargs
+):
+    """
+    Show a Mermaid diagram to the user - displays visual flowcharts and schematics.
+    
+    Use this when:
+    - User asks "show me a diagram", "laat een schema zien", "visualiseer het systeem"
+    - Explaining SMIDO methodology (use diagram_id="smido_overview")
+    - Showing refrigeration cycle (use diagram_id="basic_cycle")  
+    - Explaining diagnosis steps (use diagram_id="diagnose_4ps")
+    - SMIDO phase needs visual aid (use smido_step filter)
+    
+    Available diagrams:
+    - smido_overview: Complete SMIDO M→T→I→D→O flow
+    - diagnose_4ps: 4 P's diagnostic checklist  
+    - basic_cycle: Refrigeration cycle basics
+    - measurement_points: Where to measure P/T
+    - system_balance: "Uit balans" concept explained
+    - pressostat_settings: Pressostat adjustment guide
+    - frozen_evaporator: A3 frozen evaporator case
+    
+    Args:
+        diagram_id: Specific diagram ID to fetch (optional)
+        smido_step: Filter diagrams by SMIDO phase (optional, e.g., "3P_power", "installatie_vertrouwd")
+    
+    Returns:
+        Mermaid diagram code in markdown format for frontend rendering
+    """
+    if not client_manager:
+        yield Error("Client manager not available. Cannot query Weaviate.")
+        return
+    
+    if not client_manager.is_client:
+        yield Error("Weaviate client not configured. Please set WCD_URL and WCD_API_KEY.")
+        return
+    
+    if not diagram_id and not smido_step:
+        yield Error("Either diagram_id or smido_step must be provided.")
+        return
+    
+    yield Status("Searching for diagram...")
+    
+    try:
+        async with client_manager.connect_to_async_client() as client:
+            # Check collections exist
+            user_exists = await client.collections.exists("VSM_DiagramUserFacing")
+            agent_exists = await client.collections.exists("VSM_DiagramAgentInternal")
+            
+            if not (user_exists or agent_exists):
+                yield Error("Diagram collections not found in Weaviate.")
+                return
+            
+            diagram_objects = []
+            
+            # Strategy 1: Fetch by diagram_id
+            if diagram_id:
+                if user_exists:
+                    user_coll = client.collections.get("VSM_DiagramUserFacing")
+                    user_results = await user_coll.query.fetch_objects(
+                        filters=Filter.by_property("diagram_id").equal(diagram_id),
+                        limit=1
+                    )
+                    if user_results.objects:
+                        diagram_objects.extend(user_results.objects)
+                
+                if agent_exists and not diagram_objects:
+                    agent_coll = client.collections.get("VSM_DiagramAgentInternal")
+                    agent_results = await agent_coll.query.fetch_objects(
+                        filters=Filter.by_property("diagram_id").equal(diagram_id),
+                        limit=1
+                    )
+                    if agent_results.objects:
+                        diagram_objects.extend(agent_results.objects)
+            
+            # Strategy 2: Fetch by smido_step
+            elif smido_step:
+                phase_map = {
+                    "melding": ["M", "melding"],
+                    "technisch": ["T", "technisch"],
+                    "installatie_vertrouwd": ["I", "installatie"],
+                    "3P_power": ["P1", "power"],
+                    "3P_procesinstellingen": ["P2", "procesinstellingen"],
+                    "3P_procesparameters": ["P3", "procesparameters"],
+                    "3P_productinput": ["P4", "productinput"],
+                    "ketens_onderdelen": ["O", "onderdelen"],
+                }
+                
+                if smido_step in phase_map:
+                    phases = phase_map[smido_step]
+                    
+                    if agent_exists:
+                        agent_coll = client.collections.get("VSM_DiagramAgentInternal")
+                        agent_results = await agent_coll.query.fetch_objects(
+                            filters=Filter.by_property("smido_phases").contains_any(phases),
+                            limit=3
+                        )
+                        diagram_objects.extend(agent_results.objects)
+            
+            if not diagram_objects:
+                yield Error(f"No diagram found for diagram_id='{diagram_id}' or smido_step='{smido_step}'")
+                return
+            
+            yield Status(f"Found {len(diagram_objects)} diagram(s)")
+            
+            # Format diagrams for display - output as markdown with Mermaid code blocks
+            diagram_output = []
+            for obj in diagram_objects:
+                props = obj.properties
+                
+                # Build markdown output
+                title = props.get("title", "Diagram")
+                mermaid_code = props.get("mermaid_code", "")
+                description = props.get("description", "")
+                
+                if mermaid_code:
+                    # Create formatted markdown with Mermaid diagram
+                    markdown = f"**{title}**\n\n"
+                    if description:
+                        markdown += f"{description}\n\n"
+                    markdown += f"```mermaid\n{mermaid_code}\n```"
+                    
+                    diagram_output.append({
+                        "diagram_id": props.get("diagram_id"),
+                        "title": title,
+                        "description": description,
+                        "markdown": markdown,
+                        "mermaid_code": mermaid_code
+                    })
+            
+            if not diagram_output:
+                yield Error("Diagram found but contains no Mermaid code")
+                return
+            
+            # Return as Response with formatted markdown for direct display
+            yield Response(diagram_output[0]["markdown"])
+            
+            # Also yield Result for structured data
+            yield Result(
+                objects=diagram_output,
+                metadata={
+                    "diagram_count": len(diagram_output),
+                    "diagram_id": diagram_id,
+                    "smido_step": smido_step
+                }
+            )
+            
+    except Exception as e:
+        yield Error(f"Error fetching diagram: {str(e)}")
+        return
+
+
+@tool(
+    status="Searching manual images...",
+    branch_id="smido_installatie"
+)
+async def search_manual_images(
+    query: str = "",
+    smido_step: str = None,
+    component: str = None,
+    limit: int = 5,
+    tree_data=None,
+    client_manager=None,
+    **kwargs
+):
+    """
+    Search manual images for visual troubleshooting support.
+    
+    Use when:
+    - T (TECHNISCH): Show what healthy components look like
+    - I (INSTALLATIE): Show schema/wiring photos for reference
+    - D (DIAGNOSE): Visual comparison - 'Lijkt dit op wat je ziet?'
+    - O (ONDERDELEN): Show component photos for identification
+    - User asks to see a photo/image of a component
+    
+    Source: VSM_ManualImage collection (233 images from 3 manuals)
+    
+    Args:
+        query: Description of what to find (e.g., "verdamper foto", "pressostaat aansluiting")
+        smido_step: Filter by SMIDO phase (optional)
+        component: Filter by component name (verdamper, compressor, etc.)
+        limit: Max images to return. Default: 5
+    
+    Returns:
+        List of image objects with:
+        - image_url: URL to display in frontend
+        - image_description: What the image shows
+        - manual_name: Which manual it's from
+        - page_number: Original page
+        - component_tags: Relevant components
+    """
+    if not client_manager:
+        yield Error("Client manager not available. Cannot query Weaviate.")
+        return
+    
+    if not client_manager.is_client:
+        yield Error("Weaviate client not configured. Please set WCD_URL and WCD_API_KEY.")
+        return
+    
+    yield Status("Searching manual images...")
+    
+    try:
+        async with client_manager.connect_to_async_client() as client:
+            # Check collection exists
+            if not await client.collections.exists("VSM_ManualImage"):
+                yield Error("VSM_ManualImage collection not found. Run upload_manual_images_weaviate.py first.")
+                return
+            
+            collection = client.collections.get("VSM_ManualImage")
+            
+            # Build filters
+            from weaviate.classes.query import Filter
+            filters = None
+            
+            if component:
+                filters = Filter.by_property("component_tags").contains_any([component])
+            
+            if smido_step:
+                # Map SMIDO step to tag
+                step_map = {
+                    "melding": ["M"],
+                    "technisch": ["T"],
+                    "installatie_vertrouwd": ["I"],
+                    "3P_power": ["P1"],
+                    "3P_procesinstellingen": ["P2"],
+                    "3P_procesparameters": ["P3"],
+                    "3P_productinput": ["P4"],
+                    "ketens_onderdelen": ["O"],
+                }
+                
+                if smido_step in step_map:
+                    smido_filter = Filter.by_property("smido_tags").contains_any(step_map[smido_step])
+                    filters = filters & smido_filter if filters else smido_filter
+            
+            # Perform search
+            if query:
+                # Hybrid search (semantic + keyword)
+                results = await collection.query.hybrid(
+                    query=query,
+                    filters=filters,
+                    limit=limit
+                )
+            else:
+                # Filter-only search
+                results = await collection.query.fetch_objects(
+                    filters=filters,
+                    limit=limit
+                )
+            
+            yield Status(f"Found {len(results.objects)} images")
+            
+            # Format results
+            image_objects = []
+            for obj in results.objects:
+                props = obj.properties
+                image_objects.append({
+                    "image_id": props.get("image_id"),
+                    "image_url": props.get("image_url"),
+                    "image_description": props.get("image_description", ""),
+                    "manual_name": props.get("manual_name"),
+                    "page_number": props.get("page_number"),
+                    "component_tags": props.get("component_tags", []),
+                    "smido_tags": props.get("smido_tags", []),
+                })
+            
+            # Store in tree environment for context
+            if tree_data:
+                tree_data.environment["manual_images"] = image_objects
+            
+            yield Result(
+                objects=image_objects,
+                metadata={
+                    "num_images": len(image_objects),
+                    "query": query,
+                    "filters": {"component": component, "smido_step": smido_step}
+                },
+                result_type="image_gallery"
+            )
+    
+    except Exception as e:
+        yield Error(f"Error searching images: {str(e)}")
         return

@@ -33,6 +33,7 @@ elysia start  # Opens on http://localhost:8000
 - **VSM_ManualSections**: 167 (4 P's classified, 9 opgave test content)
 - **VSM_DiagramUserFacing**: 8 (simple diagrams for technicians (M))
 - **VSM_DiagramAgentInternal**: 8 (complex logic for agent (A))
+- **VSM_ManualImage**: 233 (photos/figures from manuals, visual troubleshooting)
 - **VSM_TelemetryEvent**: 12 ("uit balans" incidents, used by `get_alarms` tool)
 - **VSM_VlogCase**: 5 (A1-A5 problem→solution workflows)
 - **VSM_VlogClip**: 15 (individual clips)
@@ -137,14 +138,16 @@ async with ClientManager().connect_to_async_client() as client:
 
 **VSM uses `branch_initialisation="empty"`** — native Elysia tools (query, aggregate, visualise) are **NOT loaded**.
 
-### VSM Custom Tools (7 loaded via bootstrap)
+### VSM Custom Tools (9 loaded via bootstrap)
 1. `search_manuals_by_smido` - SMIDO-filtered manual + diagram search
-2. `get_alarms` - Query VSM_TelemetryEvent by severity
-3. `query_telemetry_events` - Historical "uit balans" incidents
-4. `query_vlog_cases` - Find A1-A5 problem→solution cases
-5. `compute_worldstate` - Calculate 58 features from parquet (<500ms)
-6. `get_asset_health` - W vs C comparison, balance check
-7. `analyze_sensor_pattern` - Match against 13 reference snapshots
+2. `search_manual_images` - Visual troubleshooting support (233 manual photos)
+3. `get_current_status` - Quick status check with A3 demo override
+4. `get_alarms` - Query VSM_TelemetryEvent by severity
+5. `query_telemetry_events` - Historical "uit balans" incidents
+6. `query_vlog_cases` - Find A1-A5 problem→solution cases
+7. `compute_worldstate` - Calculate 58 features from parquet (<500ms)
+8. `get_asset_health` - W vs C comparison, balance check
+9. `analyze_sensor_pattern` - Match against 13 reference snapshots
 
 ### Always Available
 - `forced_text_response` - Fallback text generation (automatic)

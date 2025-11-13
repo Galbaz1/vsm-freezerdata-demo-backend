@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useContext, useEffect, useState } from "react";
+import Image from "next/image";
 
 import { SocketContext } from "../contexts/SocketContext";
 
@@ -104,7 +105,7 @@ const SidebarComponent: React.FC = () => {
       },
     ];
     setItems(_items);
-  }, [collections, unsavedChanges]);
+  }, [collections, unsavedChanges, changePage, loadingCollections]);
 
   const openNewTab = (url: string) => {
     window.open(url, "_blank");
@@ -115,10 +116,12 @@ const SidebarComponent: React.FC = () => {
       <SidebarHeader>
         <div className={`flex items-center gap-2 w-full justify-between p-2`}>
           <div className="flex items-center gap-2">
-            <img
+            <Image
               src={`${public_path}logo.svg`}
               alt="Elysia"
-              className="w-5 h-5 stext-primary"
+              width={20}
+              height={20}
+              className="stext-primary"
             />
             <p className="text-sm font-bold text-primary">Elysia</p>
           </div>
@@ -210,10 +213,11 @@ const SidebarComponent: React.FC = () => {
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <SidebarMenuButton>
-                  <img
+                  <Image
                     src={`${public_path}weaviate-logo.svg`}
                     alt="Weaviate"
-                    className="w-4 h-4"
+                    width={16}
+                    height={16}
                   />
                   <p>Powered by Weaviate</p>
                 </SidebarMenuButton>

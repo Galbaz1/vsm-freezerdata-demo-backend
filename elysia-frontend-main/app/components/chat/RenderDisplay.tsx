@@ -19,6 +19,7 @@ import DocumentDisplay from "./displays/Document/DocumentDisplay";
 import BarDisplay from "./displays/ChartTable/BarDisplay";
 import ScatterOrLineDisplay from "./displays/ChartTable/ScatterOrLineDisplay";
 import HistogramDisplay from "./displays/ChartTable/HistogramDisplay";
+import ImageGalleryDisplay, { ImagePayload } from "./displays/Image/ImageGalleryDisplay";
 import { DisplayContext } from "../contexts/DisplayContext";
 
 interface RenderDisplayProps {
@@ -118,6 +119,13 @@ const RenderDisplay: React.FC<RenderDisplayProps> = ({
       return <ScatterOrLineDisplay key={`${keyBase}-chart`} result={payload} />;
     case "histogram_chart":
       return <HistogramDisplay key={`${keyBase}-chart`} result={payload} />;
+    case "image_gallery":
+      return (
+        <ImageGalleryDisplay
+          key={`${keyBase}-image-gallery`}
+          images={payload.objects as ImagePayload[]}
+        />
+      );
     default:
       if (process.env.NODE_ENV === "development") {
         console.warn("Unhandled ResultPayload type:", payload.type);

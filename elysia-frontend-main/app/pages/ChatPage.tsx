@@ -174,7 +174,7 @@ export default function ChatPage() {
     if (collections.length > 0) {
       setRandomPrompts(getRandomPrompts(4));
     }
-  }, [collections]);
+  }, [collections, getRandomPrompts]);
 
   if (!socketOnline) {
     return (
