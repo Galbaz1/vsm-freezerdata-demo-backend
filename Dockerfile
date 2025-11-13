@@ -22,9 +22,6 @@ COPY elysia/ ./elysia/
 # Install Python dependencies (after copying code for editable install)
 RUN pip install --no-cache-dir -e .
 
-# Copy data files
-COPY features/ ./features/
-
 # Copy startup scripts (needed for auto-seed)
 COPY scripts/auto_seed_on_startup.py ./scripts/
 COPY scripts/seed_default_config.py ./scripts/
@@ -32,11 +29,11 @@ COPY scripts/seed_default_config.py ./scripts/
 # Copy static files (frontend build + images)
 COPY elysia/api/static/ ./elysia/api/static/
 
-# Copy telemetry data (parquet file)
-COPY features/telemetry/timeseries_freezerdata/ ./features/telemetry/timeseries_freezerdata/
-
-# Copy config JSON files
-COPY features/integration_vsm/output/ ./features/integration_vsm/output/
+# Copy specific feature data (avoid large extraction/diagrams directories)
+COPY features/telemetry/ ./features/telemetry/
+COPY features/integration_vsm/ ./features/integration_vsm/
+COPY features/telemetry_vsm/ ./features/telemetry_vsm/
+COPY features/vsm_tree/ ./features/vsm_tree/
 
 # Expose port (Railway sets $PORT automatically)
 EXPOSE 8000
