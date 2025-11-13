@@ -16,11 +16,13 @@ COPY pyproject.toml ./
 COPY MANIFEST.in ./
 COPY README.md ./
 
-# Install Python dependencies
+# Copy application code (needed for editable install)
+COPY elysia/ ./elysia/
+
+# Install Python dependencies (after copying code for editable install)
 RUN pip install --no-cache-dir -e .
 
-# Copy application code
-COPY elysia/ ./elysia/
+# Copy data files
 COPY features/ ./features/
 
 # Copy static files (frontend build + images)
