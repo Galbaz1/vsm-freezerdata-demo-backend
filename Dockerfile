@@ -41,8 +41,8 @@ EXPOSE 8000
 HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
     CMD python -c "import requests; requests.get('http://localhost:${PORT:-8000}/api/health')" || exit 1
 
-# Start command
+# Start command with auto-seed
 # Railway provides $PORT environment variable
 # Use --reload false for production
-CMD elysia start --host 0.0.0.0 --port ${PORT:-8000} --reload false
+CMD python3 scripts/auto_seed_on_startup.py && elysia start --host 0.0.0.0 --port ${PORT:-8000} --reload false
 
