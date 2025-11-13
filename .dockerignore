@@ -68,10 +68,15 @@ Thumbs.db
 
 # Large source files (already processed)
 features/extraction/
-features/manuals_vsm/output/*.jsonl
-features/vlogs_vsm/output/*.jsonl
+features/manuals_vsm/
+features/vlogs_vsm/
 features/diagrams_vsm/
-features/vlogs_vsm/*.mov
+
+# Explicitly keep required feature directories
+!features/telemetry/
+!features/integration_vsm/
+!features/telemetry_vsm/
+!features/vsm_tree/
 
 # Keep only what's needed:
 # ✅ elysia/ (application code)
