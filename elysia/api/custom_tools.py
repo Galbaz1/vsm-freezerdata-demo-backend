@@ -793,17 +793,17 @@ Returns:
     from features.telemetry_vsm.src.worldstate_engine import WorldStateEngine
     from datetime import datetime
     
-    # Parse timestamp - use historical demo timestamp within data range
-    # Telemetry data range: 2022-10-20 to 2024-04-01
+    # Parse timestamp - use current time or timestamp within data range
+    # Telemetry data range: July 2024 - January 2026 (785K rows)
     if timestamp and timestamp != 'None' and timestamp.strip():
         try:
             ts = datetime.fromisoformat(timestamp)
         except (ValueError, AttributeError):
-            # Default to historical timestamp within data range
-            ts = datetime(2024, 1, 15, 12, 0, 0)
+            # Default to December 2025 (within data range)
+            ts = datetime(2025, 12, 15, 12, 0, 0)
     else:
-        # Use default historical timestamp for demo (data ends 2024-04-01)
-        ts = datetime(2024, 1, 15, 12, 0, 0)
+        # Use December 2025 by default (middle of data range with plenty of data on both sides)
+        ts = datetime(2025, 12, 15, 12, 0, 0)
     
     # Initialize engine
     engine = WorldStateEngine("features/telemetry/timeseries_freezerdata/135_1570_cleaned_with_flags.parquet")
@@ -1112,17 +1112,17 @@ Returns:
     from features.telemetry_vsm.src.worldstate_engine import WorldStateEngine
     from datetime import datetime
     
-    # Parse timestamp - use historical demo timestamp within data range
-    # Telemetry data range: 2022-10-20 to 2024-04-01
+    # Parse timestamp - use current time or timestamp within data range
+    # Telemetry data range: July 2024 - January 2026 (785K rows)
     if timestamp and timestamp != 'None' and timestamp.strip():
         try:
             ts = datetime.fromisoformat(timestamp)
         except (ValueError, AttributeError):
-            # Default to historical timestamp within data range
-            ts = datetime(2024, 1, 15, 12, 0, 0)
+            # Default to December 2025 (within data range)
+            ts = datetime(2025, 12, 15, 12, 0, 0)
     else:
-        # Use default historical timestamp for demo (data ends 2024-04-01)
-        ts = datetime(2024, 1, 15, 12, 0, 0)
+        # Use December 2025 by default (middle of data range with plenty of data on both sides)
+        ts = datetime(2025, 12, 15, 12, 0, 0)
     
     engine = WorldStateEngine("features/telemetry/timeseries_freezerdata/135_1570_cleaned_with_flags.parquet")
     
@@ -1465,14 +1465,15 @@ async def visualize_temperature_timeline(
     
     yield Status(f"Loading telemetry data for last {hours_back} hours...")
     
-    # Parse timestamp - use historical demo timestamp
+    # Parse timestamp - use timestamp within data range (July 2024 - January 2026)
     if timestamp and timestamp != 'None' and timestamp.strip():
         try:
             end_time = datetime.fromisoformat(timestamp)
         except (ValueError, AttributeError):
-            end_time = datetime(2024, 1, 15, 12, 0, 0)
+            end_time = datetime(2025, 12, 15, 12, 0, 0)
     else:
-        end_time = datetime(2024, 1, 15, 12, 0, 0)
+        # Default to December 2025 (within data range)
+        end_time = datetime(2025, 12, 15, 12, 0, 0)
     
     start_time = end_time - timedelta(hours=hours_back)
     
