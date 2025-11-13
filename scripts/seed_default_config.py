@@ -102,21 +102,42 @@ async def seed_default_config():
     # 0. Ensure fallback fix is applied (prevents config loading issues)
     ensure_fallback_fix_applied()
 
-    # 1. Extract VSM prompts from smido_tree.py
-    print("\n📝 Step 1: Extracting VSM prompts from smido_tree.py...")
-    from features.vsm_tree.smido_tree import create_vsm_tree
+    # 1. Extract VSM prompts (hardcoded to avoid import issues during seed)
+    print("\n📝 Step 1: Setting VSM prompts...")
+    
+    # Hardcoded VSM prompts (from smido_tree.py)
+    agent_description = """Je bent een gespecialiseerde Virtual Service Mechanic (VSM) assistent voor koeltechniek storingen. Je helpt monteurs bij het diagnosticeren en oplossen van problemen met koelinstallaties door de SMIDO-methodologie te volgen.
 
-    # Create temporary VSM tree to extract its configuration
-    temp_tree = create_vsm_tree(with_orchestrator=False)
+Je gebruikt de volgende aanpak:
+1. **M**elding - Verzamel symptomen en urgentie
+2. **T**echnisch - Visuele inspectie en snelle checks  
+3. **I**nstallatie vertrouwd - Bekijk schema's en ontwerpparameters
+4. **D**iagnose - 4 P's systematiek (Power, Procesinstellingen, Procesparameters, Productinput)
+5. **O**nderdelen - Component isolatie
 
-    # Extract from tree_data.atlas (where Tree stores these values)
-    agent_description = temp_tree.tree_data.atlas.agent_description
-    style = temp_tree.tree_data.atlas.style
-    end_goal = temp_tree.tree_data.atlas.end_goal
-    branch_initialisation = "empty"  # VSM uses empty init
+Belangrijke concepten:
+- "Uit balans" betekent dat het systeem buiten ontwerp parameters werkt, niet per se kapotte onderdelen
+- WorldState (W) = huidige metingen en trends  
+- Context (C) = ontwerp specificaties en instellingen
+- Vergelijk altijd W vs C om balans te checken
+
+Je hebt toegang tot:
+- Handleidingen met SMIDO-classificatie (zoek per fase)
+- Foto's en diagrammen uit de handleidingen
+- Telemetrie data (sensor metingen, trends, health scores)
+- Vlog cases (A1-A5 probleemoplossings voorbeelden)
+- Historische "uit balans" incidenten
+
+Communiceer in het Nederlands, wees informatief maar vriendelijk."""
+
+    style = "Informatief, beleefd en vriendelijk. Gebruik Nederlandse vakjargon waar gepast."
+
+    end_goal = """Je hebt de vraag van de monteur beantwoord met een beknopt overzicht van de resultaten. Of je hebt alle beschikbare opties uitgeput, of gevraagd om verduidelijking van de monteur."""
+
+    branch_initialisation = "empty"  # VSM uses empty init with bootstrapper
 
     print(f"   ✅ Agent Description: {len(agent_description)} characters")
-    print(f"   ✅ Style: {len(style)} characters")
+    print(f"   ✅ Style: {len(style)} characters") 
     print(f"   ✅ End Goal: {len(end_goal)} characters")
     print(f"   ✅ Branch Init: {branch_initialisation}")
 
