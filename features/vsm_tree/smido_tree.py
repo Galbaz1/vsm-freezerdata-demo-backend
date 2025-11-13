@@ -130,6 +130,25 @@ In beide gevallen begrijpt de monteur het "waarom" achter de diagnose en welke s
     # Log cache creation status
     if cache_name:
         logger.info(f"Context cache ready: {cache_name}")
+        
+        # Configure DSPy LM to use cached_content
+        # Update base_lm and complex_lm kwargs to include cached_content
+        # This allows DSPy to pass cached_content to Gemini API calls
+        try:
+            base_lm = tree.base_lm
+            complex_lm = tree.complex_lm
+            
+            # Add cached_content to LM kwargs if they exist
+            if hasattr(base_lm, 'kwargs') and isinstance(base_lm.kwargs, dict):
+                base_lm.kwargs['cached_content'] = cache_name
+                logger.info(f"Added cached_content to base_lm kwargs: {cache_name}")
+            
+            if hasattr(complex_lm, 'kwargs') and isinstance(complex_lm.kwargs, dict):
+                complex_lm.kwargs['cached_content'] = cache_name
+                logger.info(f"Added cached_content to complex_lm kwargs: {cache_name}")
+        except Exception as e:
+            logger.warning(f"Failed to configure DSPy LM with cached_content: {e}")
+            logger.warning("Cache created but may not be used by DSPy LM calls")
     else:
         logger.warning("Failed to create context cache, continuing without caching")
     

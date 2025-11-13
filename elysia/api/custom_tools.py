@@ -47,8 +47,7 @@ class TellAJoke(Tool):
 
 @tool(
     status="Searching SMIDO manuals and diagrams...",
-    branch_id="smido_installatie",
-    end=True  # Complete manual sections + diagrams - no text formatting needed
+    branch_id="smido_installatie"
 )
 async def search_manuals_by_smido(
     query: str = "",
@@ -296,8 +295,7 @@ async def search_manuals_by_smido(
 
 @tool(
     status="Checking active alarms...",
-    branch_id="smido_melding",
-    end=True  # Complete alarm list - no text formatting needed
+    branch_id="smido_melding"
 )
 async def get_alarms(
     asset_id: str = None,
@@ -499,8 +497,7 @@ async def query_telemetry_events(
 
 @tool(
     status="Searching video case library...",
-    branch_id="smido_onderdelen",
-    end=True  # Complete case descriptions - no text formatting needed
+    branch_id="smido_onderdelen"
 )
 async def query_vlog_cases(
     problem_description: str = None,
@@ -647,8 +644,7 @@ Returns:
 
 @tool(
     status="Retrieving current status...",
-    branch_id="smido_melding",
-    end=True  # Complete answer - no text_response recursion needed
+    branch_id="smido_melding"
 )
 async def get_current_status(
     asset_id: str = "135_1570",
@@ -719,13 +715,6 @@ async def get_current_status(
         "is_synthetic_today": worldstate.get("is_synthetic_today", False),
     }
 
-    # Build text response
-    status_text = f"""Status voor {asset_id}:
-- Kamertemp: {current.get('current_room_temp', 0):.1f}°C ({trend_description})
-- Alarmen: {len(active_flags)} actief
-- Gezondheid: Koeling {health.get('cooling_performance_score', 0)}/100"""
-    
-    yield Response(status_text)
     yield Result(objects=[status_summary])
 
 
@@ -1227,8 +1216,7 @@ Returns:
 
 @tool(
     status="Fetching diagram...",
-    branch_id="smido_installatie",
-    end=True  # Complete diagram display - no text formatting needed
+    branch_id="smido_installatie"
 )
 async def show_diagram(
     diagram_id: str = None,
@@ -1409,8 +1397,7 @@ async def show_diagram(
 
 @tool(
     status="Creating temperature timeline visualization...",
-    branch_id="smido_p3_procesparameters",
-    end=True  # Complete chart - no text formatting needed
+    branch_id="smido_p3_procesparameters"
 )
 async def visualize_temperature_timeline(
     asset_id: str = "135_1570",
@@ -1574,8 +1561,7 @@ async def visualize_temperature_timeline(
 
 @tool(
     status="Creating health score dashboard...",
-    branch_id="smido_diagnose",
-    end=True  # Complete dashboard - no text formatting needed
+    branch_id="smido_diagnose"
 )
 async def show_health_dashboard(
     asset_id: str = "135_1570",
@@ -1706,8 +1692,7 @@ async def show_health_dashboard(
 
 @tool(
     status="Analyzing alarm distribution...",
-    branch_id="smido_melding",
-    end=True  # Complete chart - no text formatting needed
+    branch_id="smido_melding"
 )
 async def show_alarm_breakdown(
     asset_id: str = "135_1570",
@@ -1836,8 +1821,7 @@ async def show_alarm_breakdown(
 
 @tool(
     status="Searching manual images...",
-    branch_id="smido_installatie",
-    end=True  # Complete image gallery - no text formatting needed
+    branch_id="smido_installatie"
 )
 async def search_manual_images(
     query: str = "",
