@@ -1470,9 +1470,7 @@ async def search_manual_images(
                     "smido_tags": props.get("smido_tags", []),
                 })
             
-            # Store in tree environment for context
-            if tree_data:
-                tree_data.environment["manual_images"] = image_objects
+            # Store in tree environment for context (no direct assignment needed - Result handles it)
             
             yield Result(
                 objects=image_objects,
