@@ -651,18 +651,34 @@ async def get_current_status(
     tree_data=None,
     **kwargs
 ):
-    """Quick status check - current temps, flags, health.
+    """Quick status check - get current system snapshot with temps, flags, and health scores.
 
-    Use when the user requests the current system status.
+    WHEN TO USE (gebruik bij deze vragen):
+    - "Wat is de status?" / "Hoe staat het ervoor?"
+    - "Geef me een overzicht" / "Wat zie je nu?"
+    - "Hoe is de huidige situatie?"
+    - "Laat de status zien" / "Check de status"
+    - Start of M (MELDING) phase - first thing to check
+    - User asks about "nu" / "current" / "actueel"
+    
+    DO NOT USE when:
+    - User asks for trends/history (use compute_worldstate instead)
+    - User wants detailed analysis (use get_asset_health)
+    - User wants specific alarms (use get_alarms)
+    
+    This is the FASTEST tool (<500ms) - use it for quick initial assessment.
     
     NOTE: For demo purposes, if current timestamp is TODAY (datetime.now()),
     returns synthetic A3 problem (frozen evaporator). Otherwise returns real sensor data.
 
     Returns:
-    - 5 key sensors (room, hot-gas, suction, liquid, ambient)
-    - Active warning flags
-    - 30-minute trend (stijgend/stabiel/dalend)
-    - Health score summary (cooling, compressor, stability)
+    - 5 key sensors (room, hot-gas, suction, liquid, ambient) in °C
+    - Active warning flags (e.g., _flag_main_temp_high, _flag_suction_extreme)
+    - 30-minute trend: "stijgend", "stabiel", or "dalend"
+    - Health scores: cooling_performance, compressor_health, system_stability (0-100)
+    
+    Args:
+        asset_id: Asset identifier (default: "135_1570")
     """
     yield Status("Loading system status...")
 

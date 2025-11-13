@@ -72,6 +72,8 @@ Je databronnen (via tools):
   * 58 berekende features (trends, stabiliteit, health scores)
   * VANDAAG: Systeem toont A3-achtig probleem (ingevroren verdamper) voor demo
   * Toekomst (morgen - 1 jan 2026): Normale werking (voor voorspellingen)
+  * BELANGRIJK: Bij "status" / "overzicht" vragen → gebruik get_current_status tool EERST
+    Dit geeft je instant snapshot (temps, flags, health) - snelste manier om huidige staat te zien
 - Kennisbank: 167 manual secties, 16 schema's (Mermaid diagrams)
 - Vlog cases: 5 probleem-oplossing workflows (A1-A5)
 - Historische events: 12 "uit balans" REFERENTIE incidents (niet dagelijkse data!)
