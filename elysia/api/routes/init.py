@@ -114,6 +114,8 @@ async def initialise_user(
                 logger.error("Error initialising user, removing user")
                 if user_id in user_manager.users:
                     del user_manager.users[user_id]
+                # Re-raise to return error response instead of continuing
+                raise
 
         # if a user exists, get the existing configs
         user = await user_manager.get_user_local(user_id)
