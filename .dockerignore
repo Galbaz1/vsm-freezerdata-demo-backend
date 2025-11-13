@@ -66,17 +66,15 @@ build/
 .DS_Store
 Thumbs.db
 
-# Large source files (already processed)
+# Large directories to exclude (specific paths)
 features/extraction/
-features/manuals_vsm/
-features/vlogs_vsm/
-features/diagrams_vsm/
+features/manuals_vsm/output/
+features/vlogs_vsm/output/
+features/diagrams_vsm/src/
+features/diagrams_vsm/output/
 
-# Explicitly keep required feature directories
-!features/telemetry/
-!features/integration_vsm/
-!features/telemetry_vsm/
-!features/vsm_tree/
+# Note: features/telemetry, features/integration_vsm, features/telemetry_vsm, features/vsm_tree
+# are NOT excluded and will be copied via COPY features/ in Dockerfile
 
 # Keep only what's needed:
 # ✅ elysia/ (application code)
