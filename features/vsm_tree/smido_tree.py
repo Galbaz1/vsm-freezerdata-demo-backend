@@ -13,6 +13,10 @@ from elysia import Tree
 from typing import Tuple, Optional, Union
 from features.vsm_tree.context_manager import ContextManager
 from features.vsm_tree.smido_orchestrator import SMIDOOrchestrator
+from features.vsm_tree.context_cache import VSMContextCache
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 def create_vsm_tree(
@@ -115,6 +119,19 @@ In beide gevallen begrijpt de monteur het "waarom" achter de diagnose en welke s
     # Bootstrap tree structure (flat root + tools + post-tool chains)
     from features.vsm_tree.bootstrap import bootstrap_tree
     bootstrap_tree(tree, ["vsm_smido"], {})
+    
+    # Create and attach Gemini context cache
+    cache_manager = VSMContextCache(ttl_seconds=3600)
+    cache_name = cache_manager.create_cache(tree)
+    
+    # Store cache manager in tree for later access
+    tree._context_cache = cache_manager
+    
+    # Log cache creation status
+    if cache_name:
+        logger.info(f"Context cache ready: {cache_name}")
+    else:
+        logger.warning("Failed to create context cache, continuing without caching")
     
     if with_orchestrator:
         # Create context manager and orchestrator

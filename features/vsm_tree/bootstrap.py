@@ -139,6 +139,19 @@ def _register_root_tools(tree: Tree) -> None:
     from elysia.tools.retrieval.aggregate import Aggregate
     from elysia.tools.text.text import CitedSummarizer, FakeTextResponse
     
+    # Configure DSPy to use Gemini cache if available
+    cache_name = None
+    if hasattr(tree, '_context_cache'):
+        cache_name = tree._context_cache.get_cache_name()
+    
+    if cache_name:
+        # Note: DSPy cache configuration happens at LM initialization level
+        # The cached_content parameter is passed per-call in Elysia's internals
+        # We log here to confirm cache is available for use
+        logger.info(f"Gemini cache available for DSPy: {cache_name}")
+    else:
+        logger.debug("No Gemini cache configured, using standard DSPy setup")
+    
     # Always-available tools (following one_branch pattern)
     tree.add_tool(branch_id="base", tool=CitedSummarizer)
     tree.add_tool(branch_id="base", tool=FakeTextResponse)

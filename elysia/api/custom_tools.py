@@ -85,6 +85,12 @@ async def search_manuals_by_smido(
     
     Used in: I (Installatie), P2 (Procesinstellingen), O (Onderdelen) nodes
     """
+    # Log cache usage if available
+    if tree_data and hasattr(tree_data, 'environment'):
+        cache_name = tree_data.environment.hidden_environment.get("gemini_cache_name")
+        if cache_name:
+            logger.debug(f"Using Gemini cache: {cache_name}")
+    
     if not client_manager:
         yield Error("Client manager not available. Cannot query Weaviate.")
         return
