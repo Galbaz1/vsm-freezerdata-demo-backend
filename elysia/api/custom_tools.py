@@ -1479,7 +1479,7 @@ async def search_manual_images(
                     "query": query,
                     "filters": {"component": component, "smido_step": smido_step}
                 },
-                result_type="image_gallery"
+                payload_type="image_gallery"
             )
     
     except Exception as e:
