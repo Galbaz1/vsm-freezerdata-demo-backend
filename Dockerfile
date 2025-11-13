@@ -27,17 +27,23 @@ COPY scripts/auto_seed_on_startup.py ./scripts/
 COPY scripts/seed_default_config.py ./scripts/
 
 # Copy ONLY required feature data (explicitly to avoid .dockerignore conflicts)
-# Telemetry data (parquet files - 9MB)
-COPY features/telemetry/timeseries_freezerdata/*.parquet ./features/telemetry/timeseries_freezerdata/
+# Create directories first, then copy files
+RUN mkdir -p ./features/telemetry/timeseries_freezerdata/ \
+    ./features/integration_vsm/output/ \
+    ./features/telemetry_vsm/ \
+    ./features/vsm_tree/
+
+# Telemetry data (parquet files - 9MB) - copy individually to ensure they're included
+COPY features/telemetry/timeseries_freezerdata/135_1570_cleaned_with_flags.parquet ./features/telemetry/timeseries_freezerdata/
 
 # Integration data (commissioning JSON)
-COPY features/integration_vsm/output/ ./features/integration_vsm/output/
+COPY features/integration_vsm/output/fd_assets_enrichment.json ./features/integration_vsm/output/
 
-# Telemetry VSM (WorldState engine)
-COPY features/telemetry_vsm/ ./features/telemetry_vsm/
+# Telemetry VSM (WorldState engine - Python files)
+COPY features/telemetry_vsm/*.py ./features/telemetry_vsm/
 
-# VSM tree (bootstrap, context manager, orchestrator)
-COPY features/vsm_tree/ ./features/vsm_tree/
+# VSM tree (bootstrap, context manager, orchestrator - Python files)
+COPY features/vsm_tree/*.py ./features/vsm_tree/
 
 # Static files (frontend build + images - 63MB)
 COPY elysia/api/static/ ./elysia/api/static/
