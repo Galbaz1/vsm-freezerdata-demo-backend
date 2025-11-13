@@ -153,6 +153,12 @@ Communiceer in het Nederlands, wees informatief maar vriendelijk."""
     settings.set_from_env()
     settings_dict = settings.to_json()
 
+    # Fix: Convert port numbers from float to int (Weaviate serialization issue)
+    for key in ["LOCAL_WEAVIATE_PORT", "LOCAL_WEAVIATE_GRPC_PORT", 
+                "CUSTOM_HTTP_PORT", "CUSTOM_GRPC_PORT"]:
+        if key in settings_dict and isinstance(settings_dict[key], float):
+            settings_dict[key] = int(settings_dict[key])
+
     print(f"   ✅ Base Model: {settings.BASE_MODEL}")
     print(f"   ✅ Complex Model: {settings.COMPLEX_MODEL}")
     print(f"   ✅ Weaviate URL: {settings.WCD_URL}")
