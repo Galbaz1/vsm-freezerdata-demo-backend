@@ -26,8 +26,11 @@ env/
 
 # Documentation
 docs/
-*.md
-!README.md
+
+# Markdown files (but keep README.md for pyproject.toml)
+CLAUDE.md
+LATENCY_ROOT_CAUSE_ANALYSIS.md
+*.example
 
 # Frontend source (already built in static/)
 elysia-frontend-main/
