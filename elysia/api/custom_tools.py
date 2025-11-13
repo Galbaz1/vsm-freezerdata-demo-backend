@@ -278,7 +278,8 @@ async def search_manuals_by_smido(
                     "test_content_included": include_test_content,
                     "diagram_count": len(diagram_dicts),
                     "manual_section_count": len(manual_objects)
-                }
+                },
+                payload_type="document"
             )
             
     except Exception as e:

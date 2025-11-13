@@ -10,12 +10,12 @@ class BarChartData(BaseModel):
     x_labels: list[str | int | float] = Field(
         description="The shared labels for the x-axis. Must be all string or all numeric. Cannot mix.",
         min_length=1,
-        max_length=10,
+        max_length=1000,
     )
     y_values: dict[str, list[int | float]] = Field(
         description="A dictionary of data points for the y-axis, with the key being the category/group for the data points.",
         min_length=1,
-        max_length=10,
+        max_length=1000,
     )
 
 

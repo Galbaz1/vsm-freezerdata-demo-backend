@@ -188,9 +188,12 @@ async def search_manual_images(...):
    - Mermaid: `Response(markdown="```mermaid\n...\n```")`
    - Weaviate: `VSM_DiagramUserFacing` + `VSM_DiagramAgentInternal`
 
-3. **search_manuals_by_smido** (can include diagrams)
-   - Returns manual sections + diagrams in same call
-   - Diagrams use same dual-handling as `show_diagram`
+3. **search_manuals_by_smido** (167 manual sections, 146 uitleg)
+   - `payload_type="document"`
+   - Frontend: `DocumentDisplay.tsx` (card-based list)
+   - Weaviate: `VSM_ManualSections` collection
+   - Returns: Text sections (body_text) + optional diagrams
+   - Filters out test content by default (include_test_content=False)
 
 ### Why This Matters
 
@@ -199,10 +202,47 @@ async def search_manual_images(...):
 - **Weaviate preprocessing** maps collection fields → frontend fields
 - **Tool registration** makes visual content discoverable by agent decision LLM
 
+### Manual Text Content (IMPORTANT)
+
+**Pattern for Text Sections**:
+```python
+@tool
+async def search_manuals_by_smido(...):
+    # Text sections need payload_type for frontend display
+    yield Result(
+        objects=[{
+            "title": "Section title",
+            "body_text": "Full section content...",
+            "section_id": "...",
+            "smido_step": "procesinstellingen",
+            "manual_title": "Koelinstallaties - Opbouw en Werking",
+        }],
+        payload_type="document",  # Frontend renders via DocumentDisplay.tsx
+        metadata={...}
+    )
+```
+
+**Why Manual Text Needs Different Pattern than Images**:
+- **Images**: Custom `ImageGalleryDisplay` component (visual grid)
+- **Diagrams**: Markdown parsing (PNG) or Mermaid rendering
+- **Text sections**: Generic `DocumentDisplay` component (card list)
+  - User clicks card → opens `DocumentView` modal with full text
+  - Shows title, collection_name, preview
+  - Built-in Elysia component, no custom work needed
+
+**Content Type Breakdown** (VSM_ManualSections):
+- 146 "uitleg" sections (informative content for technicians)
+- 9 "opgave" sections (test content - filtered out by default)
+- 8 "flowchart" sections
+- 2 "stappenplan" sections
+- 1 "tabel" + 1 "foto"
+
 ### Reference
 - Docs: `docs/offical/Advanced/custom_objects.md` (Result vs Response)
 - Docs: `docs/offical/API/payload_formats.md` (Frontend payloads)
 - Docs: `docs/offical/start_here/creating_tools.md` (Tool yielding patterns)
+- Frontend components: `elysia-frontend-main/app/components/chat/displays/`
+- Document display: Uses `DocumentDisplay.tsx` + `DocumentView.tsx`
 
 ---
 
