@@ -115,14 +115,85 @@ async def my_tool(param: str, tree_data=None, client_manager=None, **kwargs):
 from elysia.util.client import ClientManager
 from weaviate.classes.query import Filter
 
-async with ClientManager().connect_to_async_client() as client:
-    collection = client.collections.get("VSM_ManualSections")
-    result = await collection.query.hybrid(
+    async with ClientManager().connect_to_async_client() as client:
+        collection = client.collections.get("VSM_ManualSections")
+        result = await collection.query.hybrid(
         query="search text",
         filters=Filter.by_property("smido_step").equal("power") &
                 Filter.by_property("content_type").not_equal("opgave")
     )
 ```
+
+---
+
+## Elysia Architecture: Visual Content Display (CRITICAL)
+
+### Why Separate Tools for Images/Diagrams are Required
+
+**Core Principle**: In Elysia, visual content **CANNOT** be displayed by embedding markdown in `Response` objects alone. This is a fundamental architectural constraint.
+
+**The Issue**:
+- `Response(text="![Image](url)")` → Renders as text in frontend, **NOT** as image
+- `Response` objects only yield **text** to the user, no structured payloads
+- Markdown in Response text is **NOT parsed** by default Elysia frontend
+
+**The Solution**: Use dedicated tools that yield `Result` objects with proper `payload_type`
+
+### Response vs Result Objects
+
+| Object | Purpose | Frontend Behavior | Environment Impact |
+|--------|---------|-------------------|-------------------|
+| `Response` | Text-only messages to user | Displayed as markdown/text | **NOT** added to environment |
+| `Result` | Structured data + frontend payloads | Rendered via custom components | **Added** to environment for agent context |
+
+### Pattern for Visual Content
+
+```python
+@tool
+async def search_manual_images(...):
+    # ❌ WRONG - Will not display images!
+    # yield Response("![Image](url)")
+    
+    # ✅ CORRECT - Frontend receives structured payload
+    yield Result(
+        objects=[{
+            "image_id": "...",
+            "image_url": "/static/manual_images/...",
+            "image_description": "...",
+        }],
+        payload_type="image_gallery",  # Frontend knows how to render this
+        metadata={...}
+    )
+```
+
+### Visual Content Tools in VSM
+
+1. **search_manual_images** (233 PNG photos)
+   - `payload_type="image_gallery"`
+   - Frontend: `ImageGalleryDisplay.tsx` (2-column grid)
+   - Weaviate: `VSM_ManualImage` collection
+
+2. **show_diagram** (8 PNG + 8 Mermaid)
+   - Dual handling: PNG (UserFacing) OR Mermaid (AgentInternal)
+   - PNG: `Response(markdown="![Diagram](url)")`
+   - Mermaid: `Response(markdown="```mermaid\n...\n```")`
+   - Weaviate: `VSM_DiagramUserFacing` + `VSM_DiagramAgentInternal`
+
+3. **search_manuals_by_smido** (can include diagrams)
+   - Returns manual sections + diagrams in same call
+   - Diagrams use same dual-handling as `show_diagram`
+
+### Why This Matters
+
+- **Agent cannot "just output" visual content** - needs dedicated tools
+- **Frontend needs structured payloads** - custom React components expect specific fields
+- **Weaviate preprocessing** maps collection fields → frontend fields
+- **Tool registration** makes visual content discoverable by agent decision LLM
+
+### Reference
+- Docs: `docs/offical/Advanced/custom_objects.md` (Result vs Response)
+- Docs: `docs/offical/API/payload_formats.md` (Frontend payloads)
+- Docs: `docs/offical/start_here/creating_tools.md` (Tool yielding patterns)
 
 ---
 
@@ -138,16 +209,17 @@ async with ClientManager().connect_to_async_client() as client:
 
 **VSM uses `branch_initialisation="empty"`** — native Elysia tools (query, aggregate, visualise) are **NOT loaded**.
 
-### VSM Custom Tools (9 loaded via bootstrap)
+### VSM Custom Tools (10 loaded via bootstrap)
 1. `search_manuals_by_smido` - SMIDO-filtered manual + diagram search
-2. `search_manual_images` - Visual troubleshooting support (233 manual photos)
-3. `get_current_status` - Quick status check with A3 demo override
-4. `get_alarms` - Query VSM_TelemetryEvent by severity
-5. `query_telemetry_events` - Historical "uit balans" incidents
-6. `query_vlog_cases` - Find A1-A5 problem→solution cases
-7. `compute_worldstate` - Calculate 58 features from parquet (<500ms)
-8. `get_asset_health` - W vs C comparison, balance check
-9. `analyze_sensor_pattern` - Match against 13 reference snapshots
+2. `search_manual_images` - Visual troubleshooting support (233 manual photos, limit=2)
+3. `show_diagram` - Display PNG diagrams (UserFacing) or Mermaid (AgentInternal)
+4. `get_current_status` - Quick status check with A3 demo override
+5. `get_alarms` - Query VSM_TelemetryEvent by severity
+6. `query_telemetry_events` - Historical "uit balans" incidents
+7. `query_vlog_cases` - Find A1-A5 problem→solution cases
+8. `compute_worldstate` - Calculate 58 features from parquet (<500ms)
+9. `get_asset_health` - W vs C comparison, balance check
+10. `analyze_sensor_pattern` - Match against 13 reference snapshots
 
 ### Always Available
 - `forced_text_response` - Fallback text generation (automatic)
