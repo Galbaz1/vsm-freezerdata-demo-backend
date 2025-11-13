@@ -39,6 +39,7 @@ dependencies = [
     "pip>=25.2",
     "google-genai>=0.3.0",
     "pandas>=2.0.0",
+    "pyarrow>=14.0.0",
 ]
 packages=[{include="elysia"}]
 

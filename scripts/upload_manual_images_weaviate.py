@@ -105,8 +105,9 @@ def main():
         with collection.batch.dynamic() as batch:
             for i, img in enumerate(images, 1):
                 # Build image URL with chunk- prefix (how files are actually named)
+                # Use relative URL so it works on any domain (localhost, Railway, production)
                 filename = f"chunk-{img['chunk_id']}.png"
-                image_url = f"http://localhost:8000/static/manual_images/{img['manual_name']}/{filename}"
+                image_url = f"/static/manual_images/{img['manual_name']}/{filename}"
                 
                 batch.add_object({
                     "image_id": img["chunk_id"],
