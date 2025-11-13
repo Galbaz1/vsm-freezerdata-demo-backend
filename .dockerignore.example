@@ -1,0 +1,72 @@
+# Example .dockerignore for Railway Deployment
+# Rename to .dockerignore when ready to deploy
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.venv/
+venv/
+ENV/
+env/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# Documentation
+docs/
+*.md
+!README.md
+
+# Frontend source (already built in static/)
+elysia-frontend-main/
+
+# Logs
+*.log
+logs/
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Test files
+tests/
+*.test.py
+*_test.py
+
+# Build artifacts
+dist/
+build/
+*.egg-info/
+
+# Railway specific
+.railway/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Large source files (already processed)
+features/extraction/production_output/
+features/manuals_vsm/output/*.jsonl
+features/vlogs_vsm/output/*.jsonl
+features/diagrams_vsm/src/
+
+# Keep only what's needed:
+# ✅ elysia/ (application code)
+# ✅ features/telemetry/timeseries_freezerdata/*.parquet (data)
+# ✅ features/integration_vsm/output/*.json (config)
+# ✅ elysia/api/static/ (frontend + images)
+
