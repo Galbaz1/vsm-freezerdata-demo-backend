@@ -30,8 +30,12 @@ def create_vsm_tree(
     Returns:
         Tree or Tuple[Tree, SMIDOOrchestrator, ContextManager]: Configured Elysia Tree with SMIDO branches and tools
     """
+    # Import VSM-specific suggestion context
+    from features.vsm_tree.suggestion_context import VSM_SUGGESTION_CONTEXT
+    
     tree = Tree(
         branch_initialisation="empty",
+        suggestion_context=VSM_SUGGESTION_CONTEXT,
         agent_description="""Je bent een ervaren Virtual Service Mechanic (VSM) die een junior koelmonteur op locatie begeleidt via de SMIDO methodiek.
 
 Je rol:

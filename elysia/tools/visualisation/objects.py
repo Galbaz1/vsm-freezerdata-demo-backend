@@ -102,11 +102,114 @@ class ScatterOrLineChart(BaseModel):
     )
 
 
+# Area Chart - for time series trends
+class AreaChartSeries(BaseModel):
+    name: str
+    data: list[float | int]
+    color: Optional[str] = None
+    fill_opacity: float = Field(default=0.3, ge=0, le=1)
+
+
+class AreaChartData(BaseModel):
+    x_axis: list[str | datetime | float | int] = Field(max_length=1000)
+    series: list[AreaChartSeries] = Field(min_length=1, max_length=5)
+
+
+class AreaChart(BaseModel):
+    title: str
+    description: str
+    x_axis_label: str
+    y_axis_label: str
+    data: AreaChartData
+
+
+# Pie Chart - for distributions/breakdowns
+class PieChartSlice(BaseModel):
+    name: str
+    value: float | int
+    color: Optional[str] = None
+
+
+class PieChart(BaseModel):
+    title: str
+    description: str
+    data: list[PieChartSlice] = Field(min_length=2, max_length=10)
+
+
+# Radial Bar Chart - for gauge/progress metrics
+class RadialBarData(BaseModel):
+    name: str
+    value: float | int
+    max_value: float | int
+    color: Optional[str] = None
+
+
+class RadialBarChart(BaseModel):
+    title: str
+    description: str
+    data: list[RadialBarData] = Field(min_length=1, max_length=5)
+
+
+# Composed Chart - mix line + bar
+class ComposedChartSeries(BaseModel):
+    name: str
+    data: list[float | int]
+    type: Literal["line", "bar", "area"]
+    color: Optional[str] = None
+
+
+class ComposedChart(BaseModel):
+    title: str
+    description: str
+    x_axis_label: str
+    y_axis_label: str
+    x_axis: list[str | datetime | float | int] = Field(max_length=1000)
+    series: list[ComposedChartSeries] = Field(min_length=1, max_length=5)
+
+
+# Radar Chart - multi-dimensional comparison
+class RadarChart(BaseModel):
+    title: str
+    description: str
+    metrics: list[str]  # e.g., ["cooling", "compressor", "stability"]
+    data: dict[str, list[float | int]]  # series_name -> values
+
+
+# Funnel Chart - process flow
+class FunnelStage(BaseModel):
+    name: str
+    value: float | int
+    color: Optional[str] = None
+
+
+class FunnelChart(BaseModel):
+    title: str
+    description: str
+    stages: list[FunnelStage] = Field(min_length=2, max_length=8)
+
+
+# Treemap Chart - hierarchical data
+class TreemapNode(BaseModel):
+    name: str
+    value: float | int
+    children: Optional[list['TreemapNode']] = None
+
+
+class TreemapChart(BaseModel):
+    title: str
+    description: str
+    data: list[TreemapNode]
+
+
+# Enable forward reference for TreemapNode
+TreemapNode.model_rebuild()
+
+
 class ChartResult(Result):
     def __init__(
         self,
-        charts: list[BarChart | HistogramChart | ScatterOrLineChart],
-        chart_type: Literal["bar", "histogram", "scatter_or_line"],
+        charts: list[BarChart | HistogramChart | ScatterOrLineChart | AreaChart | PieChart | RadialBarChart | ComposedChart | RadarChart | FunnelChart | TreemapChart],
+        chart_type: Literal["bar", "histogram", "scatter_or_line", "area", "pie", "radial_bar", "composed", "radar", "funnel", "treemap"],
         title: str = "",
         metadata: dict[str, Any] = {},
     ):

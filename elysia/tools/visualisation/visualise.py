@@ -6,12 +6,26 @@ from elysia.tools.visualisation.objects import (
     BarChart,
     HistogramChart,
     ScatterOrLineChart,
+    AreaChart,
+    PieChart,
+    RadialBarChart,
+    ComposedChart,
+    RadarChart,
+    FunnelChart,
+    TreemapChart,
 )
 from elysia.tools.visualisation.util import convert_chart_types_to_matplotlib
 from elysia.tools.visualisation.prompt_templates import (
     CreateBarChart,
     CreateHistogramChart,
     CreateScatterOrLineChart,
+    CreateAreaChart,
+    CreatePieChart,
+    CreateRadialBarChart,
+    CreateComposedChart,
+    CreateRadarChart,
+    CreateFunnelChart,
+    CreateTreemapChart,
 )
 from elysia.objects import Response
 from elysia.util.objects import TrainingUpdate, TreeUpdate
@@ -25,7 +39,18 @@ class Visualise(Tool):
             description=(
                 "Visualise data in a chart from the environment. "
                 "You can only visualise data that is in the environment. "
-                "If there is nothing relevant in the environment, do not choose this tool."
+                "If there is nothing relevant in the environment, do not choose this tool.\n"
+                "Choose chart type based on data:\n"
+                "- `bar`: Categorical comparisons\n"
+                "- `histogram`: Distribution of continuous data\n"
+                "- `scatter_or_line`: X-Y relationships, trends\n"
+                "- `area`: Time series with filled regions\n"
+                "- `pie`: Part-to-whole percentages (2-10 categories)\n"
+                "- `radial_bar`: Gauge/progress metrics (scores, capacity)\n"
+                "- `composed`: Mix multiple chart types (line+bar)\n"
+                "- `radar`: Multi-dimensional comparison (3-8 metrics)\n"
+                "- `funnel`: Sequential process stages\n"
+                "- `treemap`: Hierarchical proportions"
             ),
             status="Visualising...",
             end=True,
@@ -34,7 +59,7 @@ class Visualise(Tool):
                     "type": str,
                     "description": (
                         "The type of chart to create. "
-                        "Must be one of: `bar`, `histogram`, `scatter_or_line`."
+                        "Must be one of: `bar`, `histogram`, `scatter_or_line`, `area`, `pie`, `radial_bar`, `composed`, `radar`, `funnel`, `treemap`."
                     ),
                     "required": True,
                     "default": "",
@@ -59,6 +84,13 @@ class Visualise(Tool):
                 "bar": CreateBarChart,
                 "histogram": CreateHistogramChart,
                 "scatter_or_line": CreateScatterOrLineChart,
+                "area": CreateAreaChart,
+                "pie": CreatePieChart,
+                "radial_bar": CreateRadialBarChart,
+                "composed": CreateComposedChart,
+                "radar": CreateRadarChart,
+                "funnel": CreateFunnelChart,
+                "treemap": CreateTreemapChart,
             }
 
             create_chart = ElysiaChainOfThought(

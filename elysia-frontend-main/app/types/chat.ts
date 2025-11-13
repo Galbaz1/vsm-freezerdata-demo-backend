@@ -9,6 +9,13 @@ import {
   BarPayload,
   ScatterOrLinePayload,
   HistogramPayload,
+  AreaChartPayload,
+  PieChartPayload,
+  RadialBarChartPayload,
+  ComposedChartPayload,
+  RadarChartPayload,
+  FunnelChartPayload,
+  TreemapChartPayload,
 } from "@/app/types/displays";
 
 export type Message = {
@@ -118,6 +125,13 @@ export type ResultPayload = {
     | "bar_chart"
     | "histogram_chart"
     | "scatter_or_line_chart"
+    | "area_chart"
+    | "pie_chart"
+    | "radial_bar_chart"
+    | "composed_chart"
+    | "radar_chart"
+    | "funnel_chart"
+    | "treemap_chart"
     | "image_gallery";
 
   /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -134,7 +148,14 @@ export type ResultPayload = {
     | DocumentPayload[]
     | BarPayload[]
     | ScatterOrLinePayload[]
-    | HistogramPayload[];
+    | HistogramPayload[]
+    | AreaChartPayload[]
+    | PieChartPayload[]
+    | RadialBarChartPayload[]
+    | ComposedChartPayload[]
+    | RadarChartPayload[]
+    | FunnelChartPayload[]
+    | TreemapChartPayload[];
 };
 
 export type TextWithCitationsPayload = {

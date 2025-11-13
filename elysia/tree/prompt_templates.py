@@ -160,6 +160,17 @@ class FollowUpSuggestionsPrompt(dspy.Signature):
     Do not suggest questions that will require _complex_ calculations or reasoning, it should be mostly focused on following up on the already retrieved data,
     or following up by retrieving similar or new data that is related to the already retrieved data.
 
+    IMPORTANT - VISUAL CONTENT SUGGESTIONS:
+    When the conversation context indicates that visual content would be helpful, intelligently suggest viewing it:
+    - If discussing sensor data/trends → suggest "Show me a temperature timeline" or "Visualize the sensor data"
+    - If discussing system health/scores → suggest "Show me the health dashboard"  
+    - If discussing alarms/incidents → suggest "Show me alarm distribution"
+    - If discussing manual content → suggest "Show me a diagram of the system" or "Show me related images"
+    - If discussing specific components → suggest "Show me a photo of the [component]"
+    
+    Only suggest visual content when it's contextually relevant to what was just discussed or retrieved.
+    Do NOT suggest visual content if the conversation is purely about concepts, definitions, or procedural steps without data/diagnostics.
+
     You must ALWAYS return a list of strings (for `suggestions`), with each string being a follow-up question. Do not leave it empty.
     """
 

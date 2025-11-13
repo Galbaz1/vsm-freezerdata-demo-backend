@@ -91,6 +91,95 @@ export type ChartValue = {
   data: number[];
 };
 
+// Area Chart Types
+export type AreaChartPayload = DefaultResultPayload & {
+  title: string;
+  description: string;
+  x_axis_label: string;
+  y_axis_label: string;
+  data: {
+    x_axis: (string | number | Date)[];
+    series: {
+      name: string;
+      data: (number | null)[];
+      color?: string;
+      fill_opacity?: number;
+    }[];
+  };
+};
+
+// Pie Chart Types
+export type PieChartPayload = DefaultResultPayload & {
+  title: string;
+  description: string;
+  data: {
+    name: string;
+    value: number;
+    color?: string;
+  }[];
+};
+
+// Radial Bar Chart Types
+export type RadialBarChartPayload = DefaultResultPayload & {
+  title: string;
+  description: string;
+  data: {
+    name: string;
+    value: number;
+    max_value: number;
+    color?: string;
+  }[];
+};
+
+// Composed Chart Types
+export type ComposedChartPayload = DefaultResultPayload & {
+  title: string;
+  description: string;
+  x_axis_label: string;
+  y_axis_label: string;
+  x_axis: (string | number | Date)[];
+  series: {
+    name: string;
+    data: (number | null)[];
+    type: "line" | "bar" | "area";
+    color?: string;
+  }[];
+};
+
+// Radar Chart Types
+export type RadarChartPayload = DefaultResultPayload & {
+  title: string;
+  description: string;
+  metrics: string[];
+  data: {
+    [seriesName: string]: number[];
+  };
+};
+
+// Funnel Chart Types
+export type FunnelChartPayload = DefaultResultPayload & {
+  title: string;
+  description: string;
+  stages: {
+    name: string;
+    value: number;
+    color?: string;
+  }[];
+};
+
+// Treemap Chart Types
+export type TreemapNode = {
+  name: string;
+  value: number;
+  children?: TreemapNode[];
+};
+
+export type TreemapChartPayload = DefaultResultPayload & {
+  title: string;
+  description: string;
+  data: TreemapNode[];
+};
+
 export type ChunkSpan = {
   start: number;
   end: number;

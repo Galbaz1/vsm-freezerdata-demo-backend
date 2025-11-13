@@ -69,9 +69,10 @@ elysia start  # Opens on http://localhost:8000
 ## Key Files
 
 ### Agent & Tree
-- `features/vsm_tree/smido_tree.py` - Agent persona with explicit SMIDO flow, "uit balans" definition
-- `features/vsm_tree/bootstrap.py` - Flat root architecture, tool registration, 13 tools at base root
-- `elysia/api/custom_tools.py` - 10 VSM tools (all with collection source transparency)
+- `features/vsm_tree/smido_tree.py` - Agent persona with explicit SMIDO flow, "uit balans" definition, VSM suggestion context
+- `features/vsm_tree/bootstrap.py` - Flat root architecture, tool registration, 16 tools at base root
+- `features/vsm_tree/suggestion_context.py` - Context-aware visual content suggestions
+- `elysia/api/custom_tools.py` - 13 VSM tools (all with collection source transparency)
 
 ### Data Sources
 - `features/telemetry/timeseries_freezerdata/135_1570_cleaned_with_flags.parquet` - 785K rows (July 2024 - Jan 2026)
@@ -246,6 +247,89 @@ async def search_manuals_by_smido(...):
 
 ---
 
+## Visualization System (Nov 13, 2025)
+
+### Chart Types Available (10 total)
+
+**Original (3)**:
+- `bar`: Categorical comparisons
+- `histogram`: Distribution of continuous data
+- `scatter_or_line`: X-Y relationships, trends
+
+**New (7)**:
+- `area`: Time series with filled regions (telemetry over time)
+- `pie`: Part-to-whole percentages (2-10 categories)
+- `radial_bar`: Gauge/progress metrics (health scores 0-100)
+- `composed`: Mix line + bar + area on same axes
+- `radar`: Multi-dimensional comparison (3-8 metrics)
+- `funnel`: Sequential process stages (SMIDO M→T→I→D→O)
+- `treemap`: Hierarchical proportions
+
+### VSM Domain-Specific Visualization Tools
+
+**1. visualize_temperature_timeline** (Area Chart)
+- **Use**: P3 Procesparameters phase
+- **Shows**: Room temp vs setpoint over time (last N hours)
+- **Data**: Parquet telemetry + FD_Assets target
+- **Example**: `visualize_temperature_timeline(hours_back=24)`
+
+**2. show_health_dashboard** (Radial Bar Gauges)
+- **Use**: D Diagnose or M Melding phases
+- **Shows**: 3 health scores (cooling, compressor, stability)
+- **Color coding**: Green 70-100, Yellow 30-70, Red 0-30
+- **Example**: `show_health_dashboard(window_minutes=60)`
+
+**3. show_alarm_breakdown** (Pie Chart)
+- **Use**: M Melding phase
+- **Shows**: Alarm distribution by failure mode
+- **Data**: VSM_TelemetryEvent collection (12 reference incidents)
+- **Example**: `show_alarm_breakdown(period_days=30)`
+
+### Intelligent Agent Selection
+
+The `visualise` tool description guides the agent to choose appropriate chart types:
+- Time series data → `area` or `scatter_or_line`
+- Categorical comparison → `bar`
+- Distribution → `histogram` or `pie`
+- Multi-dimensional scores → `radar` or `radial_bar`
+- Process stages → `funnel`
+- Hierarchy → `treemap`
+- Mixed metrics → `composed`
+
+### Data Limits
+- **Before**: max 10 points (hardcoded)
+- **After**: max 1000 points (configurable)
+- **Agent behavior**: Automatically samples if data exceeds limit
+
+---
+
+## Intelligent Follow-Up Suggestions
+
+### Context-Aware Visual Content Recommendations
+
+The system now suggests relevant visual actions based on conversation context:
+
+**Trigger Logic** (in `FollowUpSuggestionsPrompt`):
+- Sensor data discussed → "Visualiseer de temperatuur van de laatste 24 uur"
+- Health scores mentioned → "Laat de health dashboard zien"
+- Alarms reviewed → "Toon de alarm verdeling als grafiek"
+- Manual content retrieved → "Laat een diagram van dit systeem zien"
+- Component named → "Laat een foto van de [component] zien"
+
+**VSM Suggestion Context**: `features/vsm_tree/suggestion_context.py`
+- Emphasizes multimodal capabilities
+- Suggests visual aids when contextually relevant
+- Dutch language suggestions
+- Prioritizes visual content for diagnostic workflows
+
+**Integration**:
+- Tree stores `suggestion_context` (set in `smido_tree.py`)
+- `get_follow_up_suggestions_async()` uses VSM context automatically
+- LLM generates 2 suggestions per response
+- Frontend displays as clickable "Related Questions"
+
+---
+
 ## WorldState (W) vs Context (C)
 
 - **W** (Dynamic): Current sensors, flags, trends, health scores (from parquet) given a certain time range
@@ -256,27 +340,43 @@ async def search_manuals_by_smido(...):
 
 ## Tools Available in VSM
 
-**VSM uses `branch_initialisation="empty"`** — native Elysia tools (query, aggregate, visualise) are **NOT loaded**.
+**VSM uses `branch_initialisation="empty"`** — tools manually registered via bootstrap  
+**Total**: 16 tools at base root (13 VSM custom + 3 native)
 
-### VSM Custom Tools (10 loaded via bootstrap)
-1. `search_manuals_by_smido` - SMIDO-filtered manual + diagram search
-2. `search_manual_images` - Visual troubleshooting support (233 manual photos, limit=2)
-3. `show_diagram` - Display PNG diagrams (UserFacing) or Mermaid (AgentInternal)
-4. `get_current_status` - Quick status check with A3 demo override
-5. `get_alarms` - Query VSM_TelemetryEvent by severity
+### VSM Custom Tools (13 loaded via bootstrap)
+
+**Data & Analysis**:
+1. `get_current_status` - Quick status check with A3 demo override
+2. `get_alarms` - Query VSM_TelemetryEvent by severity
+3. `compute_worldstate` - Calculate 58 features from parquet (<500ms)
+4. `get_asset_health` - W vs C comparison, balance check
+5. `analyze_sensor_pattern` - Match against 13 reference snapshots
 6. `query_telemetry_events` - Historical "uit balans" incidents
-7. `query_vlog_cases` - Find A1-A5 problem→solution cases
-8. `compute_worldstate` - Calculate 58 features from parquet (<500ms)
-9. `get_asset_health` - W vs C comparison, balance check
-10. `analyze_sensor_pattern` - Match against 13 reference snapshots
+
+**Knowledge & Content**:
+7. `search_manuals_by_smido` - SMIDO-filtered manual + diagram search
+8. `search_manual_images` - Visual troubleshooting support (233 manual photos, limit=2)
+9. `show_diagram` - Display Mermaid diagrams (8 UserFacing + 8 AgentInternal)
+10. `query_vlog_cases` - Find A1-A5 problem→solution cases
+
+**VSM Visualizations** (NEW - Nov 13, 2025):
+11. `visualize_temperature_timeline` - Area chart: temp vs setpoint over time (P3)
+12. `show_health_dashboard` - Radial gauges: cooling/compressor/stability scores (D, M)
+13. `show_alarm_breakdown` - Pie chart: alarm distribution by type (M)
+
+### Native Elysia Tools (3 loaded via bootstrap)
+1. `query` - Flexible Weaviate search across all collections
+2. `aggregate` - Statistics, counts, grouping
+3. `visualise` - Generic chart tool (appears after data tools)
+   - **Chart types** (10 total):
+     - Original: `bar`, `histogram`, `scatter_or_line`
+     - NEW: `area`, `pie`, `radial_bar`, `composed`, `radar`, `funnel`, `treemap`
+   - **Data limits**: Increased from max 10 to max 1000 points
+   - **Intelligent selection**: Agent chooses chart type based on data characteristics
 
 ### Always Available
+- `cited_summarize` - Summarize with source citations
 - `forced_text_response` - Fallback text generation (automatic)
-
-### Native Elysia Tools (NOT in VSM, available in other tree modes)
-- `query`, `aggregate`, `visualise`, `cited_summarize`, `summarise_items`
-- Loaded in `one_branch` or `multi_branch` init modes
-- VSM uses `empty` init → only custom tools loaded
 
 ---
 
@@ -311,6 +411,7 @@ source .venv/bin/activate
 
 # Visual content tests
 python3 scripts/test_image_diagram_improvements.py  # 5/5 tests passing
+python3 scripts/test_visualizations.py  # 7/7 chart models validated
 
 # WorldState & tools
 pytest  # 18/18 WorldState tests
@@ -323,9 +424,10 @@ python3 scripts/test_plan7_full_tree.py  # Full A3 scenario
 ## Status (Nov 13, 2025)
 
 - ✅ Phase 1: Data Upload COMPLETE (221 objects)
-- ✅ Phase 2: Agent & Tools COMPLETE (10 VSM tools, all tests passing)
-- ✅ Phase 3: Visual Content COMPLETE (images + diagrams fully functional)
-- 🔄 Phase 4: UX & Performance IN PROGRESS (30% complete)
+- ✅ Phase 2: Agent & Tools COMPLETE (16 VSM tools, all tests passing)
+- ✅ Phase 3: Visual Content COMPLETE (images + diagrams + Mermaid rendering)
+- ✅ Phase 4: Visualization System COMPLETE (10 chart types, 3 VSM domain tools)
+- 🔄 Phase 5: UX & Performance IN PROGRESS (40% complete)
 
 **Recent Completions** (Nov 13):
 - ✅ Image gallery UX improved (limit=2, 1-line descriptions, high contrast)
@@ -333,12 +435,18 @@ python3 scripts/test_plan7_full_tree.py  # Full A3 scenario
 - ✅ show_diagram tool registered and functional
 - ✅ UserFacing diagrams tagged with SMIDO phases (8/8)
 - ✅ Elysia visual content architecture documented
+- ✅ **Enhanced visualization system** (3 → 10 chart types)
+- ✅ **VSM domain visualizations** (3 new tools: temperature timeline, health dashboard, alarm breakdown)
+- ✅ **Intelligent suggestions** (context-aware visual content recommendations)
+- ✅ **Data limits increased** (10 → 1000 points, configurable)
+- ✅ **Frontend auto-scroll fix** (block: "end" for new queries)
 
 **Critical TODOs**:
-1. ~~Redesign branching (flat root + native tools)~~ → DONE (13 tools at base root)
-2. ~~Fix diagram search~~ → DONE (dual PNG/Mermaid handling)
-3. Implement `get_current_status` with `run_if_true` (<200ms, cached WorldState)
-4. Add vlog video display capability (5 cases, 15 clips)
+1. ~~Redesign branching (flat root + native tools)~~ → DONE (16 tools at base root)
+2. ~~Fix diagram search~~ → DONE (dual PNG/Mermaid handling, auto-display)
+3. ~~Enhance visualization system~~ → DONE (10 chart types, VSM domain tools)
+4. Implement `get_current_status` with `run_if_true` (<200ms, cached WorldState)
+5. Add vlog video display capability (5 cases, 15 clips)
 
 ---
 
@@ -358,25 +466,29 @@ Root (base)
 └── text_response, cited_summarize (always)
 ```
 
-### Tools Available
-- **Root**: 10-12 tools (VSM + native, agent chooses based on intent)
-- **Post-tool**: 3-5 tools (context-specific, via `from_tool_ids`)
-- **Total**: 7 VSM + 5 native + forced_text_response
+### Current Architecture (IMPLEMENTED)
+- **Root**: 16 tools (13 VSM + 3 native, flat structure)
+- **Post-tool chains**: SMIDO flows via `from_tool_ids`
+- **Total**: 13 VSM custom + 3 native + 2 always-available
 
-### Key Changes from Current
-- ❌ Remove: Deep SMIDO hierarchy (M→T→I→D→O branches)
-- ✅ Add: Flat root with all tools
-- ✅ Add: Native Elysia tools (query, aggregate, visualise)
-- ✅ Add: Fast status tool (get_current_status)
-- ✅ Use: Post-tool chains for SMIDO flows
-- ✅ Use: Clear tool descriptions (no keyword detection)
+### Implementation Status
+- ✅ Flat root with all tools
+- ✅ Native Elysia tools (query, aggregate, visualise)
+- ✅ Enhanced visualise tool (10 chart types with intelligent selection)
+- ✅ VSM domain visualizations (3 specialized chart tools)
+- ✅ Context-aware follow-up suggestions (visual content recommendations)
+- ✅ Post-tool chains for SMIDO flows
+- ✅ Clear tool descriptions (no keyword detection)
+- 🔄 Fast status tool with `run_if_true` (TODO)
 
-### Benefits
-- <200ms status checks (run_if_true)
-- Native search/stats capabilities
-- Simpler code (~200 lines vs ~500)
-- Follows Weaviate's proven patterns
-- SMIDO methodology preserved (via tool sequences)
+### Benefits Achieved
+- ✅ Native search/stats capabilities
+- ✅ Rich visualization options (10 chart types)
+- ✅ Simpler code (~300 lines bootstrap)
+- ✅ Follows Weaviate's proven patterns
+- ✅ SMIDO methodology preserved (via tool sequences)
+- ✅ Intelligent visual suggestions in follow-ups
+- 🔄 <200ms status checks (pending run_if_true implementation)
 
 ---
 

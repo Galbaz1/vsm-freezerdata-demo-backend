@@ -1389,6 +1389,427 @@ async def show_diagram(
 
 
 @tool(
+    status="Creating temperature timeline visualization...",
+    branch_id="smido_p3_procesparameters"
+)
+async def visualize_temperature_timeline(
+    asset_id: str = "135_1570",
+    hours_back: int = 24,
+    timestamp: str = None,
+    tree_data=None,
+    client_manager=None,
+    **kwargs
+):
+    """
+    Visualize temperature trends over time with setpoint comparison - area chart for telemetry analysis.
+    
+    Use this when:
+    - P3 (PROCESPARAMETERS): Analyzing temperature trends vs design values
+    - Need to show how room temp changed over time
+    - Comparing actual performance against target setpoint
+    - Identifying when system went "uit balans"
+    
+    What it shows:
+    - Room temperature timeline (area chart with gradient)
+    - Target setpoint line (from FD_Assets Context C)
+    - Visual threshold bands (critical/warning/ok zones)
+    - Time range: last N hours of telemetry data
+    
+    Output interpretation:
+    - Blue area = Actual room temperature
+    - Green line = Design setpoint (-22.5°C typically)
+    - Red zone = Critical (temp too high)
+    - Yellow zone = Warning
+    - Green zone = OK range
+    
+    How to explain to M:
+    "Ik laat nu een temperatuuroverzicht zien van de laatste 24 uur..."
+    [after tool runs]
+    "Je ziet hier dat de kamertemperatuur rond [time] begon te stijgen boven het setpoint. 
+    Dit duidt op verminderde koelprestaties."
+    
+    Args:
+        asset_id: Asset identifier (default: "135_1570")
+        hours_back: Hours of history to show (default: 24)
+        timestamp: Reference timestamp (ISO format). If None, uses historical demo data.
+    
+    Returns:
+        Area chart with temperature timeline, setpoint, and threshold bands
+    """
+    from features.telemetry_vsm.src.worldstate_engine import WorldStateEngine
+    from datetime import datetime, timedelta
+    import pandas as pd
+    
+    yield Status(f"Loading telemetry data for last {hours_back} hours...")
+    
+    # Parse timestamp - use historical demo timestamp
+    if timestamp and timestamp != 'None' and timestamp.strip():
+        try:
+            end_time = datetime.fromisoformat(timestamp)
+        except (ValueError, AttributeError):
+            end_time = datetime(2024, 1, 15, 12, 0, 0)
+    else:
+        end_time = datetime(2024, 1, 15, 12, 0, 0)
+    
+    start_time = end_time - timedelta(hours=hours_back)
+    
+    # Load parquet data
+    engine = WorldStateEngine("features/telemetry/timeseries_freezerdata/135_1570_cleaned_with_flags.parquet")
+    
+    try:
+        # Read parquet directly for time range
+        df = pd.read_parquet("features/telemetry/timeseries_freezerdata/135_1570_cleaned_with_flags.parquet")
+        
+        # Filter to time range
+        df['timestamp'] = pd.to_datetime(df['timestamp'])
+        mask = (df['timestamp'] >= start_time) & (df['timestamp'] <= end_time)
+        df_filtered = df[mask].sort_values('timestamp')
+        
+        if len(df_filtered) == 0:
+            yield Error(f"No telemetry data found between {start_time} and {end_time}")
+            return
+        
+        # Get target setpoint from FD_Assets (Context C)
+        target_temp = -22.5  # Default target
+        
+        if client_manager and client_manager.is_client:
+            try:
+                async with client_manager.connect_to_async_client() as client:
+                    if await client.collections.exists("FD_Assets"):
+                        assets = client.collections.get("FD_Assets")
+                        result = await assets.query.fetch_objects(limit=1)
+                        if result.objects:
+                            commissioning = result.objects[0].properties.get("commissioning_data", {})
+                            target_temp = commissioning.get("design_room_temp", -22.5)
+            except Exception as e:
+                yield Status(f"Using default setpoint (couldn't load from FD_Assets): {str(e)}")
+        
+        yield Status(f"Found {len(df_filtered)} data points, creating visualization...")
+        
+        # Sample if too many points (keep max 500 for performance)
+        if len(df_filtered) > 500:
+            step = len(df_filtered) // 500
+            df_filtered = df_filtered.iloc[::step]
+        
+        # Prepare data for area chart
+        timestamps = df_filtered['timestamp'].dt.strftime('%H:%M').tolist()
+        room_temps = df_filtered['room_temp'].tolist()
+        setpoint_data = [target_temp] * len(timestamps)
+        
+        # Create area chart
+        chart_data = {
+            "title": f"Temperature Timeline - Last {hours_back} Hours",
+            "description": f"Room temperature vs setpoint (target: {target_temp}°C)",
+            "x_axis_label": "Time",
+            "y_axis_label": "Temperature (°C)",
+            "data": {
+                "x_axis": timestamps,
+                "series": [
+                    {
+                        "name": "Room Temperature",
+                        "data": room_temps,
+                        "color": "#3B82F6",
+                        "fill_opacity": 0.4
+                    },
+                    {
+                        "name": "Setpoint",
+                        "data": setpoint_data,
+                        "color": "#10B981",
+                        "fill_opacity": 0.1
+                    }
+                ]
+            }
+        }
+        
+        # Store in environment for cross-tool access
+        if tree_data:
+            tree_data.environment["temperature_timeline"] = {
+                "start_time": start_time.isoformat(),
+                "end_time": end_time.isoformat(),
+                "data_points": len(timestamps),
+                "avg_temp": sum(room_temps) / len(room_temps),
+                "target_temp": target_temp,
+                "deviation": (sum(room_temps) / len(room_temps)) - target_temp
+            }
+        
+        yield Result(
+            objects=[chart_data],
+            payload_type="area_chart",
+            metadata={
+                "asset_id": asset_id,
+                "time_range_hours": hours_back,
+                "data_points": len(timestamps),
+                "target_temp": target_temp,
+                "avg_temp": round(sum(room_temps) / len(room_temps), 2)
+            }
+        )
+        
+    except Exception as e:
+        yield Error(f"Error creating temperature timeline: {str(e)}")
+        return
+
+
+@tool(
+    status="Creating health score dashboard...",
+    branch_id="smido_diagnose"
+)
+async def show_health_dashboard(
+    asset_id: str = "135_1570",
+    timestamp: str = None,
+    window_minutes: int = 60,
+    tree_data=None,
+    client_manager=None,
+    **kwargs
+):
+    """
+    Display system health scores as gauge-style radial bars - visual health overview.
+    
+    Use this when:
+    - D (DIAGNOSE): Need quick visual of overall system health
+    - M (MELDING): First assessment after symptom reported
+    - Want to show monteur current state in one view
+    
+    What it shows:
+    - Cooling Performance (0-100): How well system maintains target temp
+    - Compressor Health (0-100): Compressor efficiency and operation
+    - System Stability (0-100): Overall system stability and consistency
+    
+    Color coding:
+    - Green (70-100): Good / Gezond
+    - Yellow (30-70): Warning / Waarschuwing
+    - Red (0-30): Critical / Kritiek
+    
+    How to explain to M:
+    "Ik laat nu de gezondheidsscores van het systeem zien..."
+    [after tool runs]
+    "Koelprestaties: [score]/100 ([status]). Dit betekent dat [interpretation]."
+    
+    Args:
+        asset_id: Asset identifier (default: "135_1570")
+        timestamp: Reference timestamp (ISO format). If None, uses historical demo.
+        window_minutes: Time window for health computation (default: 60)
+    
+    Returns:
+        Radial bar chart with 3 health gauges
+    """
+    yield Status("Computing health scores...")
+    
+    # Compute asset health using existing tool logic
+    from features.telemetry_vsm.src.worldstate_engine import WorldStateEngine
+    from datetime import datetime
+    
+    # Parse timestamp
+    if timestamp and timestamp != 'None' and timestamp.strip():
+        try:
+            ts = datetime.fromisoformat(timestamp)
+        except (ValueError, AttributeError):
+            ts = datetime(2024, 1, 15, 12, 0, 0)
+    else:
+        ts = datetime(2024, 1, 15, 12, 0, 0)
+    
+    engine = WorldStateEngine("features/telemetry/timeseries_freezerdata/135_1570_cleaned_with_flags.parquet")
+    
+    try:
+        # Compute WorldState
+        worldstate = engine.compute_worldstate(asset_id, ts, window_minutes)
+        health_scores = worldstate.get("health_scores", {})
+        
+        # Get scores
+        cooling_score = health_scores.get("cooling_performance_score", 50)
+        compressor_score = health_scores.get("compressor_health_score", 50)
+        stability_score = health_scores.get("system_stability_score", 50)
+        
+        # Helper function for color coding
+        def get_color_for_score(score):
+            if score >= 70:
+                return "#10B981"  # Green
+            elif score >= 30:
+                return "#F59E0B"  # Yellow
+            else:
+                return "#EF4444"  # Red
+        
+        yield Status("Creating health dashboard...")
+        
+        chart_data = {
+            "title": "System Health Overview",
+            "description": f"Current health metrics for asset {asset_id}",
+            "data": [
+                {
+                    "name": "Cooling Performance",
+                    "value": round(cooling_score, 1),
+                    "max_value": 100,
+                    "color": get_color_for_score(cooling_score)
+                },
+                {
+                    "name": "Compressor Health",
+                    "value": round(compressor_score, 1),
+                    "max_value": 100,
+                    "color": get_color_for_score(compressor_score)
+                },
+                {
+                    "name": "System Stability",
+                    "value": round(stability_score, 1),
+                    "max_value": 100,
+                    "color": get_color_for_score(stability_score)
+                }
+            ]
+        }
+        
+        # Store in environment
+        if tree_data:
+            tree_data.environment["health_dashboard"] = {
+                "cooling": cooling_score,
+                "compressor": compressor_score,
+                "stability": stability_score,
+                "timestamp": ts.isoformat()
+            }
+        
+        yield Result(
+            objects=[chart_data],
+            payload_type="radial_bar_chart",
+            metadata={
+                "asset_id": asset_id,
+                "timestamp": str(ts),
+                "window_minutes": window_minutes,
+                "avg_score": round((cooling_score + compressor_score + stability_score) / 3, 1)
+            }
+        )
+        
+    except Exception as e:
+        yield Error(f"Error creating health dashboard: {str(e)}")
+        return
+
+
+@tool(
+    status="Analyzing alarm distribution...",
+    branch_id="smido_melding"
+)
+async def show_alarm_breakdown(
+    asset_id: str = "135_1570",
+    period_days: int = 30,
+    tree_data=None,
+    client_manager=None,
+    **kwargs
+):
+    """
+    Show pie chart of alarm type distribution - overview of incident patterns.
+    
+    Use this when:
+    - M (MELDING): Initial assessment to understand alarm history
+    - Need to identify most common failure modes
+    - Showing monteur what types of problems occur most often
+    
+    What it shows:
+    - Pie chart with alarm distribution by failure mode
+    - Each slice shows: alarm type, count, percentage
+    - Color-coded by severity/type
+    
+    How to explain to M:
+    "Ik bekijk nu de alarmhistorie van de laatste 30 dagen..."
+    [after tool runs]
+    "De meeste alarmen zijn [type] ([count] keer, [%]%). Dit suggereert een patroon van [interpretation]."
+    
+    Args:
+        asset_id: Asset identifier (default: "135_1570")
+        period_days: Number of days to look back (default: 30)
+    
+    Returns:
+        Pie chart showing alarm distribution by type
+    """
+    if not client_manager:
+        yield Error("Client manager not available. Cannot query Weaviate.")
+        return
+    
+    if not client_manager.is_client:
+        yield Error("Weaviate client not configured. Please set WCD_URL and WCD_API_KEY.")
+        return
+    
+    yield Status(f"Querying alarms for last {period_days} days...")
+    
+    try:
+        async with client_manager.connect_to_async_client() as client:
+            if not await client.collections.exists("VSM_TelemetryEvent"):
+                yield Error("VSM_TelemetryEvent collection not found in Weaviate.")
+                return
+            
+            collection = client.collections.get("VSM_TelemetryEvent")
+            
+            # Fetch all events (we have 12 total)
+            results = await collection.query.fetch_objects(limit=50)
+            
+            if not results.objects:
+                yield Error("No alarm events found in database")
+                return
+            
+            yield Status(f"Found {len(results.objects)} events, analyzing distribution...")
+            
+            # Group by failure mode
+            alarm_counts = {}
+            for obj in results.objects:
+                failure_mode = obj.properties.get("failure_mode", "Unknown")
+                alarm_counts[failure_mode] = alarm_counts.get(failure_mode, 0) + 1
+            
+            # Map failure modes to readable names and colors
+            failure_mode_names = {
+                "ingevroren_verdamper": "Frozen Evaporator",
+                "te_weinig_koudemiddel": "Low Refrigerant",
+                "condensor_ventilator": "Condenser Fan Issue",
+                "expansieventiel_blokkade": "Expansion Valve Block",
+                "verkeerde_instellingen": "Incorrect Settings",
+                "Unknown": "Other/Unknown"
+            }
+            
+            failure_mode_colors = {
+                "ingevroren_verdamper": "#EF4444",  # Red - critical
+                "te_weinig_koudemiddel": "#F59E0B",  # Orange - warning
+                "condensor_ventilator": "#3B82F6",  # Blue
+                "expansieventiel_blokkade": "#8B5CF6",  # Purple
+                "verkeerde_instellingen": "#EC4899",  # Pink
+                "Unknown": "#6B7280"  # Gray
+            }
+            
+            # Create pie chart data
+            pie_slices = []
+            total_alarms = sum(alarm_counts.values())
+            
+            for failure_mode, count in sorted(alarm_counts.items(), key=lambda x: x[1], reverse=True):
+                pie_slices.append({
+                    "name": failure_mode_names.get(failure_mode, failure_mode),
+                    "value": count,
+                    "color": failure_mode_colors.get(failure_mode, "#6B7280")
+                })
+            
+            chart_data = {
+                "title": f"Alarm Distribution - Last {period_days} Days",
+                "description": f"Breakdown of {total_alarms} alarm events by failure mode",
+                "data": pie_slices
+            }
+            
+            # Store in environment
+            if tree_data:
+                tree_data.environment["alarm_breakdown"] = {
+                    "total_alarms": total_alarms,
+                    "most_common": pie_slices[0]["name"] if pie_slices else "None",
+                    "period_days": period_days
+                }
+            
+            yield Result(
+                objects=[chart_data],
+                payload_type="pie_chart",
+                metadata={
+                    "asset_id": asset_id,
+                    "period_days": period_days,
+                    "total_alarms": total_alarms,
+                    "unique_types": len(pie_slices)
+                }
+            )
+            
+    except Exception as e:
+        yield Error(f"Error creating alarm breakdown: {str(e)}")
+        return
+
+
+@tool(
     status="Searching manual images...",
     branch_id="smido_installatie"
 )

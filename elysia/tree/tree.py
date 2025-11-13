@@ -79,6 +79,7 @@ class Tree:
         low_memory: bool = False,
         use_elysia_collections: bool = True,
         settings: Settings | None = None,
+        suggestion_context: str | None = None,
     ) -> None:
         """
         Args:
@@ -137,6 +138,7 @@ class Tree:
         self._complex_lm = None
         self._config_modified = False
         self.root = None
+        self.suggestion_context = suggestion_context
 
         # Define the inputs to prompts
         self.tree_data = TreeData(
@@ -1138,12 +1140,17 @@ class Tree:
             the follow-up suggestions might be "What other issues did Jane Doe work on?"
 
         Args:
-            context (str | None): A description of the type of follow-up questions to suggest
+            context (str | None): A description of the type of follow-up questions to suggest.
+                If None and tree has suggestion_context set, uses that instead.
             num_suggestions (int): The number of follow-up suggestions to return (length of the list output)
 
         Returns:
             (list[str]): A list of follow-up suggestions
         """
+        # Use tree's suggestion_context if no context provided
+        if context is None and self.suggestion_context is not None:
+            context = self.suggestion_context
+            
         with ElysiaKeyManager(self.settings):
             suggestions = await get_follow_up_suggestions(
                 self.tree_data,

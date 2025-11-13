@@ -128,7 +128,10 @@ def _register_root_tools(tree: Tree) -> None:
         query_vlog_cases,
         analyze_sensor_pattern,
         search_manual_images,
-        show_diagram
+        show_diagram,
+        visualize_temperature_timeline,
+        show_health_dashboard,
+        show_alarm_breakdown
     )
     
     # Import native Elysia tools
@@ -152,11 +155,16 @@ def _register_root_tools(tree: Tree) -> None:
     tree.add_tool(branch_id="base", tool=search_manual_images)
     tree.add_tool(branch_id="base", tool=show_diagram)
     
+    # VSM visualization tools
+    tree.add_tool(branch_id="base", tool=visualize_temperature_timeline)
+    tree.add_tool(branch_id="base", tool=show_health_dashboard)
+    tree.add_tool(branch_id="base", tool=show_alarm_breakdown)
+    
     # Native tools
     tree.add_tool(branch_id="base", tool=Query, summariser_in_tree=True)
     tree.add_tool(branch_id="base", tool=Aggregate)
     
-    logger.debug("Registered 13 tools at base root")
+    logger.debug("Registered 16 tools at base root")
 
 
 def _add_smido_post_tool_chains(tree: Tree) -> None:
@@ -239,14 +247,19 @@ Tool categories for reference:
 - Quick status checks: get_current_status, get_alarms, get_asset_health
 - Deep analysis: compute_worldstate, analyze_sensor_pattern
 - Knowledge search: search_manuals_by_smido, query_vlog_cases, query
+- VSM Visualizations (domain-specific charts):
+  * visualize_temperature_timeline: Area chart - temp vs setpoint over time (P3)
+  * show_health_dashboard: Radial gauges - 3 health scores (D, M)
+  * show_alarm_breakdown: Pie chart - alarm distribution by type (M)
 - Statistics & Data:
   * compute_worldstate: Sensor analysis (785K parquet rows, 1-min intervals)
     Use for: trends, monthly data, historical snapshots, any time-based analysis
   * aggregate: Collection statistics (use on VSM_ManualSections, VSM_VlogCase, etc.)
     NOTE: VSM_TelemetryEvent has only 12 reference events, not suitable for monthly stats
   * query: Flexible search across all collections
-- Visualization: visualise (appears AFTER compute_worldstate, get_asset_health, query, or aggregate)
+- Generic Visualization: visualise (appears AFTER compute_worldstate, get_asset_health, query, or aggregate)
   For viz requests: FIRST run a data tool (e.g. compute_worldstate), THEN visualise becomes available
+  Supports 10 chart types: bar, histogram, scatter_or_line, area, pie, radial_bar, composed, radar, funnel, treemap
 - Communication: cited_summarize, text_response
 
 After a tool completes, more tools may become available based on context.

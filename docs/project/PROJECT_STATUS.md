@@ -12,13 +12,14 @@ AI agent helping junior cooling technicians troubleshoot freezer installations u
 
 ---
 
-## 📊 Overall Status: 85% Complete
+## 📊 Overall Status: 90% Complete
 
 | Phase | Status | Completion |
 |-------|--------|------------|
 | **Phase 1: Data Upload** | ✅ COMPLETE | 100% |
 | **Phase 2: Agent & Tools** | ✅ COMPLETE | 100% |
-| **Phase 3: UX & Polish** | 🔄 IN PROGRESS | 20% |
+| **Phase 3: Visualization System** | ✅ COMPLETE | 100% |
+| **Phase 4: UX & Polish** | 🔄 IN PROGRESS | 40% |
 
 ---
 
@@ -40,10 +41,10 @@ AI agent helping junior cooling technicians troubleshoot freezer installations u
 - **Prompts**: Three-level hierarchy (agent/branch/tool) with A3 examples
 
 ### Tools
-**Current**: 7 VSM custom tools, NO native Elysia tools  
-**Planned**: 7 VSM + 5 native tools (flat root pattern)
+**Current**: 16 tools total at base root (flat architecture)  
+**Architecture**: Flat root + post-tool chains (Weaviate's one_branch pattern)
 
-**VSM Custom** (7):
+**VSM Custom** (13):
 1. search_manuals_by_smido - SMIDO-filtered manual + diagram search
 2. get_alarms - Query VSM_TelemetryEvent by severity
 3. query_telemetry_events - Historical "uit balans" incidents
@@ -51,13 +52,17 @@ AI agent helping junior cooling technicians troubleshoot freezer installations u
 5. compute_worldstate - 58 features from parquet (<500ms)
 6. get_asset_health - W vs C balance check
 7. analyze_sensor_pattern - Match against 13 patterns
+8. search_manual_images - Visual troubleshooting (233 PNG photos)
+9. show_diagram - Display Mermaid diagrams
+10. visualize_temperature_timeline - Area chart: temp vs setpoint
+11. show_health_dashboard - Radial gauges: 3 health scores
+12. show_alarm_breakdown - Pie chart: alarm distribution
+13. get_current_status - Quick status check
 
-**Native Elysia** (planned, not yet added):
+**Native Elysia** (3):
 1. query - Flexible Weaviate search
 2. aggregate - Statistics, counts, grouping
-3. visualise - Charts (after data tools)
-4. cited_summarize - Summarize with citations
-5. text_response - Direct answers
+3. visualise - Generic charts (10 types: bar, histogram, scatter_or_line, area, pie, radial_bar, composed, radar, funnel, treemap)
 
 ### Data Processing Complete
 - Telemetry: 785K rows (Oct 2022 - Dec 2024, rebased to 2024-2026)
@@ -71,6 +76,24 @@ AI agent helping junior cooling technicians troubleshoot freezer installations u
 - **Plan 2-4 tests**: All passing (tools functional)
 - **Plan 5-6 tests**: Passing (tree structure, orchestrator)
 - **Plan 7** (A3 end-to-end): ✅ Working - identifies frozen evaporator in 3-5 min
+- **Visualization tests**: 7/7 chart models instantiate successfully
+
+### Visualization System (NEW - Nov 13, 2025)
+**Chart Types**: 10 total (was 3)
+- Original: bar, histogram, scatter_or_line
+- New: area, pie, radial_bar, composed, radar, funnel, treemap
+
+**VSM Domain Tools** (3 new visualization tools):
+1. `visualize_temperature_timeline` - Area chart with temp vs setpoint
+2. `show_health_dashboard` - 3 radial gauges for health scores
+3. `show_alarm_breakdown` - Pie chart of alarm distribution
+
+**Data Limits**: Increased from max 10 to max 1000 points (configurable)
+
+**Intelligent Suggestions**: Follow-up questions now context-aware for visual content
+- Suggests diagrams when explaining systems
+- Suggests charts when discussing sensor data
+- Suggests images when mentioning components
 
 ---
 

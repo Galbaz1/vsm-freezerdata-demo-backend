@@ -19,6 +19,13 @@ import DocumentDisplay from "./displays/Document/DocumentDisplay";
 import BarDisplay from "./displays/ChartTable/BarDisplay";
 import ScatterOrLineDisplay from "./displays/ChartTable/ScatterOrLineDisplay";
 import HistogramDisplay from "./displays/ChartTable/HistogramDisplay";
+import AreaDisplay from "./displays/ChartTable/AreaDisplay";
+import PieDisplay from "./displays/ChartTable/PieDisplay";
+import RadialBarDisplay from "./displays/ChartTable/RadialBarDisplay";
+import ComposedDisplay from "./displays/ChartTable/ComposedDisplay";
+import RadarDisplay from "./displays/ChartTable/RadarDisplay";
+import FunnelDisplay from "./displays/ChartTable/FunnelDisplay";
+import TreemapDisplay from "./displays/ChartTable/TreemapDisplay";
 import ImageGalleryDisplay, { ImagePayload } from "./displays/Image/ImageGalleryDisplay";
 import { DisplayContext } from "../contexts/DisplayContext";
 
@@ -119,6 +126,20 @@ const RenderDisplay: React.FC<RenderDisplayProps> = ({
       return <ScatterOrLineDisplay key={`${keyBase}-chart`} result={payload} />;
     case "histogram_chart":
       return <HistogramDisplay key={`${keyBase}-chart`} result={payload} />;
+    case "area_chart":
+      return <AreaDisplay key={`${keyBase}-chart`} result={payload} />;
+    case "pie_chart":
+      return <PieDisplay key={`${keyBase}-chart`} result={payload} />;
+    case "radial_bar_chart":
+      return <RadialBarDisplay key={`${keyBase}-chart`} result={payload} />;
+    case "composed_chart":
+      return <ComposedDisplay key={`${keyBase}-chart`} result={payload} />;
+    case "radar_chart":
+      return <RadarDisplay key={`${keyBase}-chart`} result={payload} />;
+    case "funnel_chart":
+      return <FunnelDisplay key={`${keyBase}-chart`} result={payload} />;
+    case "treemap_chart":
+      return <TreemapDisplay key={`${keyBase}-chart`} result={payload} />;
     case "image_gallery":
       return (
         <ImageGalleryDisplay

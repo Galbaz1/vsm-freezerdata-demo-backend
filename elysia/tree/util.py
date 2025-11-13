@@ -661,13 +661,35 @@ async def get_follow_up_suggestions(
             "Or, questions which span across other collections, but are still relevant to the user's prompt."
         )
 
+    # Optimize inputs for speed - limit data_information to essential collections
+    # Only include collections that have data in the environment
+    collection_metadata = tree_data.output_collection_metadata(with_mappings=False)
+    
+    # Filter to only collections mentioned in environment (reduce token count)
+    env_str = str(tree_data.environment.environment)
+    filtered_metadata = {}
+    for coll_name, coll_data in collection_metadata.items():
+        # Keep collection if mentioned in environment or if it's a core VSM collection
+        if coll_name in env_str or coll_name in ["VSM_ManualSections", "VSM_DiagramUserFacing", "VSM_ManualImage"]:
+            filtered_metadata[coll_name] = coll_data
+    
+    # If no collections match, use simplified metadata (just names and counts)
+    if not filtered_metadata:
+        filtered_metadata = {
+            name: {"name": data.get("name"), "length": data.get("length")}
+            for name, data in collection_metadata.items()
+        }
+    
+    # Limit conversation history to last 3 exchanges (reduce token count)
+    limited_history = tree_data.conversation_history[-6:] if len(tree_data.conversation_history) > 6 else tree_data.conversation_history
+    
     # get prediction
     prediction = await follow_up_suggestor.aforward(
         user_prompt=tree_data.user_prompt,
         reference=tree_data.atlas.datetime_reference,
-        conversation_history=tree_data.conversation_history,
+        conversation_history=limited_history,
         environment=tree_data.environment.environment,
-        data_information=tree_data.output_collection_metadata(with_mappings=False),
+        data_information=filtered_metadata,
         old_suggestions=current_suggestions,
         context=context,
         num_suggestions=num_suggestions,

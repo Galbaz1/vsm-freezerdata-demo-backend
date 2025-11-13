@@ -932,14 +932,17 @@ class Error(Update):
     All errors are shown to the decision agent to help decide whether the tool should be called again (retried), or a different tool should be called.
     """
 
-    def __init__(self, feedback: str = "", error_message: str = ""):
+    def __init__(self, feedback: str = "", error_message: str = "", traceback: str = ""):
         """
         Args:
             feedback (str): The feedback to display to the decision agent.
                 Usually this will be the error message, but it could be formatted more specifically.
+            error_message (str): The error message.
+            traceback (str): Optional traceback information.
         """
         self.feedback = feedback
         self.error_message = error_message
+        self.traceback = traceback
 
         if feedback == "":
             self.feedback = "An unknown issue occurred."
