@@ -119,7 +119,7 @@ def _register_root_tools(tree: Tree) -> None:
     """
     # Import VSM custom tools
     from elysia.api.custom_tools import (
-        GetCurrentStatus,  # Tool class (has run_if_true)
+        get_current_status,
         get_alarms,
         get_asset_health,
         compute_worldstate,
@@ -157,7 +157,7 @@ def _register_root_tools(tree: Tree) -> None:
     tree.add_tool(branch_id="base", tool=FakeTextResponse)
     
     # VSM custom tools
-    tree.add_tool(branch_id="base", tool=GetCurrentStatus)  # Tool class (has run_if_true)
+    tree.add_tool(branch_id="base", tool=get_current_status)
     tree.add_tool(branch_id="base", tool=get_alarms)
     tree.add_tool(branch_id="base", tool=get_asset_health)
     tree.add_tool(branch_id="base", tool=compute_worldstate)
