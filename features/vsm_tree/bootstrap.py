@@ -127,7 +127,8 @@ def _register_root_tools(tree: Tree) -> None:
         search_manuals_by_smido,
         query_vlog_cases,
         analyze_sensor_pattern,
-        search_manual_images
+        search_manual_images,
+        show_diagram
     )
     
     # Import native Elysia tools
@@ -149,12 +150,13 @@ def _register_root_tools(tree: Tree) -> None:
     tree.add_tool(branch_id="base", tool=query_vlog_cases)
     tree.add_tool(branch_id="base", tool=analyze_sensor_pattern)
     tree.add_tool(branch_id="base", tool=search_manual_images)
+    tree.add_tool(branch_id="base", tool=show_diagram)
     
     # Native tools
     tree.add_tool(branch_id="base", tool=Query, summariser_in_tree=True)
     tree.add_tool(branch_id="base", tool=Aggregate)
     
-    logger.debug("Registered 12 tools at base root")
+    logger.debug("Registered 13 tools at base root")
 
 
 def _add_smido_post_tool_chains(tree: Tree) -> None:
@@ -171,7 +173,8 @@ def _add_smido_post_tool_chains(tree: Tree) -> None:
         search_manuals_by_smido,
         analyze_sensor_pattern,
         query_telemetry_events,
-        search_manual_images
+        search_manual_images,
+        show_diagram
     )
     from elysia.tools.retrieval.aggregate import Aggregate
     
@@ -186,8 +189,9 @@ def _add_smido_post_tool_chains(tree: Tree) -> None:
     tree.add_tool(search_manuals_by_smido, branch_id="base", from_tool_ids=["query_vlog_cases"])
     tree.add_tool(Aggregate, branch_id="base", from_tool_ids=["query_vlog_cases"])
     
-    # I/T flow: After search_manuals completes → offer visual images
+    # I/T flow: After search_manuals completes → offer visual images and diagrams
     tree.add_tool(search_manual_images, branch_id="base", from_tool_ids=["search_manuals_by_smido"])
+    tree.add_tool(show_diagram, branch_id="base", from_tool_ids=["search_manuals_by_smido"])
     
     logger.debug("Added SMIDO post-tool chains (M, P3, O, I/T flows)")
 

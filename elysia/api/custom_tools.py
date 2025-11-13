@@ -241,20 +241,30 @@ async def search_manuals_by_smido(
                 diagram_dict["uuid"] = str(obj.uuid)
                 diagram_dicts.append(diagram_dict)
             
-            # If diagrams found, output them as Response with Mermaid markdown
+            # If diagrams found, output them as Response (handle both PNG and Mermaid)
             if diagram_dicts:
                 for diagram in diagram_dicts:
                     title = diagram.get("title", "Diagram")
-                    mermaid_code = diagram.get("mermaid_code", "")
                     description = diagram.get("description", "")
+                    png_url = diagram.get("png_url")
+                    mermaid_code = diagram.get("mermaid_code", "")
                     
-                    if mermaid_code:
-                        # Create formatted markdown with Mermaid diagram
+                    # Check for PNG first (UserFacing diagrams)
+                    if png_url:
+                        # Build full URL for PNG image
+                        full_url = f"http://localhost:8000{png_url}"
+                        markdown = f"\n\n**📊 {title}**\n\n"
+                        if description:
+                            markdown += f"*{description}*\n\n"
+                        markdown += f"![{title}]({full_url})\n"
+                        yield Response(markdown)
+                    
+                    # Fallback to Mermaid (AgentInternal diagrams)
+                    elif mermaid_code:
                         markdown = f"\n\n**📊 {title}**\n\n"
                         if description:
                             markdown += f"*{description}*\n\n"
                         markdown += f"```mermaid\n{mermaid_code}\n```\n"
-                        
                         yield Response(markdown)
             
             # Yield results
@@ -1310,21 +1320,41 @@ async def show_diagram(
             
             yield Status(f"Found {len(diagram_objects)} diagram(s)")
             
-            # Format diagrams for display - output as markdown with Mermaid code blocks
+            # Format diagrams for display - handle both PNG (UserFacing) and Mermaid (AgentInternal)
             diagram_output = []
             for obj in diagram_objects:
                 props = obj.properties
                 
                 # Build markdown output
                 title = props.get("title", "Diagram")
-                mermaid_code = props.get("mermaid_code", "")
                 description = props.get("description", "")
+                png_url = props.get("png_url")
+                mermaid_code = props.get("mermaid_code", "")
                 
-                if mermaid_code:
-                    # Create formatted markdown with Mermaid diagram
-                    markdown = f"**{title}**\n\n"
+                markdown = None
+                
+                # Check for PNG first (UserFacing diagrams)
+                if png_url:
+                    # Build full URL for PNG image
+                    full_url = f"http://localhost:8000{png_url}"
+                    markdown = f"**📊 {title}**\n\n"
                     if description:
-                        markdown += f"{description}\n\n"
+                        markdown += f"*{description}*\n\n"
+                    markdown += f"![{title}]({full_url})"
+                    
+                    diagram_output.append({
+                        "diagram_id": props.get("diagram_id"),
+                        "title": title,
+                        "description": description,
+                        "markdown": markdown,
+                        "png_url": png_url
+                    })
+                
+                # Fallback to Mermaid (AgentInternal diagrams)
+                elif mermaid_code:
+                    markdown = f"**📊 {title}**\n\n"
+                    if description:
+                        markdown += f"*{description}*\n\n"
                     markdown += f"```mermaid\n{mermaid_code}\n```"
                     
                     diagram_output.append({
@@ -1336,7 +1366,7 @@ async def show_diagram(
                     })
             
             if not diagram_output:
-                yield Error("Diagram found but contains no Mermaid code")
+                yield Error("Diagram found but contains neither PNG nor Mermaid code")
                 return
             
             # Return as Response with formatted markdown for direct display
@@ -1365,7 +1395,7 @@ async def search_manual_images(
     query: str = "",
     smido_step: str = None,
     component: str = None,
-    limit: int = 5,
+    limit: int = 2,
     tree_data=None,
     client_manager=None,
     **kwargs

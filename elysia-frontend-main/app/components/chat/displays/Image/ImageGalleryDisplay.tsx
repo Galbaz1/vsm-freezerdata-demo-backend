@@ -49,8 +49,10 @@ const ImageGalleryDisplay: React.FC<ImageGalleryDisplayProps> = ({ images }) => 
 
             {/* Description */}
             <div className="flex flex-col gap-2">
-              <p className="text-sm text-foreground">
-                {img.image_description}
+              <p className="text-sm text-primary font-medium line-clamp-1">
+                {img.component_tags && img.component_tags.length > 0 
+                  ? img.component_tags.join(", ") 
+                  : img.image_description}
               </p>
 
               {/* Metadata */}
