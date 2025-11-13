@@ -25,6 +25,10 @@ RUN pip install --no-cache-dir -e .
 # Copy data files
 COPY features/ ./features/
 
+# Copy startup scripts (needed for auto-seed)
+COPY scripts/auto_seed_on_startup.py ./scripts/
+COPY scripts/seed_default_config.py ./scripts/
+
 # Copy static files (frontend build + images)
 COPY elysia/api/static/ ./elysia/api/static/
 

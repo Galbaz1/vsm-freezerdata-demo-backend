@@ -49,6 +49,11 @@ tests/
 *.test.py
 *_test.py
 
+# Scripts (exclude all except startup scripts)
+scripts/*
+!scripts/auto_seed_on_startup.py
+!scripts/seed_default_config.py
+
 # Build artifacts
 dist/
 build/
