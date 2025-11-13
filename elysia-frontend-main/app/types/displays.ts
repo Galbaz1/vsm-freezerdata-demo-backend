@@ -180,6 +180,15 @@ export type TreemapChartPayload = DefaultResultPayload & {
   data: TreemapNode[];
 };
 
+export type DiagramPayload = DefaultResultPayload & {
+  diagram_id: string;
+  title: string;
+  description: string;
+  png_url?: string;
+  mermaid_code?: string;
+  markdown?: string;
+};
+
 export type ChunkSpan = {
   start: number;
   end: number;

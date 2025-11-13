@@ -7,6 +7,7 @@ import {
   AggregationPayload,
   DocumentPayload,
   TicketPayload,
+  DiagramPayload,
 } from "@/app/types/displays";
 
 import TicketsDisplay from "./displays/Ticket/TicketDisplay";
@@ -27,6 +28,7 @@ import RadarDisplay from "./displays/ChartTable/RadarDisplay";
 import FunnelDisplay from "./displays/ChartTable/FunnelDisplay";
 import TreemapDisplay from "./displays/ChartTable/TreemapDisplay";
 import ImageGalleryDisplay, { ImagePayload } from "./displays/Image/ImageGalleryDisplay";
+import DiagramDisplay from "./displays/Diagram/DiagramDisplay";
 import { DisplayContext } from "../contexts/DisplayContext";
 
 interface RenderDisplayProps {
@@ -55,6 +57,11 @@ const RenderDisplay: React.FC<RenderDisplayProps> = ({
   ) => {
     handleResultPayloadChange(type, payload, currentCollectionName);
   };
+
+  // Debug logging for diagram payloads
+  if (payload.type === "diagram" && process.env.NODE_ENV === "development") {
+    console.log("Diagram payload received:", payload);
+  }
 
   switch (payload.type) {
     case "ticket":
@@ -145,6 +152,19 @@ const RenderDisplay: React.FC<RenderDisplayProps> = ({
         <ImageGalleryDisplay
           key={`${keyBase}-image-gallery`}
           images={payload.objects as ImagePayload[]}
+        />
+      );
+    case "diagram":
+      if (!payload.objects || !Array.isArray(payload.objects)) {
+        if (process.env.NODE_ENV === "development") {
+          console.warn("Diagram payload missing objects array:", payload);
+        }
+        return null;
+      }
+      return (
+        <DiagramDisplay
+          key={`${keyBase}-diagram`}
+          diagrams={payload.objects as DiagramPayload[]}
         />
       );
     default:

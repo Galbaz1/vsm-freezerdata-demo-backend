@@ -1373,9 +1373,10 @@ async def show_diagram(
             # Return as Response with formatted markdown for direct display
             yield Response(diagram_output[0]["markdown"])
             
-            # Also yield Result for structured data
+            # Also yield Result for structured data with payload_type for frontend rendering
             yield Result(
                 objects=diagram_output,
+                payload_type="diagram",
                 metadata={
                     "diagram_count": len(diagram_output),
                     "diagram_id": diagram_id,
@@ -1460,6 +1461,9 @@ async def visualize_temperature_timeline(
         # Read parquet directly for time range
         df = pd.read_parquet("features/telemetry/timeseries_freezerdata/135_1570_cleaned_with_flags.parquet")
         
+        # Reset index to make timestamp a column (it's the index in the parquet file)
+        df = df.reset_index()
+        
         # Filter to time range
         df['timestamp'] = pd.to_datetime(df['timestamp'])
         mask = (df['timestamp'] >= start_time) & (df['timestamp'] <= end_time)
@@ -1493,7 +1497,7 @@ async def visualize_temperature_timeline(
         
         # Prepare data for area chart
         timestamps = df_filtered['timestamp'].dt.strftime('%H:%M').tolist()
-        room_temps = df_filtered['room_temp'].tolist()
+        room_temps = df_filtered['sGekoeldeRuimte'].tolist()  # Room temperature column
         setpoint_data = [target_temp] * len(timestamps)
         
         # Create area chart
@@ -1521,9 +1525,9 @@ async def visualize_temperature_timeline(
             }
         }
         
-        # Store in environment for cross-tool access
+        # Store in hidden environment for cross-tool access
         if tree_data:
-            tree_data.environment["temperature_timeline"] = {
+            tree_data.environment.hidden_environment["temperature_timeline"] = {
                 "start_time": start_time.isoformat(),
                 "end_time": end_time.isoformat(),
                 "data_points": len(timestamps),
@@ -1655,9 +1659,9 @@ async def show_health_dashboard(
             ]
         }
         
-        # Store in environment
+        # Store in hidden environment
         if tree_data:
-            tree_data.environment["health_dashboard"] = {
+            tree_data.environment.hidden_environment["health_dashboard"] = {
                 "cooling": cooling_score,
                 "compressor": compressor_score,
                 "stability": stability_score,
@@ -1785,9 +1789,9 @@ async def show_alarm_breakdown(
                 "data": pie_slices
             }
             
-            # Store in environment
+            # Store in hidden environment
             if tree_data:
-                tree_data.environment["alarm_breakdown"] = {
+                tree_data.environment.hidden_environment["alarm_breakdown"] = {
                     "total_alarms": total_alarms,
                     "most_common": pie_slices[0]["name"] if pie_slices else "None",
                     "period_days": period_days

@@ -97,7 +97,7 @@ const RadialBarDisplay: React.FC<RadialBarDisplayProps> = ({ result }) => {
                       fill: '#fff',
                       fontSize: 12,
                       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                      formatter: (value: number, entry: any) => `${entry.name}: ${entry.percentage}%`
+                      formatter: (value: number, entry: any) => entry?.name && entry?.percentage ? `${entry.name}: ${entry.percentage}%` : ''
                     }}
                   />
                   <Legend

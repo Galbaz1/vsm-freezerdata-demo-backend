@@ -76,6 +76,7 @@ elysia start  # Opens on http://localhost:8000
 
 ### Data Sources
 - `features/telemetry/timeseries_freezerdata/135_1570_cleaned_with_flags.parquet` - 785K rows (July 2024 - Jan 2026)
+  - **NOTE**: `timestamp` is the **index**, not a column. Use `df.reset_index()` before accessing `df['timestamp']`
 - `features/integration_vsm/output/fd_assets_enrichment.json` - Context C (commissioning data)
 - `features/manuals_vsm/output/manual_sections_classified.jsonl` - 167 sections (SMIDO-classified)
 - `features/manuals_vsm/output/manual_images_enriched.jsonl` - 233 manual images (SMIDO-tagged)
@@ -115,10 +116,22 @@ async def my_tool(param: str, tree_data=None, client_manager=None, **kwargs):
     """Docstring with when/what/how."""
     yield Status("Working...")
     result = do_work(param)
+    
+    # Store metadata in hidden environment (NOT visible to LLM)
     if tree_data:
-        tree_data.environment["key"] = result
-    yield Result(objects=[result])
+        tree_data.environment.hidden_environment["my_tool_metadata"] = {
+            "key": "value"
+        }
+    
+    # Yield Result for LLM context and frontend display
+    yield Result(
+        objects=[result],
+        payload_type="document",  # Required for frontend rendering
+        metadata={"source": "my_tool"}
+    )
 ```
+
+**CRITICAL**: Never use `tree_data.environment["key"] = value` - this throws error. Always use `hidden_environment` for custom data storage.
 
 ### Weaviate Query (v4 API)
 ```python
@@ -184,9 +197,10 @@ async def search_manual_images(...):
    - Weaviate: `VSM_ManualImage` collection
 
 2. **show_diagram** (8 PNG + 8 Mermaid)
+   - `payload_type="diagram"`
    - Dual handling: PNG (UserFacing) OR Mermaid (AgentInternal)
-   - PNG: `Response(markdown="![Diagram](url)")`
-   - Mermaid: `Response(markdown="```mermaid\n...\n```")`
+   - Both return `Response(markdown)` + `Result(payload_type="diagram")`
+   - Frontend: `DiagramDisplay.tsx` (renders PNG via Image or Mermaid via MarkdownFormat)
    - Weaviate: `VSM_DiagramUserFacing` + `VSM_DiagramAgentInternal`
 
 3. **search_manuals_by_smido** (167 manual sections, 146 uitleg)
@@ -440,6 +454,10 @@ python3 scripts/test_plan7_full_tree.py  # Full A3 scenario
 - ✅ **Intelligent suggestions** (context-aware visual content recommendations)
 - ✅ **Data limits increased** (10 → 1000 points, configurable)
 - ✅ **Frontend auto-scroll fix** (block: "end" for new queries)
+- ✅ **Diagram display fix** (payload_type + DiagramDisplay component)
+- ✅ **Environment assignment bugfix** (hidden_environment for custom data)
+- ✅ **Parquet timestamp fix** (reset_index() for timestamp column access)
+- ✅ **RadialBar formatter crash fix** (null check for entry.name)
 
 **Critical TODOs**:
 1. ~~Redesign branching (flat root + native tools)~~ → DONE (16 tools at base root)

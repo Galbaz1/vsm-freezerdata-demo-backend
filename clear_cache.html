@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Clear Elysia Cache</title>
+</head>
+<body>
+    <h1>Clearing Elysia localStorage...</h1>
+    <script>
+        // Clear all localStorage
+        localStorage.clear();
+        sessionStorage.clear();
+        
+        // Clear IndexedDB if present
+        if ('indexedDB' in window) {
+            indexedDB.databases().then(databases => {
+                databases.forEach(db => {
+                    if (db.name) indexedDB.deleteDatabase(db.name);
+                });
+            });
+        }
+        
+        document.body.innerHTML = '<h1>Cache cleared!</h1><p>Please close this tab and refresh your Elysia app (Cmd/Ctrl + Shift + R)</p>';
+    </script>
+</body>
+</html>

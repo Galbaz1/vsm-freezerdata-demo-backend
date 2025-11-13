@@ -16,6 +16,7 @@ import {
   RadarChartPayload,
   FunnelChartPayload,
   TreemapChartPayload,
+  DiagramPayload,
 } from "@/app/types/displays";
 
 export type Message = {
@@ -132,7 +133,8 @@ export type ResultPayload = {
     | "radar_chart"
     | "funnel_chart"
     | "treemap_chart"
-    | "image_gallery";
+    | "image_gallery"
+    | "diagram";
 
   /* eslint-disable @typescript-eslint/no-explicit-any */
   metadata: any;
@@ -155,7 +157,8 @@ export type ResultPayload = {
     | ComposedChartPayload[]
     | RadarChartPayload[]
     | FunnelChartPayload[]
-    | TreemapChartPayload[];
+    | TreemapChartPayload[]
+    | DiagramPayload[];
 };
 
 export type TextWithCitationsPayload = {
