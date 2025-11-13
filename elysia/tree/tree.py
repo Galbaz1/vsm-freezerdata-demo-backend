@@ -490,7 +490,8 @@ class Tree:
             if function_name not in self.tools:
                 pass
             elif "run_if_true" in dir(self.tools[function_name]):
-                rule_met, rule_tool_inputs = await self.tools[
+                # FIX: Use different variable name to avoid overwriting rule_tool_inputs dict
+                rule_met, returned_inputs = await self.tools[
                     function_name
                 ].run_if_true(
                     tree_data=self.tree_data,
@@ -500,12 +501,12 @@ class Tree:
                 )
                 if rule_met:
                     nodes_with_rules_met.append(function_name)
-                    if rule_tool_inputs is None or rule_tool_inputs == {}:
+                    if returned_inputs is None or returned_inputs == {}:
                         rule_tool_inputs[function_name] = self.tools[
                             function_name
                         ].get_default_inputs()
                     else:
-                        rule_tool_inputs[function_name] = rule_tool_inputs
+                        rule_tool_inputs[function_name] = returned_inputs
 
         return nodes_with_rules_met, rule_tool_inputs
 

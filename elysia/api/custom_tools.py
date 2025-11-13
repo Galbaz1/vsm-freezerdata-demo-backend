@@ -642,80 +642,132 @@ Returns:
         return
 
 
-@tool(
-    status="Retrieving current status...",
-    branch_id="smido_melding"
-)
-async def get_current_status(
-    asset_id: str = "135_1570",
-    tree_data=None,
-    **kwargs
-):
-    """Quick status check - current temps, flags, health.
-
-    Use when the user requests the current system status.
+class GetCurrentStatus(Tool):
+    """Quick status check with A3 demo override - auto-runs on first message."""
     
-    NOTE: For demo purposes, if current timestamp is TODAY (datetime.now()),
-    returns synthetic A3 problem (frozen evaporator). Otherwise returns real sensor data.
-
-    Returns:
-    - 5 key sensors (room, hot-gas, suction, liquid, ambient)
-    - Active warning flags
-    - 30-minute trend (stijgend/stabiel/dalend)
-    - Health score summary (cooling, compressor, stability)
-    """
-    yield Status("Loading system status...")
-
-    from features.telemetry_vsm.src.worldstate_engine import WorldStateEngine
-    from datetime import datetime
-
-    engine = WorldStateEngine(
-        "features/telemetry/timeseries_freezerdata/135_1570_cleaned_with_flags.parquet"
-    )
+    def __init__(self, **kwargs):
+        super().__init__(
+            name="get_current_status",
+            description="Get current system status with health scores and active alarms. Auto-runs on first message for fast feedback.",
+            status="Retrieving current status...",
+            inputs={
+                "asset_id": {
+                    "type": str,
+                    "description": "Asset identifier",
+                    "required": False,
+                    "default": "135_1570"
+                }
+            },
+            branch_id="smido_melding",
+            end=False
+        )
     
-    # Use current time - worldstate_engine auto-detects "today" and injects A3
-    now = datetime.now()
-    worldstate = engine.compute_worldstate(asset_id, now, 60)
+    async def __call__(
+        self,
+        tree_data,
+        inputs,
+        base_lm,
+        complex_lm,
+        client_manager,
+        **kwargs
+    ):
+        """
+        Quick status check - current temps, flags, health.
 
-    current = worldstate.get("current_state", {})
-    flags = worldstate.get("flags", {})
-    trends = worldstate.get("trends_30m", {})
-    health = worldstate.get("health_scores", {})
+        Use when the user requests the current system status.
+        
+        NOTE: For demo purposes, if current timestamp is TODAY (datetime.now()),
+        returns synthetic A3 problem (frozen evaporator). Otherwise returns real sensor data.
 
-    active_flags = [flag for flag, active in flags.items() if active]
+        Returns:
+        - 5 key sensors (room, hot-gas, suction, liquid, ambient)
+        - Active warning flags
+        - 30-minute trend (stijgend/stabiel/dalend)
+        - Health score summary (cooling, compressor, stability)
+        """
+        asset_id = inputs.get("asset_id", "135_1570")
+        
+        yield Status("Loading system status...")
 
-    room_delta = trends.get("room_temp_delta_30m", 0.0)
-    if room_delta > 0.5:
-        trend_description = "stijgend"
-    elif room_delta < -0.5:
-        trend_description = "dalend"
-    else:
-        trend_description = "stabiel"
+        from features.telemetry_vsm.src.worldstate_engine import WorldStateEngine
+        from datetime import datetime
 
-    status_summary = {
-        "asset_id": asset_id,
-        "timestamp": worldstate.get("timestamp"),
-        "readings": {
-            "room_temp_C": current.get("current_room_temp"),
-            "hot_gas_temp_C": current.get("current_hot_gas_temp"),
-            "suction_temp_C": current.get("current_suction_temp"),
-            "liquid_temp_C": current.get("current_liquid_temp"),
-            "ambient_temp_C": current.get("current_ambient_temp"),
-        },
-        "active_flags": active_flags,
-        "trend_30m": {
-            "room_temp_delta_C": room_delta,
-            "description": trend_description,
-        },
-        "health_scores": {
-            "cooling": health.get("cooling_performance_score"),
-            "compressor": health.get("compressor_health_score"),
-            "stability": health.get("system_stability_score"),
-        },
-        "is_synthetic_today": worldstate.get("is_synthetic_today", False),
-    }
+        engine = WorldStateEngine(
+            "features/telemetry/timeseries_freezerdata/135_1570_cleaned_with_flags.parquet"
+        )
+        
+        # Use current time - worldstate_engine auto-detects "today" and injects A3
+        now = datetime.now()
+        worldstate = engine.compute_worldstate(asset_id, now, 60)
 
-    yield Result(objects=[status_summary])
+        current = worldstate.get("current_state", {})
+        flags = worldstate.get("flags", {})
+        trends = worldstate.get("trends_30m", {})
+        health = worldstate.get("health_scores", {})
+
+        active_flags = [flag for flag, active in flags.items() if active]
+
+        room_delta = trends.get("room_temp_delta_30m", 0.0)
+        if room_delta > 0.5:
+            trend_description = "stijgend"
+        elif room_delta < -0.5:
+            trend_description = "dalend"
+        else:
+            trend_description = "stabiel"
+
+        status_summary = {
+            "asset_id": asset_id,
+            "timestamp": worldstate.get("timestamp"),
+            "readings": {
+                "room_temp_C": current.get("current_room_temp"),
+                "hot_gas_temp_C": current.get("current_hot_gas_temp"),
+                "suction_temp_C": current.get("current_suction_temp"),
+                "liquid_temp_C": current.get("current_liquid_temp"),
+                "ambient_temp_C": current.get("current_ambient_temp"),
+            },
+            "active_flags": active_flags,
+            "trend_30m": {
+                "room_temp_delta_C": room_delta,
+                "description": trend_description,
+            },
+            "health_scores": {
+                "cooling": health.get("cooling_performance_score"),
+                "compressor": health.get("compressor_health_score"),
+                "stability": health.get("system_stability_score"),
+            },
+            "is_synthetic_today": worldstate.get("is_synthetic_today", False),
+        }
+
+        yield Result(objects=[status_summary])
+    
+    async def run_if_true(
+        self,
+        tree_data,
+        base_lm,
+        complex_lm,
+        client_manager,
+    ) -> tuple[bool, dict]:
+        """
+        Auto-run on first message if environment is empty.
+        Bypasses LLM decision for fast initial status check.
+        
+        Returns:
+            (should_run, inputs_dict) - Return empty dict to use default inputs
+        
+        NOTE: Elysia bug in tree.py:493 was fixed (variable name collision)
+        """
+        # Check if this is the first message
+        is_first_message = len(tree_data.conversation_history) <= 1
+        
+        # Check if environment is empty (no tools have run yet)
+        env_empty = tree_data.environment.is_empty()
+        
+        # Auto-run if: first message AND environment empty
+        # Return empty dict to trigger default input usage
+        if is_first_message and env_empty:
+            return (True, {})
+        
+        return (False, {})
 
 
 @tool(
