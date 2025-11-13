@@ -70,13 +70,22 @@ elysia start  # Opens on http://localhost:8000
 
 ### Agent & Tree
 - `features/vsm_tree/smido_tree.py` - Agent persona with explicit SMIDO flow, "uit balans" definition
-- `features/vsm_tree/bootstrap.py` - Flat root architecture, tool registration, Weaviate-aligned instruction
-- `elysia/api/custom_tools.py` - 8 VSM tools (all with collection source transparency)
+- `features/vsm_tree/bootstrap.py` - Flat root architecture, tool registration, 13 tools at base root
+- `elysia/api/custom_tools.py` - 10 VSM tools (all with collection source transparency)
 
-### Data
+### Data Sources
 - `features/telemetry/timeseries_freezerdata/135_1570_cleaned_with_flags.parquet` - 785K rows (July 2024 - Jan 2026)
-- `features/integration_vsm/output/fd_assets_enrichment.json` - Context C
-- `features/manuals_vsm/output/manual_sections_classified.jsonl` - 167 sections
+- `features/integration_vsm/output/fd_assets_enrichment.json` - Context C (commissioning data)
+- `features/manuals_vsm/output/manual_sections_classified.jsonl` - 167 sections (SMIDO-classified)
+- `features/manuals_vsm/output/manual_images_enriched.jsonl` - 233 manual images (SMIDO-tagged)
+- `features/extraction/production_output/` - 3 manuals (689 text chunks total)
+  - `storingzoeken-koeltechniek_theorie_179/` - Troubleshooting theory (11 images)
+  - `koelinstallaties-opbouw-en-werking_theorie_2016/` - System structure (181 images)
+  - `koelinstallaties-inspectie-en-onderhoud_theorie_168/` - Inspection/maintenance (43 images)
+
+### Static Files
+- `elysia/api/static/manual_images/` - 233 PNG images (opbouw-werking: 181, inspectie-onderhoud: 43, storingzoeken: 11)
+- `elysia/api/static/diagrams/` - 8 PNG diagrams (UserFacing, simple for technicians)
 
 ### Config
 - `.env` - API keys (Gemini, Weaviate)
@@ -260,10 +269,10 @@ Config(
 ```bash
 source .venv/bin/activate
 
-# All plans
-python3 scripts/run_all_plan_tests.py
+# Visual content tests
+python3 scripts/test_image_diagram_improvements.py  # 5/5 tests passing
 
-# Individual
+# WorldState & tools
 pytest  # 18/18 WorldState tests
 python3 scripts/test_plan2_tools.py  # Query tools
 python3 scripts/test_plan7_full_tree.py  # Full A3 scenario
@@ -271,16 +280,25 @@ python3 scripts/test_plan7_full_tree.py  # Full A3 scenario
 
 ---
 
-## Status (Nov 12, 2025)
+## Status (Nov 13, 2025)
 
 - ✅ Phase 1: Data Upload COMPLETE (221 objects)
-- ✅ Phase 2: Agent & Tools COMPLETE (7 VSM tools, tests passing)
-- 🔄 Phase 3: UX & Performance IN PROGRESS (20% complete)
+- ✅ Phase 2: Agent & Tools COMPLETE (10 VSM tools, all tests passing)
+- ✅ Phase 3: Visual Content COMPLETE (images + diagrams fully functional)
+- 🔄 Phase 4: UX & Performance IN PROGRESS (30% complete)
+
+**Recent Completions** (Nov 13):
+- ✅ Image gallery UX improved (limit=2, 1-line descriptions, high contrast)
+- ✅ Diagram dual-handling (PNG UserFacing + Mermaid AgentInternal)
+- ✅ show_diagram tool registered and functional
+- ✅ UserFacing diagrams tagged with SMIDO phases (8/8)
+- ✅ Elysia visual content architecture documented
 
 **Critical TODOs**:
-1. Redesign branching (flat root + native tools, Weaviate's one_branch pattern)
-2. Implement `get_current_status` with `run_if_true` (<200ms)
-3. Fix diagram search (VSM_DiagramUserFacing + AgentInternal)
+1. ~~Redesign branching (flat root + native tools)~~ → DONE (13 tools at base root)
+2. ~~Fix diagram search~~ → DONE (dual PNG/Mermaid handling)
+3. Implement `get_current_status` with `run_if_true` (<200ms, cached WorldState)
+4. Add vlog video display capability (5 cases, 15 clips)
 
 ---
 
