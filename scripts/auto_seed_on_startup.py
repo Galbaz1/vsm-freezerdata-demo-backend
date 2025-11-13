@@ -45,11 +45,24 @@ async def check_and_seed():
                     bootstrappers = config.get("feature_bootstrappers", [])
                     print(f"✅ Found existing default config: {config_name}")
                     print(f"   Bootstrappers: {', '.join(bootstrappers) if bootstrappers else 'none'}")
+                    
+                    # Verify the config can be decrypted (important for Railway deployments)
+                    try:
+                        from elysia.api.utils.encryption import decrypt_api_keys
+                        settings = config.get("settings", {})
+                        if settings:
+                            decrypt_api_keys(settings)
+                            print("   ✅ Config encryption keys valid")
+                    except Exception as e:
+                        print(f"   ⚠️  Config encryption invalid: {e}")
+                        print("   🔄 Will re-seed config with current environment keys...")
+                        needs_seed = True
         
         await client_manager.close_clients()
         
         if needs_seed:
-            print("🌱 No VSM config found - seeding now...")
+            reason = "No VSM config found" if len(default_configs.objects) == 0 else "Encryption keys invalid"
+            print(f"🌱 {reason} - seeding now...")
             # Import and run the seed script
             sys.path.insert(0, os.path.dirname(__file__))
             from seed_default_config import seed_default_config
