@@ -26,14 +26,21 @@ RUN pip install --no-cache-dir -e .
 COPY scripts/auto_seed_on_startup.py ./scripts/
 COPY scripts/seed_default_config.py ./scripts/
 
-# Copy static files (frontend build + images)
-COPY elysia/api/static/ ./elysia/api/static/
+# Copy ONLY required feature data (explicitly to avoid .dockerignore conflicts)
+# Telemetry data (parquet files - 9MB)
+COPY features/telemetry/timeseries_freezerdata/*.parquet ./features/telemetry/timeseries_freezerdata/
 
-# Copy specific feature data (avoid large extraction/diagrams directories)
-COPY features/telemetry/ ./features/telemetry/
-COPY features/integration_vsm/ ./features/integration_vsm/
+# Integration data (commissioning JSON)
+COPY features/integration_vsm/output/ ./features/integration_vsm/output/
+
+# Telemetry VSM (WorldState engine)
 COPY features/telemetry_vsm/ ./features/telemetry_vsm/
+
+# VSM tree (bootstrap, context manager, orchestrator)
 COPY features/vsm_tree/ ./features/vsm_tree/
+
+# Static files (frontend build + images - 63MB)
+COPY elysia/api/static/ ./elysia/api/static/
 
 # Expose port (Railway sets $PORT automatically)
 EXPOSE 8000
