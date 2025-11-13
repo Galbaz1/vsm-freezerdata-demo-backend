@@ -137,15 +137,24 @@ class FrontendConfig:
         self.save_location_wcd_url: str = os.getenv("WCD_URL", "")
         self.save_location_wcd_api_key: str = os.getenv("WCD_API_KEY", "")
 
+        # Helper to safely convert port values (handles "8080.0" from Weaviate)
+        def safe_int_port(value, default):
+            if value is None or value == "":
+                return default
+            try:
+                return int(float(value)) if isinstance(value, str) else int(value)
+            except (ValueError, TypeError):
+                return default
+
         # Local connection settings
         self.save_location_weaviate_is_local: bool = (
             os.getenv("WEAVIATE_IS_LOCAL", "False") == "True"
         )
-        self.save_location_local_weaviate_port: int = int(
-            os.getenv("LOCAL_WEAVIATE_PORT", 8080)
+        self.save_location_local_weaviate_port: int = safe_int_port(
+            os.getenv("LOCAL_WEAVIATE_PORT", 8080), 8080
         )
-        self.save_location_local_weaviate_grpc_port: int = int(
-            os.getenv("LOCAL_WEAVIATE_GRPC_PORT", 50051)
+        self.save_location_local_weaviate_grpc_port: int = safe_int_port(
+            os.getenv("LOCAL_WEAVIATE_GRPC_PORT", 50051), 50051
         )
 
         # Custom connection settings
@@ -153,15 +162,15 @@ class FrontendConfig:
             os.getenv("WEAVIATE_IS_CUSTOM", "False") == "True"
         )
         self.save_location_custom_http_host: str = os.getenv("CUSTOM_HTTP_HOST", "")
-        self.save_location_custom_http_port: int = int(
-            os.getenv("CUSTOM_HTTP_PORT", 8080)
+        self.save_location_custom_http_port: int = safe_int_port(
+            os.getenv("CUSTOM_HTTP_PORT", 8080), 8080
         )
         self.save_location_custom_http_secure: bool = (
             os.getenv("CUSTOM_HTTP_SECURE", "False") == "True"
         )
         self.save_location_custom_grpc_host: str = os.getenv("CUSTOM_GRPC_HOST", "")
-        self.save_location_custom_grpc_port: int = int(
-            os.getenv("CUSTOM_GRPC_PORT", 50051)
+        self.save_location_custom_grpc_port: int = safe_int_port(
+            os.getenv("CUSTOM_GRPC_PORT", 50051), 50051
         )
         self.save_location_custom_grpc_secure: bool = (
             os.getenv("CUSTOM_GRPC_SECURE", "False") == "True"
