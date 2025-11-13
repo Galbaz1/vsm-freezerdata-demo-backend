@@ -30,3 +30,10 @@ from elysia.preprocessing.collection import (
     view_preprocessed_collection,
 )
 from elysia.config import Settings, settings, configure, smart_setup, set_from_env
+
+# Eagerly import VSM bootstrap to ensure bootstrappers are registered
+# This must happen before any trees are created
+try:
+    import features.vsm_tree.bootstrap  # noqa: F401
+except ImportError:
+    pass  # VSM features not available, continue without them
