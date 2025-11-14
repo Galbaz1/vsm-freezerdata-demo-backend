@@ -27,6 +27,15 @@ elysia start  # Opens on http://localhost:8000
 
 ---
 
+## Branch Workflow Reminder
+
+- Keep `railway` as the production branch (Railway deploy targets it).
+- Do local development on `railway-dev` or short-lived feature branches, but frequently sync with `railway` via `git fetch && git merge origin/railway` so the branches don’t drift.
+- When a feature is ready, open a PR from your working branch back into `railway` and merge there before deploying.
+- Park experimental local tweaks on separate branches or stashes so `railway-dev` stays mergeable at all times.
+
+---
+
 ## Weaviate Collections (Verified Counts)
 
 ### Active Collections (Preprocessed with Gemini 2.5 Pro ✅)
